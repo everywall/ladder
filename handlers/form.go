@@ -1,3 +1,13 @@
+package handlers
+
+import "github.com/gofiber/fiber/v2"
+
+func Form(c *fiber.Ctx) error {
+	c.Set("Content-Type", "text/html")
+	return c.SendString(html)
+}
+
+const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -72,3 +82,4 @@
     </script>
 </body>
 </html>
+`

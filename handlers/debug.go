@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gojek/heimdall/v7/httpclient"
+	"github.com/imroc/req/v3"
 )
 
 func Debug(c *fiber.Ctx) error {
@@ -35,4 +38,15 @@ func Debug(c *fiber.Ctx) error {
 
 	*/
 	return c.SendString(string(body))
+}
+
+func Debug2(c *fiber.Ctx) error {
+	client := req.C()        // Use C() to create a client.
+	resp, err := client.R(). // Use R() to create a request.
+					Get("https://httpbin.org/uuid")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(resp)
+	return c.SendString(resp.String())
 }

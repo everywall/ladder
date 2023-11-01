@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"paywall-ladder/handlers"
+	"runtime"
 	"syscall"
 
 	"github.com/elazarl/goproxy"
@@ -15,18 +16,30 @@ import (
 func main() {
 
 	//os.Setenv("HTTP_PROXY", "http://localhost:3000")
-	proxyForkID, _, _ := syscall.Syscall(syscall.SYS_FORK, 0, 0, 0) // LINUX
-	//_, proxyForkID, _ := syscall.Syscall(syscall.SYS_FORK, 0, 0, 0) // MAC
+
+	proxyForkID := uintptr(0)
+	if runtime.GOOS == "darwin" {
+		_, proxyForkID, _ = syscall.Syscall(syscall.SYS_FORK, 0, 0, 0)
+	} else if runtime.GOOS == "linux" {
+		proxyForkID, _, _ = syscall.Syscall(syscall.SYS_FORK, 0, 0, 0)
+	}
 
 	fmt.Println("Proxy fork id", proxyForkID)
 
 	if proxyForkID == 0 {
 
-		app := fiber.New()
-		app.Static("/", "./public")
+		app := fiber.New(
+			fiber.Config{
+				Prefork: false,
+			},
+		)
+
+		//app.Static("/", "./public")
+		app.Get("/", handlers.Form)
 
 		app.Get("/proxy/*", handlers.FetchSite)
 		app.Get("debug/*", handlers.Debug)
+		app.Get("debug2/*", handlers.Debug2)
 		app.Get("/*", handlers.ProxySite)
 
 		port := os.Getenv("PORT")

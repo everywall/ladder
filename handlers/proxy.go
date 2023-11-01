@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -60,7 +61,9 @@ func FetchSite(c *fiber.Ctx) error {
 	//client.Timeout = time.Duration(5 * time.Second)
 
 	client := http.Client{}
-	client.Transport = &loggingTransport{}
+	if os.Getenv("LADDER_DEBUG") == "true" {
+		client.Transport = &loggingTransport{}
+	}
 
 	fmt.Println("DEBUG1")
 	resp, err := client.Do(req)

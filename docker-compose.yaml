@@ -4,8 +4,8 @@ services:
     build: .
     container_name: ladder
     #restart: always
-    command: tail -f /dev/null
-    #command: ./ladder
+    #command: tail -f /dev/null
+    command: ./ladder
     environment:
       - PORT=2000
       - PORT_PROXY=3000
