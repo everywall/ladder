@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple HTML Form</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+    <style>
+        .logo-title {
+            font-family: 'Arial', sans-serif;
+            font-size: 2rem;
+            color: #2196F3;
+            margin-bottom: 20px;
+        }
+        .logo {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!--
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+        </div>
+        -->
+        <h1 class="center-align logo-title">Paywall ladddddddder</h1>
+        <form id="inputForm" class="col s12" method="get">
+            <div class="row">
+                <div class="input-field col s10">
+                    <input type="text" id="inputField" name="inputField" class="validate" required>
+                    <label for="inputField">URL</label>
+                </div>
+                <div class="input-field col s2">
+                    <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </div>
+            <div class="row center-align">
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            M.AutoInit();
+        });
+        document.getElementById('inputForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const inputValue = document.getElementById('inputField').value;
+            window.location.href = '/' + inputValue;
+            return false;
+        });
+    </script>
+</body>
+</html>

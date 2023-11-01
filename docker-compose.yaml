@@ -1,0 +1,15 @@
+version: '3'
+services:
+  ladder:
+    build: .
+    container_name: ladder
+    #restart: always
+    command: tail -f /dev/null
+    #command: ./ladder
+    environment:
+      - PORT=2000
+      - PORT_PROXY=3000
+      - GODEBUG=netdns=go+4
+    ports:
+      - "2000:2000"
+      - "8080:3000"
