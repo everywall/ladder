@@ -15,7 +15,12 @@ import (
 
 func main() {
 
-	//os.Setenv("HTTP_PROXY", "http://localhost:3000")
+	if os.Getenv("PORT_PROXY") == "" {
+		os.Setenv("PORT_PROXY", "3000")
+	}
+	if os.Getenv("HTTP_PROXY") == "" {
+		os.Setenv("HTTP_PROXY", "http://127.0.0.1:"+os.Getenv("PORT_PROXY"))
+	}
 
 	proxyForkID := uintptr(0)
 	if runtime.GOOS == "darwin" {
