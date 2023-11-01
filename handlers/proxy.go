@@ -39,7 +39,7 @@ func FetchSite(c *fiber.Ctx) error {
 
 	u, err := url.Parse(urlQuery)
 	if err != nil {
-		log.Fatal(err)
+		return c.SendString(err.Error())
 	}
 
 	log.Println(u.String())
@@ -122,7 +122,7 @@ func ProxySite(c *fiber.Ctx) error {
 
 	u, err := url.Parse(urlQuery)
 	if err != nil {
-		log.Fatal(err)
+		return c.SendString(err.Error())
 	}
 
 	log.Println(u.String())
@@ -144,7 +144,7 @@ func ProxySite(c *fiber.Ctx) error {
 
 	resp, err := client.Get(u.String(), nil)
 	if err != nil {
-		panic(err)
+		return c.SendString(err.Error())
 	}
 
 	if err != nil {
