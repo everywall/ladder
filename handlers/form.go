@@ -57,13 +57,13 @@ const html = `
                     <input type="text" id="inputField" name="inputField" class="validate" required>
                     <label for="inputField">URL</label>
                 </div>
+				<!--
                 <div class="input-field col s2">
                     <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-                        <i class="material-icons right">send</i>
+                        <i class="material-icons right">go</i>
                     </button>
                 </div>
-            </div>
-            <div class="row center-align">
+				-->
             </div>
         </form>
     </div>
