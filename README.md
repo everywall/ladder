@@ -14,21 +14,22 @@ Certain sites may display missing images or encounter formatting issues. This ca
 
 ### Features
 - [x] Bypass Paywalls
-- [x] Remove CORS Headers from Responses, Assets, and Images ...
-- [x] Keep Site browsable
+- [x] Remove CORS headers from responses, Assets, and images ...
+- [x] Keep site browsable
 - [x] Add a debug path
 - [x] Add a API
-- [x] Docker Container
-- [x] Linux Binary
-- [x] Mac OS Binary
-- [x] Windows Binary (Untested)
+- [x] Docker container
+- [x] Linux binary
+- [x] Mac OS binary
+- [x] Windows binary (Untested)
+- [x] Remove most of the ads (unexpected side effect)
 - [ ] Basic Auth
 
 ## Installation
 
 ### Binary
-1) Download Binary
-2) Run Binary
+1) Download binary [here](https://github.com/kubero-dev/ladder/releases/latest)
+2) Unpack and run the binary `./ladder`
 3) Open Browser (Default: http://localhost:8080)
 
 ### Docker
@@ -41,6 +42,26 @@ docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
 wget https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yml
 docker-compose up -d
 ```
+
+## Usage
+
+### Browser
+1) Open Browser (Default: http://localhost:8080)
+2) Enter URL
+3) Press Enter
+
+Or direct by appending the URL to the end of the proxy URL:
+http://localhost:8080/https://www.google.com
+
+
+
+### API
+```bash
+curl -X GET "http://localhost:8080/api/https://www.google.com"
+```
+
+### Debug
+http://localhost:8080/debug/https://www.google.com
 
 ## Configuration
 
