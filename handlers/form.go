@@ -53,7 +53,7 @@ const html = `
         </header>
         <form id="inputForm" class="col s12" method="get">
             <div class="row">
-                <div class="input-field col s10">
+                <div class="input-field col s12">
                     <input type="text" id="inputField" name="inputField" class="validate" required>
                     <label for="inputField">URL</label>
                 </div>

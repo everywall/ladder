@@ -5,14 +5,13 @@ services:
     container_name: ladder
     #restart: always
     #command: tail -f /dev/null
-    command: ./ladder
+    command: sh -c ./ladder
     environment:
       - PORT=2000
-      - PORT_PROXY=3000
-      - GODEBUG=netdns=go+4
+      - PREFORK=true
+      #- GODEBUG=netdns=go+4
     ports:
       - "2000:2000"
-      - "8080:3000"
     deploy:
       resources:
         limits:
