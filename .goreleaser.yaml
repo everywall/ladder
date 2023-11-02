@@ -7,7 +7,7 @@ before:
 builds:
   -
     main: cmd/main.go
-    binary: kubero
+    binary: ladder
     env:
       - CGO_ENABLED=0
     goos:
