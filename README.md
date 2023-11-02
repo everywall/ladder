@@ -4,7 +4,7 @@
 
 <h1 align="center">Ladder</h1>
 
-*Ladder is a web proxy to help bypass paywalls.* This is a selfhosted version of [1ft.io](1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
+*Ladder is a web proxy to help bypass paywalls.* This is a selfhosted version of [1ft.io](https://1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
 
 ### Why
 
@@ -31,6 +31,12 @@ Some site might have missing images or other formating issues. This is due to th
 ### Docker
 ```bash
 docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
+```
+
+### Docker Compose
+```bash
+wget https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yml
+docker-compose up -d
 ```
 
 ## Configuration

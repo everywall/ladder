@@ -1,8 +1,9 @@
 version: '3'
 services:
   ladder:
-    build: .
+    image: ghcr.io/kubero-dev/ladder:latest
     container_name: ladder
+    build: .
     #restart: always
     #command: tail -f /dev/null
     command: sh -c ./ladder

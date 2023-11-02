@@ -1,0 +1,42 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+builds:
+  -
+    main: cmd/main.go
+    binary: kubero
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+        - goos: windows
+          format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^public:'
+      - '^.github:'
+#brews:
+#  -
+#    repository:
+#      owner: kubero-dev
+#      name: homebrew-ladder
+#      token: "{{ .Env.GORELEASER_GITHUB_TOKEN }}"
+#    homepage: "https://www.kubero.dev"
+#    description: "Manage your kubero applications with the CLI"
+#    test: |
+#      system "#{bin}/kubero", "--version"

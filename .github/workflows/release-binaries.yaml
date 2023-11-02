@@ -1,0 +1,40 @@
+name: release binaries
+
+on:
+  push:
+    #branches:
+    #  - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+  workflow_dispatch:
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      -
+        name: Set version
+        run: |
+          echo -n $(git describe --tags --abbrev=0) > cmd/VERSION
+      -
+        name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.21
+      -
+        name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GORELEASER_GITHUB_TOKEN: ${{ secrets.GORELEASER_GITHUB_TOKEN }}
