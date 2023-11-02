@@ -1,16 +1,20 @@
 package handlers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"os"
 
-func NoForm(c *fiber.Ctx) error {
-	c.Set("Content-Type", "text/html")
-	c.SendStatus(fiber.StatusNotFound)
-	return c.SendString("Form Disabled")
-}
+	"github.com/gofiber/fiber/v2"
+)
 
 func Form(c *fiber.Ctx) error {
-	c.Set("Content-Type", "text/html")
-	return c.SendString(html)
+	if os.Getenv("DISABLE_FORM") == "true" {
+		c.Set("Content-Type", "text/html")
+		c.SendStatus(fiber.StatusNotFound)
+		return c.SendString("Form Disabled")
+	} else {
+		c.Set("Content-Type", "text/html")
+		return c.SendString(html)
+	}
 }
 
 const html = `

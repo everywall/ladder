@@ -48,11 +48,7 @@ func main() {
 		})
 	}
 
-	if os.Getenv("DISABLE_FORM") != "true" {
-		app.Get("/", handlers.Form)
-	} else {
-		app.Get("/", handlers.NoForm)
-	}
+	app.Get("/", handlers.Form)
 
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
