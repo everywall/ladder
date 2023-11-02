@@ -9,10 +9,12 @@ services:
     #command: sh -c ./ladder
     environment:
       - PORT=8080
-      - PREFORK=true
-      - X_FORWARDED_FOR=66.249.66.1
-      - USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
-      #- GODEBUG=netdns=go+4
+      #- PREFORK=true
+      #- X_FORWARDED_FOR=66.249.66.1
+      #- USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+      #- USERPASS=foo:bar
+      #- LOG_URLS=true
+      #- GODEBUG=netdns=go
     ports:
       - "8080:8080"
     deploy:

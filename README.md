@@ -24,6 +24,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Windows binary (untested)
 - [x] Remove most of the ads (unexpected side effect)
 - [x] Basic Auth
+- [x] Disable Logs
 
 ## Installation
 
@@ -70,6 +71,6 @@ http://localhost:8080/raw/https://www.google.com
 | `PORT` | Port to listen on | `8080` |
 | `PREFORK` | Spawn multiple server instances | `false` |
 | `USER_AGENT` | User agent to emulate | `Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)` |
-| `X_FORWARDED_FOR` | IP Forwarder address | `66.249.66.1` |
-| `USERPASS` | Enables Basic Auth, format `admin:123456` |  |
+| `X_FORWARDED_FOR` | IP forwarder address | `66.249.66.1` |
+| `USERPASS` | Enables Basic Auth, format `admin:123456` | `` |
 | `LOG_URLS` | Log fetched URL's | `true` |
