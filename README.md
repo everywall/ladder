@@ -12,13 +12,28 @@ Freedom of information is an essential pillar of democracy and informed decision
 
 
 ### Features
-- [x] Bypass Paywalls.
-- [x] Bypass CORS.
+- [x] Bypass Paywalls
+- [x] Remove CORS
+- [ ] Docker Container
+- [x] Linux Binary
+- [x] Mac OS Binary
+- [ ] Windows Binary
+
 
 ## How to use
 
-1) Download Binary.
-2) Run Binary.
+1) Download Binary
+2) Run Binary
 3) Open Browser (Default: https://localhost:2000)
-4) Enter URL.
-5) Hit Enter.
+4) Enter URL
+5) Hit Enter
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `PORT` | Port to listen on | `2000` |
+| `PORT_PROXY` | Port the proxy listens on | `3000` |
+| `HTTP_PROXY` | Proxy to use | `http://127.0.0.1:3000` |
