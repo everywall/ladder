@@ -20,6 +20,7 @@ func main() {
 
 	app.Get("/", handlers.Form)
 	app.Get("debug/*", handlers.Debug)
+	app.Get("api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite)
 
 	port := os.Getenv("PORT")

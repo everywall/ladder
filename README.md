@@ -10,18 +10,21 @@
 
 Freedom of information is an essential pillar of democracy and informed decision-making. While media organizations have legitimate financial interests, it is crucial to strike a balance between profitability and the public's right to access information. The proliferation of paywalls raises concerns about the erosion of this fundamental freedom, and it is imperative for society to find innovative ways to preserve access to vital information without compromising the sustainability of journalism. In a world where knowledge should be shared and not commodified, paywalls should be critically examined to ensure that they do not undermine the principles of an open and informed society.
 
-Some site might have missing images or other formating issues. This is due to the fact that the site using javascript or CSS to load the images/JS/CSS. This is a limitation of this proxy. If you prefer a full experience, please concider buying a subscription for the site.
+Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please concider buying a subscription for the site.
 
 ### Features
 - [x] Bypass Paywalls
-- [x] Remove CORS
+- [x] Remove CORS Headers from Responses, Assets, and Images ...
 - [x] Keep Site browsable
+- [x] Add a debug path
+- [x] Add a API
 - [x] Docker Container
 - [x] Linux Binary
 - [x] Mac OS Binary
 - [x] Windows Binary (Untested)
+- [ ] Basic Auth
 
-## How to use
+## Installation
 
 ### Binary
 1) Download Binary
