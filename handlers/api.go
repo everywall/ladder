@@ -1,13 +1,17 @@
 package handlers
 
 import (
-	"io"
+	_ "embed"
+
 	"log"
 	"net/http"
 	"net/url"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+//go:embed VERSION
+var version string
 
 func Api(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -41,7 +45,8 @@ func Api(c *fiber.Ctx) error {
 	}
 	body := rewriteHtml(bodyB, u)
 	response := Response{
-		Body: body,
+		Version: version,
+		Body:    body,
 	}
 	response.Request.Headers = make([]interface{}, 0)
 	for k, v := range req.Header {
@@ -63,6 +68,7 @@ func Api(c *fiber.Ctx) error {
 }
 
 type Response struct {
+	Version string `json:"version"`
 	Body    string `json:"body"`
 	Request struct {
 		Headers []interface{} `json:"headers"`
