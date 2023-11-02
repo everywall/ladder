@@ -26,11 +26,11 @@ Some site might have missing images or other formating issues. This is due to th
 ### Binary
 1) Download Binary
 2) Run Binary
-3) Open Browser (Default: http://localhost:2000)
+3) Open Browser (Default: http://localhost:8080)
 
 ### Docker
 ```bash
-docker run -p 2000:2000 -d --name ladder ghcr.io/kubero-dev/ladder:latest
+docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
 ```
 
 ## Configuration
@@ -39,5 +39,5 @@ docker run -p 2000:2000 -d --name ladder ghcr.io/kubero-dev/ladder:latest
 
 | Variable | Description | Default |
 | --- | --- | --- |
-| `PORT` | Port to listen on | `2000` |
+| `PORT` | Port to listen on | `8080` |
 | `PREFORK` | Spawn multiple server instances | `false` |

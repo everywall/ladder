@@ -19,13 +19,12 @@ func main() {
 	)
 
 	app.Get("/", handlers.Form)
-
 	app.Get("debug/*", handlers.Debug)
 	app.Get("/*", handlers.ProxySite)
 
 	port := os.Getenv("PORT")
 	if os.Getenv("PORT") == "" {
-		port = "2000"
+		port = "8080"
 	}
 	log.Fatal(app.Listen(":" + port))
 

@@ -12,7 +12,7 @@ const html = `
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Simple HTML Form</title>
+    <title>Ladder</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 </head>
     <style>
