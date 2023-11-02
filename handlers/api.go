@@ -4,8 +4,6 @@ import (
 	_ "embed"
 
 	"log"
-	"net/http"
-	"net/url"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -17,33 +15,13 @@ func Api(c *fiber.Ctx) error {
 	// Get the url from the URL
 	urlQuery := c.Params("*")
 
-	u, err := url.Parse(urlQuery)
+	body, req, resp, err := fetchSite(urlQuery)
 	if err != nil {
+		log.Println("ERROR:", err)
+		c.SendStatus(500)
 		return c.SendString(err.Error())
 	}
 
-	log.Println(u.String())
-
-	// Fetch the site
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", u.String(), nil)
-	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("X-Forwarded-For", ForwardedFor)
-	req.Header.Set("Referer", u.String())
-	req.Header.Set("Host", u.Host)
-	resp, err := client.Do(req)
-
-	if err != nil {
-		return c.SendString(err.Error())
-	}
-	defer resp.Body.Close()
-
-	bodyB, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("ERROR", err)
-		return c.SendString(err.Error())
-	}
-	body := rewriteHtml(bodyB, u)
 	response := Response{
 		Version: version,
 		Body:    body,

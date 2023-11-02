@@ -20,11 +20,21 @@ func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
 	urlQuery := c.Params("*")
 
-	u, err := url.Parse(urlQuery)
+	body, _, resp, err := fetchSite(urlQuery)
 	if err != nil {
-		log.Println("ERROR", err)
+		log.Println("ERROR:", err)
 		c.SendStatus(500)
 		return c.SendString(err.Error())
+	}
+
+	c.Set("Content-Type", resp.Header.Get("Content-Type"))
+	return c.SendString(body)
+}
+
+func fetchSite(urlQuery string) (string, *http.Request, *http.Response, error) {
+	u, err := url.Parse(urlQuery)
+	if err != nil {
+		return "", nil, nil, err
 	}
 
 	log.Println(u.String())
@@ -39,20 +49,17 @@ func ProxySite(c *fiber.Ctx) error {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		return c.SendString(err.Error())
+		return "", nil, nil, err
 	}
 	defer resp.Body.Close()
 
 	bodyB, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("ERROR", err)
-		c.SendStatus(500)
-		return c.SendString(err.Error())
+		return "", nil, nil, err
 	}
 
 	body := rewriteHtml(bodyB, u)
-	c.Set("Content-Type", resp.Header.Get("Content-Type"))
-	return c.SendString(body)
+	return body, req, resp, nil
 }
 
 func rewriteHtml(bodyB []byte, u *url.URL) string {
