@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="public/pigeon.svg" width="100px">
+    <img src="assets/pigeon.svg" width="100px">
 </p>
 
 <h1 align="center">Ladder</h1>
@@ -39,7 +39,7 @@ docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
 
 ### Docker Compose
 ```bash
-wget https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yml
+wget https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yaml
 docker-compose up -d
 ```
 
