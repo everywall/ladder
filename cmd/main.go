@@ -1,9 +1,9 @@
 package main
 
 import (
+	"ladder/handlers"
 	"log"
 	"os"
-	"paywall-ladder/handlers"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,12 +18,9 @@ func main() {
 		},
 	)
 
-	//app.Static("/", "./public")
 	app.Get("/", handlers.Form)
 
-	app.Get("/proxy/*", handlers.FetchSite)
 	app.Get("debug/*", handlers.Debug)
-	app.Get("debug2/*", handlers.Debug2)
 	app.Get("/*", handlers.ProxySite)
 
 	port := os.Getenv("PORT")

@@ -1,52 +1,44 @@
 package handlers
 
 import (
-	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
-	"time"
+	"net/url"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gojek/heimdall/v7/httpclient"
-	"github.com/imroc/req/v3"
 )
 
 func Debug(c *fiber.Ctx) error {
-	//url := c.Params("*")
+	// Get the url from the URL
+	urlQuery := c.Params("*")
 
-	timeout := 1000 * time.Millisecond
-	client := httpclient.NewClient(httpclient.WithHTTPTimeout(timeout))
-
-	headers := http.Header{}
-	headers.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	headers.Set("X-Forwarded-For", "66.249.66.1")
-	res, err := client.Get("http://google.com", headers)
+	u, err := url.Parse(urlQuery)
 	if err != nil {
-		panic(err)
+		return c.SendString(err.Error())
 	}
 
-	// Heimdall returns the standard *http.Response object
-	body, err := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(body))
-	/*
-		resp, err := http.Get(url)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
+	log.Println(u.String())
 
-	*/
-	return c.SendString(string(body))
-}
+	// Fetch the site
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", u.String(), nil)
+	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+	req.Header.Set("X-Forwarded-For", "66.249.66.1")
+	req.Header.Set("Referer", u.String())
+	req.Header.Set("Host", u.Host)
+	resp, err := client.Do(req)
 
-func Debug2(c *fiber.Ctx) error {
-	client := req.C()        // Use C() to create a client.
-	resp, err := client.R(). // Use R() to create a request.
-					Get("https://httpbin.org/uuid")
 	if err != nil {
-		log.Fatal(err)
+		return c.SendString(err.Error())
 	}
-	fmt.Println(resp)
-	return c.SendString(resp.String())
+	defer resp.Body.Close()
+
+	bodyB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("ERROR", err)
+		return c.SendString(err.Error())
+	}
+	body := rewriteHtml(bodyB, u)
+	return c.SendString(body)
 }
