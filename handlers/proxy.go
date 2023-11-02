@@ -18,9 +18,10 @@ var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
-	urlQuery := c.Params("*")
+	url := c.Params("*")
 
-	body, _, resp, err := fetchSite(urlQuery)
+	queries := c.Queries()
+	body, _, resp, err := fetchSite(url, queries)
 	if err != nil {
 		log.Println("ERROR:", err)
 		c.SendStatus(500)
@@ -31,17 +32,26 @@ func ProxySite(c *fiber.Ctx) error {
 	return c.SendString(body)
 }
 
-func fetchSite(urlQuery string) (string, *http.Request, *http.Response, error) {
-	u, err := url.Parse(urlQuery)
+func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
+
+	urlQuery := "?"
+	if len(queries) > 0 {
+		for k, v := range queries {
+			urlQuery += k + "=" + v + "&"
+		}
+	}
+	urlQuery = strings.TrimSuffix(urlQuery, "&")
+
+	u, err := url.Parse(urlpath)
 	if err != nil {
 		return "", nil, nil, err
 	}
 
-	log.Println(u.String())
+	log.Println(u.String() + urlQuery)
 
 	// Fetch the site
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", u.String(), nil)
+	req, _ := http.NewRequest("GET", u.String()+urlQuery, nil)
 	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("X-Forwarded-For", ForwardedFor)
 	req.Header.Set("Referer", u.String())

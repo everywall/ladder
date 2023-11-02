@@ -14,14 +14,14 @@ Certain sites may display missing images or encounter formatting issues. This ca
 
 ### Features
 - [x] Bypass Paywalls
-- [x] Remove CORS headers from responses, Assets, and images ...
+- [x] Remove CORS headers from responses, assets, and images ...
 - [x] Keep site browsable
-- [x] Add a debug path
+- [x] Add a raw path
 - [x] Add a API
 - [x] Docker container
 - [x] Linux binary
 - [x] Mac OS binary
-- [x] Windows binary (Untested)
+- [x] Windows binary (untested)
 - [x] Remove most of the ads (unexpected side effect)
 - [x] Basic Auth
 
@@ -53,15 +53,13 @@ docker-compose up -d
 Or direct by appending the URL to the end of the proxy URL:
 http://localhost:8080/https://www.google.com
 
-
-
 ### API
 ```bash
 curl -X GET "http://localhost:8080/api/https://www.google.com"
 ```
 
-### Debug
-http://localhost:8080/debug/https://www.google.com
+### RAW
+http://localhost:8080/raw/https://www.google.com
 
 ## Configuration
 

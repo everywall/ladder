@@ -10,7 +10,8 @@ func Raw(c *fiber.Ctx) error {
 	// Get the url from the URL
 	urlQuery := c.Params("*")
 
-	body, _, _, err := fetchSite(urlQuery)
+	queries := c.Queries()
+	body, _, _, err := fetchSite(urlQuery, queries)
 	if err != nil {
 		log.Println("ERROR:", err)
 		c.SendStatus(500)

@@ -15,7 +15,8 @@ func Api(c *fiber.Ctx) error {
 	// Get the url from the URL
 	urlQuery := c.Params("*")
 
-	body, req, resp, err := fetchSite(urlQuery)
+	queries := c.Queries()
+	body, req, resp, err := fetchSite(urlQuery, queries)
 	if err != nil {
 		log.Println("ERROR:", err)
 		c.SendStatus(500)
