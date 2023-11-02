@@ -5,7 +5,6 @@ services:
     container_name: ladder
     build: .
     #restart: always
-    #command: tail -f /dev/null
     #command: sh -c ./ladder
     environment:
       - PORT=8080

@@ -16,15 +16,17 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
 - [x] Keep site browsable
-- [x] Add a raw path
-- [x] Add a API
+- [x] API
+- [x] Show RAW HTML
 - [x] Docker container
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
 - [x] Remove most of the ads (unexpected side effect)
 - [x] Basic Auth
-- [x] Disable Logs
+- [x] Disable logs
+- [x] Custom User Agent
+- [x] Custom X-Forwarded-For IP
 
 ## Installation
 
@@ -40,7 +42,7 @@ docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
 
 ### Docker Compose
 ```bash
-wget https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yaml
+curl https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yaml --output docker-compose.yaml
 docker-compose up -d
 ```
 
