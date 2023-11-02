@@ -1,6 +1,8 @@
 package main
 
 import (
+	_ "embed"
+
 	"ladder/handlers"
 	"log"
 	"os"
@@ -9,7 +11,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
+	"github.com/gofiber/fiber/v2/middleware/favicon"
 )
+
+//go:embed favicon.ico
+var faviconData string
 
 func main() {
 
@@ -29,6 +35,11 @@ func main() {
 			},
 		}))
 	}
+
+	app.Use(favicon.New(favicon.Config{
+		Data: []byte(faviconData),
+		URL:  "/favicon.ico",
+	}))
 
 	app.Get("/", handlers.Form)
 	app.Get("raw/*", handlers.Raw)
