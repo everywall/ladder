@@ -24,7 +24,7 @@ func ProxySite(c *fiber.Ctx) error {
 	body, _, resp, err := fetchSite(url, queries)
 	if err != nil {
 		log.Println("ERROR:", err)
-		c.SendStatus(500)
+		c.SendStatus(fiber.StatusInternalServerError)
 		return c.SendString(err.Error())
 	}
 
