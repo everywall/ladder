@@ -6,11 +6,15 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+var UserAgent = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -28,8 +32,8 @@ func ProxySite(c *fiber.Ctx) error {
 	// Fetch the site
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", u.String(), nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	req.Header.Set("X-Forwarded-For", "66.249.66.1")
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("X-Forwarded-For", ForwardedFor)
 	req.Header.Set("Referer", u.String())
 	req.Header.Set("Host", u.Host)
 	resp, err := client.Do(req)
@@ -72,4 +76,12 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
 	return body
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
 }

@@ -10,6 +10,8 @@ services:
     environment:
       - PORT=8080
       - PREFORK=true
+      - X_FORWARDED_FOR=66.249.66.1
+      - USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
       #- GODEBUG=netdns=go+4
     ports:
       - "8080:8080"

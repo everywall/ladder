@@ -71,3 +71,5 @@ http://localhost:8080/debug/https://www.google.com
 | --- | --- | --- |
 | `PORT` | Port to listen on | `8080` |
 | `PREFORK` | Spawn multiple server instances | `false` |
+| `USER_AGENT` | User agent to emulate | `Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)` |
+| `X_FORWARDED_FOR` | IP Forwarder address | `66.249.66.1` |

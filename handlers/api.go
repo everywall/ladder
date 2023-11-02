@@ -23,8 +23,8 @@ func Api(c *fiber.Ctx) error {
 	// Fetch the site
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", u.String(), nil)
-	req.Header.Set("User-Agent", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	req.Header.Set("X-Forwarded-For", "66.249.66.1")
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("X-Forwarded-For", ForwardedFor)
 	req.Header.Set("Referer", u.String())
 	req.Header.Set("Host", u.Host)
 	resp, err := client.Do(req)
