@@ -5,8 +5,10 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/basicauth"
 )
 
 func main() {
@@ -17,6 +19,16 @@ func main() {
 			Prefork: prefork,
 		},
 	)
+
+	userpass := os.Getenv("USERPASS")
+	if userpass != "" {
+		userpass := strings.Split(userpass, ":")
+		app.Use(basicauth.New(basicauth.Config{
+			Users: map[string]string{
+				userpass[0]: userpass[1],
+			},
+		}))
+	}
 
 	app.Get("/", handlers.Form)
 	app.Get("raw/*", handlers.Raw)

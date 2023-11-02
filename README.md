@@ -23,7 +23,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Mac OS binary
 - [x] Windows binary (Untested)
 - [x] Remove most of the ads (unexpected side effect)
-- [ ] Basic Auth
+- [x] Basic Auth
 
 ## Installation
 
@@ -73,3 +73,4 @@ http://localhost:8080/debug/https://www.google.com
 | `PREFORK` | Spawn multiple server instances | `false` |
 | `USER_AGENT` | User agent to emulate | `Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)` |
 | `X_FORWARDED_FOR` | IP Forwarder address | `66.249.66.1` |
+| `USERPASS` | Enables Basic Auth, format `admin:123456` |  |
