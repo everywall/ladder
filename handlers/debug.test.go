@@ -11,9 +11,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func TestDebug(t *testing.T) {
+func TestRaw(t *testing.T) {
 	app := fiber.New()
-	app.Get("/debug/*", Debug)
+	app.Get("/raw/*", Raw)
 
 	testCases := []struct {
 		name     string
@@ -34,7 +34,7 @@ func TestDebug(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/debug/"+tc.url, nil)
+			req := httptest.NewRequest(http.MethodGet, "/raw/"+tc.url, nil)
 			resp, err := app.Test(req)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)

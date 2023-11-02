@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func Debug(c *fiber.Ctx) error {
+func Raw(c *fiber.Ctx) error {
 	// Get the url from the URL
 	urlQuery := c.Params("*")
 
