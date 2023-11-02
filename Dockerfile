@@ -21,3 +21,5 @@ RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 #EXPOSE 8080
 
 #ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+CMD ["sh", "-c", "/app/ladder"]

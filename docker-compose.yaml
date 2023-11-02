@@ -6,7 +6,7 @@ services:
     build: .
     #restart: always
     #command: tail -f /dev/null
-    command: sh -c ./ladder
+    #command: sh -c ./ladder
     environment:
       - PORT=8080
       - PREFORK=true
