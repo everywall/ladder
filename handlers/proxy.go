@@ -41,13 +41,16 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		}
 	}
 	urlQuery = strings.TrimSuffix(urlQuery, "&")
+	urlQuery = strings.TrimSuffix(urlQuery, "?")
 
 	u, err := url.Parse(urlpath)
 	if err != nil {
 		return "", nil, nil, err
 	}
 
-	log.Println(u.String() + urlQuery)
+	if os.Getenv("LOG_URLS	") == "" || os.Getenv("NOLOGS") == "true" {
+		log.Println(u.String() + urlQuery)
+	}
 
 	// Fetch the site
 	client := &http.Client{}

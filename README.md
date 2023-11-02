@@ -72,3 +72,4 @@ http://localhost:8080/raw/https://www.google.com
 | `USER_AGENT` | User agent to emulate | `Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)` |
 | `X_FORWARDED_FOR` | IP Forwarder address | `66.249.66.1` |
 | `USERPASS` | Enables Basic Auth, format `admin:123456` |  |
+| `LOG_URLS` | Log fetched URL's | `true` |
