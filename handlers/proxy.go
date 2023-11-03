@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gofiber/fiber/v2"
 	"gopkg.in/yaml.v3"
 )
@@ -140,7 +141,8 @@ func loadRules() RuleSet {
 	if err != nil {
 		log.Println("ERROR:", err)
 	}
-	log.Println(ruleSet)
+
+	log.Println("Loaded rules for", len(ruleSet), "Domains")
 	return ruleSet
 }
 
@@ -160,6 +162,17 @@ func applyRules(domain string, path string, body string) string {
 			re := regexp.MustCompile(regexRule.Match)
 			body = re.ReplaceAllString(body, regexRule.Replace)
 		}
+		if rule.Inject.Code != "" {
+			doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
+			if err != nil {
+				log.Fatal(err)
+			}
+			doc.Find(rule.Inject.Position).AppendHtml(rule.Inject.Code)
+			body, err = doc.Html()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 
 	return body
@@ -171,8 +184,12 @@ type Rule struct {
 }
 
 type RuleSet []struct {
-	Domain     string `yaml:"domain"`
-	Path       string `yaml:"path,omitempty"`
-	RegexRules []Rule `yaml:"regexRules"`
-	DomRules   []Rule `yaml:"domRules"`
+	Domain      string `yaml:"domain"`
+	Path        string `yaml:"path,omitempty"`
+	googleCache bool   `yaml:"googleCache,omitempty"`
+	RegexRules  []Rule `yaml:"regexRules"`
+	Inject      struct {
+		Position string `yaml:"position"`
+		Code     string `yaml:"code"`
+	} `yaml:"inject"`
 }
