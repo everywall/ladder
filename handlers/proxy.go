@@ -116,7 +116,7 @@ func loadRules() RuleSet {
 		return RulesList
 	}
 	log.Println("Loading rules")
-	// TODO: Load the rules from the URL
+
 	resp, err := http.Get(rulesUrl)
 	if err != nil {
 		log.Println("ERROR:", err)
@@ -149,10 +149,11 @@ func applyRules(domain string, path string, body string) string {
 		if rule.Path != "" && rule.Path != path {
 			continue
 		}
-		for _, domRule := range rule.DomRules {
-			re := regexp.MustCompile(domRule.Match)
-			body = re.ReplaceAllString(body, domRule.Replace)
-		}
+		/*
+			for _, domRule := range rule.DomRules {
+				// run the dom rules
+			}
+		*/
 		for _, regexRule := range rule.RegexRules {
 			re := regexp.MustCompile(regexRule.Match)
 			body = re.ReplaceAllString(body, regexRule.Replace)

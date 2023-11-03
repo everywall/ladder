@@ -1,24 +1,15 @@
-- domain: www.example.ch
+- domain: www.example.com
   path: /article
   regexRules:
-    - match: "asdf"
-      replace: "asdf"
-    - match: "asdf"
-      replace: "asdf"
+    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
+      replace: <script $1 script="/https://www.example.com/$3"
   domRules:
-    - match: "asdf"
-      replace: "asdf"
-    - match: "asdf"
-      replace: "asdf"
-- domain: www.srf.ch
-  path: /article
+    - match: "tobe.defined"
+      replace: "test"
+- domain: www.anotherdomain.com
   regexRules:
-    - match: "asdf"
-      replace: "asdf"
-    - match: "asdf"
-      replace: "asdf"
+    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
+      replace: <script $1 script="/https://www.example.com/$3"
   domRules:
-    - match: "asdf"
-      replace: "asdf"
-    - match: "asdf"
-      replace: "asdf"
+    - match: "tobe.defined"
+      replace: "test"
