@@ -11,10 +11,12 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"gopkg.in/yaml.v3"
 )
 
 var UserAgent = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
+var rulesSet = loadRules()
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -95,6 +97,7 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "url(/", "url(/https://"+u.Host+"/")
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
+	body = applyRules(u.Host, u.Path, body)
 	return body
 }
 
@@ -104,4 +107,69 @@ func getenv(key, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func loadRules() RuleSet {
+	rulesUrl := os.Getenv("RULES_URL")
+	if rulesUrl == "" {
+		RulesList := RuleSet{}
+		return RulesList
+	}
+	log.Println("Loading rules")
+	// TODO: Load the rules from the URL
+	resp, err := http.Get(rulesUrl)
+	if err != nil {
+		log.Println("ERROR:", err)
+	}
+	defer resp.Body.Close()
+
+	bodyB, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("ERROR:", err)
+	}
+
+	var ruleSet RuleSet
+	yaml.Unmarshal(bodyB, &ruleSet)
+	if err != nil {
+		log.Println("ERROR:", err)
+	}
+
+	return ruleSet
+}
+
+func applyRules(domain string, path string, body string) string {
+	if len(rulesSet) == 0 {
+		return body
+	}
+
+	for _, rule := range rulesSet {
+		if rule.Domain != domain {
+			continue
+		}
+		if rule.Path != "" && rule.Path != path {
+			continue
+		}
+		for _, domRule := range rule.DomRules {
+			re := regexp.MustCompile(domRule.Match)
+			body = re.ReplaceAllString(body, domRule.Replace)
+		}
+		for _, regexRule := range rule.RegexRules {
+			re := regexp.MustCompile(regexRule.Match)
+			body = re.ReplaceAllString(body, regexRule.Replace)
+		}
+	}
+
+	return body
+}
+
+type Rule struct {
+	Match   string `yaml:"match"`
+	Replace string `yaml:"replace"`
+}
+
+type RuleSet []struct {
+	Domain     string `yaml:"domain"`
+	Path       string `yaml:"path,omitempty"`
+	RegexRules []Rule `yaml:"regexRules"`
+	DomRules   []Rule `yaml:"domRules"`
 }

@@ -1,0 +1,24 @@
+- domain: www.example.ch
+  path: /article
+  regexRules:
+    - match: "asdf"
+      replace: "asdf"
+    - match: "asdf"
+      replace: "asdf"
+  domRules:
+    - match: "asdf"
+      replace: "asdf"
+    - match: "asdf"
+      replace: "asdf"
+- domain: www.srf.ch
+  path: /article
+  regexRules:
+    - match: "asdf"
+      replace: "asdf"
+    - match: "asdf"
+      replace: "asdf"
+  domRules:
+    - match: "asdf"
+      replace: "asdf"
+    - match: "asdf"
+      replace: "asdf"
