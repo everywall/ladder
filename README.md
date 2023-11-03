@@ -12,13 +12,15 @@ Freedom of information is an essential pillar of democracy and informed decision
 
 Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please concider buying a subscription for the site.
 
+> **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
+
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
 - [x] Keep site browsable
 - [x] API
 - [x] Show RAW HTML
-- [x] Docker container
+- [x] [Docker container](https://github.com/kubero-dev/ladder/pkgs/container/ladder)
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
@@ -27,8 +29,11 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Disable logs
 - [x] Custom User Agent
 - [x] Custom X-Forwarded-For IP
+- [ ] Load domain based ruleset on startup to modify response
 
 ## Installation
+
+> **Warning:** If your instance will be publicly accessible, make sure to enable Basic Auth. This will prevent unauthorized users from using your proxy. If you do not enable Basic Auth, anyone can use your proxy to browse nasty/illegal stuff. And you will be responsible for it.
 
 ### Binary
 1) Download binary [here](https://github.com/kubero-dev/ladder/releases/latest)
