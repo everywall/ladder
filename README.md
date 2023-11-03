@@ -20,16 +20,17 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Apply domain based ruleset/code to modify response
 - [x] Keep site browsable
 - [x] API
-- [x] Show RAW HTML
+- [x] Fetch RAW HTML
+- [x] Custom User Agent
+- [x] Custom X-Forwarded-For IP
 - [x] [Docker container](https://github.com/kubero-dev/ladder/pkgs/container/ladder)
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
-- [x] Remove most of the ads (unexpected side effect)
+- [x] Removes most of the ads (unexpected side effect)
 - [x] Basic Auth
 - [x] Disable logs
-- [x] Custom User Agent
-- [x] Custom X-Forwarded-For IP
+- [x] No Tracking
 
 ## Installation
 
