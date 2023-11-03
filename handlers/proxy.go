@@ -48,7 +48,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
-	if os.Getenv("LOG_URLS	") == "" || os.Getenv("NOLOGS") == "true" {
+	if os.Getenv("DEBUG	") == "true" {
 		log.Println(u.String() + urlQuery)
 	}
 

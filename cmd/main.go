@@ -41,7 +41,19 @@ func main() {
 		URL:  "/favicon.ico",
 	}))
 
-	app.Get("/", handlers.Form)
+	if os.Getenv("NOLOGS") != "true" {
+		app.Use(func(c *fiber.Ctx) error {
+			log.Println(c.Method(), c.Path())
+			return c.Next()
+		})
+	}
+
+	if os.Getenv("DISABLE_FORM") != "true" {
+		app.Get("/", handlers.Form)
+	} else {
+		app.Get("/", handlers.NoForm)
+	}
+
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite)

@@ -2,6 +2,12 @@ package handlers
 
 import "github.com/gofiber/fiber/v2"
 
+func NoForm(c *fiber.Ctx) error {
+	c.Set("Content-Type", "text/html")
+	c.SendStatus(fiber.StatusNotFound)
+	return c.SendString("Form Disabled")
+}
+
 func Form(c *fiber.Ctx) error {
 	c.Set("Content-Type", "text/html")
 	return c.SendString(html)
