@@ -179,8 +179,11 @@ const html = `
         });
         document.getElementById('inputForm').addEventListener('submit', function (e) {
             e.preventDefault();
-            const inputValue = document.getElementById('inputField').value;
-            window.location.href = '/' + inputValue;
+            let url = document.getElementById('inputField').value;
+            if (url.indexOf('http') === -1) {
+                url = 'https://' + url;
+            }
+            window.location.href = '/' + url;
             return false;
         });
     </script>
