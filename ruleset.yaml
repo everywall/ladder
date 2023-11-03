@@ -2,24 +2,24 @@
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
-  inject:
-    position: head # Position where to inject the code
-    code: | 
-      <script>
-        window.localStorage.clear();
-        console.log("test");
-        alert("Hello!");
-      </script>
+  injections:
+    - position: head # Position where to inject the code
+      code: | 
+        <script>
+          window.localStorage.clear();
+          console.log("test");
+          alert("Hello!");
+        </script>
 - domain: www.anotherdomain.com # Domain where the rule applies
   path: /article                # Path where the rule applies
   googleCache: false            # Search also in Google Cache
   regexRules:                   # Regex rules to apply
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
-  inject:
-    position: .left-content article .post-title # Position where to inject the code
-    code: | 
-      <script>
-        window.localStorage.clear();
-        console.log("test");
-      </script>
+  injections:
+    - position: .left-content article .post-title # Position where to inject the code
+      code: | 
+        <script>
+          window.localStorage.clear();
+          console.log("test");
+        </script>

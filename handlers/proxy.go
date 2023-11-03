@@ -99,7 +99,6 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
 	if os.Getenv("RULES_URL") != "" {
-		log.Println("Applying rules")
 		body = applyRules(u.Host, u.Path, body)
 	}
 	return body
@@ -162,12 +161,12 @@ func applyRules(domain string, path string, body string) string {
 			re := regexp.MustCompile(regexRule.Match)
 			body = re.ReplaceAllString(body, regexRule.Replace)
 		}
-		if rule.Inject.Code != "" {
+		for _, injection := range rule.Injections {
 			doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
 			if err != nil {
 				log.Fatal(err)
 			}
-			doc.Find(rule.Inject.Position).AppendHtml(rule.Inject.Code)
+			doc.Find(injection.Position).AppendHtml(injection.Code)
 			body, err = doc.Html()
 			if err != nil {
 				log.Fatal(err)
@@ -186,10 +185,10 @@ type Rule struct {
 type RuleSet []struct {
 	Domain      string `yaml:"domain"`
 	Path        string `yaml:"path,omitempty"`
-	googleCache bool   `yaml:"googleCache,omitempty"`
+	GoogleCache bool   `yaml:"googleCache,omitempty"`
 	RegexRules  []Rule `yaml:"regexRules"`
-	Inject      struct {
+	Injections  []struct {
 		Position string `yaml:"position"`
 		Code     string `yaml:"code"`
-	} `yaml:"inject"`
+	} `yaml:"injections"`
 }
