@@ -22,7 +22,7 @@ jobs:
       -
         name: Set version
         run: |
-          echo -n $(git describe --tags --abbrev=0) > cmd/VERSION
+          echo -n $(git describe --tags --abbrev=0) > handlers/VERSION
       -
         name: Set up Go
         uses: actions/setup-go@v3
