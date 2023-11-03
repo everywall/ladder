@@ -17,6 +17,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
+- [x] Apply domain based ruleset/code to modify response
 - [x] Keep site browsable
 - [x] API
 - [x] Show RAW HTML
@@ -29,7 +30,6 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Disable logs
 - [x] Custom User Agent
 - [x] Custom X-Forwarded-For IP
-- [ ] Load domain based ruleset on startup to modify response
 
 ## Installation
 
@@ -59,15 +59,15 @@ docker-compose up -d
 3) Press Enter
 
 Or direct by appending the URL to the end of the proxy URL:
-http://localhost:8080/https://www.google.com
+http://localhost:8080/https://www.example.com
 
 ### API
 ```bash
-curl -X GET "http://localhost:8080/api/https://www.google.com"
+curl -X GET "http://localhost:8080/api/https://www.example.com"
 ```
 
 ### RAW
-http://localhost:8080/raw/https://www.google.com
+http://localhost:8080/raw/https://www.example.com
 
 ## Configuration
 
@@ -83,3 +83,9 @@ http://localhost:8080/raw/https://www.google.com
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `RULES_URL` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` |
+
+### Ruleset
+
+It is possible to apply custom rules to modify the response. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file that contains a list of rules for each domain and is loaded on startup
+
+See in [ruleset.yaml](ruleset.yaml) for an example.

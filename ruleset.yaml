@@ -17,7 +17,7 @@
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
   injections:
-    - position: .left-content article .post-title # Position where to inject the code
+    - position: .left-content article .post-title # Position where to inject the code into DOM
       code: | 
         <script>
           window.localStorage.clear();
