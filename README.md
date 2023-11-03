@@ -82,3 +82,4 @@ http://localhost:8080/raw/https://www.google.com
 | `USERPASS` | Enables Basic Auth, format `admin:123456` | `` |
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
+| `RULES_URL` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` |

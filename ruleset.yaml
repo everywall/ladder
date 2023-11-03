@@ -1,15 +1,21 @@
 - domain: www.example.com
-  path: /article
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
-  domRules:
-    - match: "tobe.defined"
-      replace: "test"
+  injectCode: | 
+    <script>
+      window.localStorage.clear();
+      console.log("test");
+    </script>
 - domain: www.anotherdomain.com
+  path: /article
+  googleCache: false
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
-  domRules:
-    - match: "tobe.defined"
-      replace: "test"
+  injectCode: | 
+    <script>
+      window.localStorage.clear();
+      console.log("test");
+    </script>
+  

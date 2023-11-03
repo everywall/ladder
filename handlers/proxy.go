@@ -97,7 +97,10 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "url(/", "url(/https://"+u.Host+"/")
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
-	body = applyRules(u.Host, u.Path, body)
+	if os.Getenv("RULES_URL") != "" {
+		log.Println("Applying rules")
+		body = applyRules(u.Host, u.Path, body)
+	}
 	return body
 }
 
@@ -123,17 +126,21 @@ func loadRules() RuleSet {
 	}
 	defer resp.Body.Close()
 
-	bodyB, err := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 400 {
+		log.Println("ERROR:", resp.StatusCode, rulesUrl)
+	}
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("ERROR:", err)
 	}
 
 	var ruleSet RuleSet
-	yaml.Unmarshal(bodyB, &ruleSet)
+	yaml.Unmarshal(body, &ruleSet)
 	if err != nil {
 		log.Println("ERROR:", err)
 	}
-
+	log.Println(ruleSet)
 	return ruleSet
 }
 
@@ -149,11 +156,6 @@ func applyRules(domain string, path string, body string) string {
 		if rule.Path != "" && rule.Path != path {
 			continue
 		}
-		/*
-			for _, domRule := range rule.DomRules {
-				// run the dom rules
-			}
-		*/
 		for _, regexRule := range rule.RegexRules {
 			re := regexp.MustCompile(regexRule.Match)
 			body = re.ReplaceAllString(body, regexRule.Replace)
