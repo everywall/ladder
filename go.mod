@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
+	github.com/akamensky/argparse v1.4.0
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/uuid v1.4.0 // indirect

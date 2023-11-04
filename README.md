@@ -31,6 +31,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Basic Auth
 - [x] Disable logs
 - [x] No Tracking
+- [ ] Optional TOR proxy
 
 ## Installation
 

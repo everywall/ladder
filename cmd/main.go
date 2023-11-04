@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 
 	"ladder/handlers"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
@@ -19,10 +21,33 @@ var faviconData string
 
 func main() {
 
-	prefork, _ := strconv.ParseBool(os.Getenv("PREFORK"))
+	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
+
+	p := os.Getenv("PORT")
+	if os.Getenv("PORT") == "" {
+		p = "8080"
+	}
+	port := parser.String("p", "port", &argparse.Options{
+		Required: false,
+		Default:  p,
+		Help:     "Port the webserver will listen on"})
+
+	pf, _ := strconv.ParseBool(os.Getenv("PREFORK"))
+
+	prefork := parser.Flag("P", "prefork", &argparse.Options{
+		Required: false,
+		Default:  pf,
+		Help:     "This will spawn multiple processes listening"})
+
+	// Parse input
+	err := parser.Parse(os.Args)
+	if err != nil {
+		fmt.Print(parser.Usage(err))
+	}
+
 	app := fiber.New(
 		fiber.Config{
-			Prefork: prefork,
+			Prefork: *prefork,
 		},
 	)
 
@@ -54,10 +79,6 @@ func main() {
 	app.Get("api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite)
 
-	port := os.Getenv("PORT")
-	if os.Getenv("PORT") == "" {
-		port = "8080"
-	}
-	log.Fatal(app.Listen(":" + port))
+	log.Fatal(app.Listen(":" + *port))
 
 }
