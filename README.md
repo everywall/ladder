@@ -93,3 +93,31 @@ http://localhost:8080/raw/https://www.example.com
 It is possible to apply custom rules to modify the response. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file that contains a list of rules for each domain and is loaded on startup
 
 See in [ruleset.yaml](ruleset.yaml) for an example.
+
+```yaml
+- domain: www.example.com
+  regexRules:
+    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
+      replace: <script $1 script="/https://www.example.com/$3"
+  injections:
+    - position: head # Position where to inject the code
+      append: | 
+        <script>
+          window.localStorage.clear();
+          console.log("test");
+          alert("Hello!");
+        </script>
+- domain: www.anotherdomain.com # Domain where the rule applies
+  path: /article                # Path where the rule applies
+  googleCache: false            # Search also in Google Cache
+  regexRules:                   # Regex rules to apply
+    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
+      replace: <script $1 script="/https://www.example.com/$3"
+  injections:
+    - position: .left-content article .post-title # Position where to inject the code into DOM
+      replace: | 
+        <h1>My Custom Title</h1>
+    - position: .left-content article # Position where to inject the code into DOM
+      prepend: | 
+        <h2>Suptitle</h2>
+```
