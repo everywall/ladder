@@ -32,6 +32,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] Disable logs
 - [x] No Tracking
 - [ ] Optional TOR proxy
+- [ ] A key to share only one URL
 
 ## Installation
 
