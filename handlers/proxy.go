@@ -166,7 +166,15 @@ func applyRules(domain string, path string, body string) string {
 			if err != nil {
 				log.Fatal(err)
 			}
-			doc.Find(injection.Position).AppendHtml(injection.Code)
+			if injection.Replace != "" {
+				doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
+			}
+			if injection.Append != "" {
+				doc.Find(injection.Position).AppendHtml(injection.Append)
+			}
+			if injection.Prepend != "" {
+				doc.Find(injection.Position).PrependHtml(injection.Prepend)
+			}
 			body, err = doc.Html()
 			if err != nil {
 				log.Fatal(err)
@@ -189,6 +197,8 @@ type RuleSet []struct {
 	RegexRules  []Rule `yaml:"regexRules"`
 	Injections  []struct {
 		Position string `yaml:"position"`
-		Code     string `yaml:"code"`
+		Append   string `yaml:"append"`
+		Prepend  string `yaml:"prepend"`
+		Replace  string `yaml:"replace"`
 	} `yaml:"injections"`
 }

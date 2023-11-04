@@ -4,7 +4,7 @@
       replace: <script $1 script="/https://www.example.com/$3"
   injections:
     - position: head # Position where to inject the code
-      code: | 
+      append: | 
         <script>
           window.localStorage.clear();
           console.log("test");
@@ -18,8 +18,8 @@
       replace: <script $1 script="/https://www.example.com/$3"
   injections:
     - position: .left-content article .post-title # Position where to inject the code into DOM
-      code: | 
-        <script>
-          window.localStorage.clear();
-          console.log("test");
-        </script>
+      replace: | 
+        <h1>My Custom Title</h1>
+    - position: .left-content article # Position where to inject the code into DOM
+      prepend: | 
+        <h2>Suptitle</h2>
