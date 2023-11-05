@@ -149,6 +149,7 @@ func loadRules() RuleSet {
 		}
 		yaml.Unmarshal(yamlFile, &ruleSet)
 	}
+	//log.Print(ruleSet)
 
 	log.Println("Loaded rules for", len(ruleSet), "Domains")
 	return ruleSet
@@ -163,7 +164,7 @@ func applyRules(domain string, path string, body string) string {
 		if rule.Domain != domain {
 			continue
 		}
-		if rule.Path != "" && rule.Path != path {
+		if rule.Path != "" && !strings.HasPrefix(path, rule.Path) {
 			continue
 		}
 		for _, regexRule := range rule.RegexRules {
@@ -179,6 +180,7 @@ func applyRules(domain string, path string, body string) string {
 				doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
 			}
 			if injection.Append != "" {
+				log.Println("Appending", injection.Append)
 				doc.Find(injection.Position).AppendHtml(injection.Append)
 			}
 			if injection.Prepend != "" {
