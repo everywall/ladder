@@ -12,11 +12,6 @@ Freedom of information is an essential pillar of democracy and informed decision
 
 > **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
 
-### Limitations
-Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please concider buying a subscription for the site.
-
-Some sites do not expose their content to search engines, which means that the proxy cannot access the content. A future version will try to fetch the content from Google Cache.
-
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
@@ -37,6 +32,11 @@ Some sites do not expose their content to search engines, which means that the p
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
 - [ ] Fetch from Google Cache if not available
+
+### Limitations
+Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please concider buying a subscription for the site.
+
+Some sites do not expose their content to search engines, which means that the proxy cannot access the content. A future version will try to fetch the content from Google Cache.
 
 ## Installation
 
