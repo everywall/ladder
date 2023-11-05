@@ -29,7 +29,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Basic Auth
 - [x] Disable logs
 - [x] No Tracking
-- [ ] Limit the proxy to a list of domains
+- [x] Limit the proxy to a list of domains
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
 - [ ] Fetch from Google Cache if not available
