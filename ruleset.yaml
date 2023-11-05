@@ -10,8 +10,12 @@
           console.log("test");
           alert("Hello!");
         </script>
+    - position: h1
+      replace: | 
+        <h1>An example with a ladder ;-)</h1>
 - domain: www.americanbanker.com
-  path: /news
+  paths: 
+    - /news
   injections:
     - position: head
       append: | 
@@ -23,5 +27,29 @@
               const inlineGated = document.querySelectorAll('.inline-gated');
               for (const elem of inlineGated) { elem.classList.remove('inline-gated'); }
             }
+          });
+        </script>
+- domain: www.nzz.ch
+  paths: 
+    - /international
+    - /sport
+    - /wirtschaft
+    - /technologie
+    - /feuilleton
+    - /zuerich
+    - /wissenschaft
+    - /gesellschaft
+    - /panorama
+    - /mobilitaet
+    - /reisen
+    - /meinung
+    - /finanze
+  injections:
+    - position: head
+      append: | 
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const paywall = document.querySelector('.dynamic-regwall');
+            removeDOMElement(paywall)
           });
         </script>

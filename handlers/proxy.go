@@ -164,7 +164,7 @@ func applyRules(domain string, path string, body string) string {
 		if rule.Domain != domain {
 			continue
 		}
-		if rule.Path != "" && !strings.HasPrefix(path, rule.Path) {
+		if len(rule.Paths) > 0 && !StringInSlice(path, rule.Paths) {
 			continue
 		}
 		for _, regexRule := range rule.RegexRules {
@@ -180,7 +180,6 @@ func applyRules(domain string, path string, body string) string {
 				doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
 			}
 			if injection.Append != "" {
-				log.Println("Appending", injection.Append)
 				doc.Find(injection.Position).AppendHtml(injection.Append)
 			}
 			if injection.Prepend != "" {
@@ -202,14 +201,23 @@ type Rule struct {
 }
 
 type RuleSet []struct {
-	Domain      string `yaml:"domain"`
-	Path        string `yaml:"path,omitempty"`
-	GoogleCache bool   `yaml:"googleCache,omitempty"`
-	RegexRules  []Rule `yaml:"regexRules"`
+	Domain      string   `yaml:"domain"`
+	Paths       []string `yaml:"paths,omitempty"`
+	GoogleCache bool     `yaml:"googleCache,omitempty"`
+	RegexRules  []Rule   `yaml:"regexRules"`
 	Injections  []struct {
 		Position string `yaml:"position"`
 		Append   string `yaml:"append"`
 		Prepend  string `yaml:"prepend"`
 		Replace  string `yaml:"replace"`
 	} `yaml:"injections"`
+}
+
+func StringInSlice(s string, list []string) bool {
+	for _, x := range list {
+		if strings.HasPrefix(s, x) {
+			return true
+		}
+	}
+	return false
 }
