@@ -98,7 +98,7 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "url(/", "url(/https://"+u.Host+"/")
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
-	if os.Getenv("RULES_URL") != "" {
+	if os.Getenv("RULESET") != "" {
 		body = applyRules(u.Host, u.Path, body)
 	}
 	return body
@@ -113,32 +113,41 @@ func getenv(key, fallback string) string {
 }
 
 func loadRules() RuleSet {
-	rulesUrl := os.Getenv("RULES_URL")
+	rulesUrl := os.Getenv("RULESET")
 	if rulesUrl == "" {
 		RulesList := RuleSet{}
 		return RulesList
 	}
 	log.Println("Loading rules")
 
-	resp, err := http.Get(rulesUrl)
-	if err != nil {
-		log.Println("ERROR:", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		log.Println("ERROR:", resp.StatusCode, rulesUrl)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Println("ERROR:", err)
-	}
-
 	var ruleSet RuleSet
-	yaml.Unmarshal(body, &ruleSet)
-	if err != nil {
-		log.Println("ERROR:", err)
+	if strings.HasPrefix(rulesUrl, "http") {
+
+		resp, err := http.Get(rulesUrl)
+		if err != nil {
+			log.Println("ERROR:", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode >= 400 {
+			log.Println("ERROR:", resp.StatusCode, rulesUrl)
+		}
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("ERROR:", err)
+		}
+		yaml.Unmarshal(body, &ruleSet)
+
+		if err != nil {
+			log.Println("ERROR:", err)
+		}
+	} else {
+		yamlFile, err := os.ReadFile(rulesUrl)
+		if err != nil {
+			log.Println("ERROR:", err)
+		}
+		yaml.Unmarshal(yamlFile, &ruleSet)
 	}
 
 	log.Println("Loaded rules for", len(ruleSet), "Domains")

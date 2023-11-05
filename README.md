@@ -29,6 +29,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Basic Auth
 - [x] Disable logs
 - [x] No Tracking
+- [ ] Limit the proxy to a list of domains
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
 - [ ] Fetch from Google Cache if not available
@@ -80,7 +81,7 @@ http://localhost:8080/raw/https://www.example.com
 
 ### Environment Variables
 
-| Variable | Description | Default |
+| Variable | Description | Value |
 | --- | --- | --- |
 | `PORT` | Port to listen on | `8080` |
 | `PREFORK` | Spawn multiple server instances | `false` |
@@ -90,7 +91,7 @@ http://localhost:8080/raw/https://www.example.com
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
-| `RULES_URL` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` |
+| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
 
 ### Ruleset
 

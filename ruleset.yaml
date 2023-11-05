@@ -10,16 +10,14 @@
           console.log("test");
           alert("Hello!");
         </script>
-- domain: www.anotherdomain.com # Domain where the rule applies
-  path: /article                # Path where the rule applies
-  googleCache: false            # Search also in Google Cache
-  regexRules:                   # Regex rules to apply
-    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
-      replace: <script $1 script="/https://www.example.com/$3"
+- domain: www.americanbanker.com
+  googleCache: false
   injections:
-    - position: .left-content article .post-title # Position where to inject the code into DOM
-      replace: | 
-        <h1>My Custom Title</h1>
-    - position: .left-content article # Position where to inject the code into DOM
-      prepend: | 
-        <h2>Suptitle</h2>
+    - position: head
+      append: | 
+        const inlineGate = document.querySelector('.inline-gate');
+        if (inlineGate) {
+          inlineGate.classList.remove('inline-gate');
+          const inlineGated = document.querySelectorAll('.inline-gated');
+          for (const elem of inlineGated) { elem.classList.remove('inline-gated'); }
+        }
