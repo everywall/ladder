@@ -10,9 +10,12 @@
 
 Freedom of information is an essential pillar of democracy and informed decision-making. While media organizations have legitimate financial interests, it is crucial to strike a balance between profitability and the public's right to access information. The proliferation of paywalls raises concerns about the erosion of this fundamental freedom, and it is imperative for society to find innovative ways to preserve access to vital information without compromising the sustainability of journalism. In a world where knowledge should be shared and not commodified, paywalls should be critically examined to ensure that they do not undermine the principles of an open and informed society.
 
+> **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
+
+### Limitations
 Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please concider buying a subscription for the site.
 
-> **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
+Some sites do not expose their content to search engines, which means that the proxy cannot access the content. A future version will try to fetch the content from Google Cache.
 
 ### Features
 - [x] Bypass Paywalls
@@ -33,6 +36,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 - [x] No Tracking
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
+- [ ] Fetch from Google Cache if not available
 
 ## Installation
 
