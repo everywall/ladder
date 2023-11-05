@@ -39,7 +39,6 @@ func main() {
 		Default:  pf,
 		Help:     "This will spawn multiple processes listening"})
 
-	// Parse input
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -74,9 +73,11 @@ func main() {
 	}
 
 	app.Get("/", handlers.Form)
+	app.Get("ruleset", handlers.Ruleset)
 
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
+	app.Get("ruleset", handlers.Raw)
 	app.Get("/*", handlers.ProxySite)
 
 	log.Fatal(app.Listen(":" + *port))

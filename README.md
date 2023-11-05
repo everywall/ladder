@@ -92,6 +92,7 @@ http://localhost:8080/raw/https://www.example.com
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
 | `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
+| `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
 
@@ -117,7 +118,8 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
           alert("Hello!");
         </script>
 - domain: www.anotherdomain.com # Domain where the rule applies
-  path: /article                # Path where the rule applies
+  paths:                        # Paths where the rule applies
+    - /article
   googleCache: false            # Search also in Google Cache
   regexRules:                   # Regex rules to apply
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
