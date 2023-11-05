@@ -18,6 +18,7 @@ import (
 var UserAgent = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
 var rulesSet = loadRules()
+var allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -49,6 +50,10 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	u, err := url.Parse(urlpath)
 	if err != nil {
 		return "", nil, nil, err
+	}
+
+	if len(allowedDomains) > 0 && !StringInSlice(u.Host, allowedDomains) {
+		return "", nil, nil, fmt.Errorf("domain not allowed. %s not in %s", u.Host, allowedDomains)
 	}
 
 	if os.Getenv("DEBUG	") == "true" {
@@ -149,7 +154,13 @@ func loadRules() RuleSet {
 		}
 		yaml.Unmarshal(yamlFile, &ruleSet)
 	}
-	//log.Print(ruleSet)
+
+	for _, rule := range ruleSet {
+		//log.Println("Loaded rules for", rule.Domain)
+		if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
+			allowedDomains = append(allowedDomains, rule.Domain)
+		}
+	}
 
 	log.Println("Loaded rules for", len(ruleSet), "Domains")
 	return ruleSet

@@ -92,6 +92,10 @@ http://localhost:8080/raw/https://www.example.com
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
 | `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
+| `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
+| `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
+
+`ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
 
 ### Ruleset
 
