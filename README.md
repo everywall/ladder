@@ -21,11 +21,11 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Fetch RAW HTML
 - [x] Custom User Agent
 - [x] Custom X-Forwarded-For IP
-- [x] [Docker container](https://github.com/kubero-dev/ladder/pkgs/container/ladder)
+- [x] [Docker container](https://github.com/kubero-dev/ladder/pkgs/container/ladder) (amd64, arm64)
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
-- [x] Removes most of the ads (unexpected side effect)
+- [x] Removes most of the ads (unexpected side effect ¯\_(ツ)_/¯ )
 - [x] Basic Auth
 - [x] Disable logs
 - [x] No Tracking
