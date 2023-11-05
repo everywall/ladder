@@ -30,6 +30,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Disable logs
 - [x] No Tracking
 - [x] Limit the proxy to a list of domains
+- [x] Expose Ruleset to other ladders
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
 - [ ] Fetch from Google Cache if not available
@@ -76,6 +77,10 @@ curl -X GET "http://localhost:8080/api/https://www.example.com"
 
 ### RAW
 http://localhost:8080/raw/https://www.example.com
+
+
+### Running Ruleset
+http://localhost:8080/ruleset
 
 ## Configuration
 
