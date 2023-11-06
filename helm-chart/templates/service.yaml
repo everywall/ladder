@@ -1,0 +1,14 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ladder-service
+spec:
+  type: ClusterIP
+  selector:
+    app: ladder
+  ports:
+  - name: http
+    port: {{ .Values.ingress.PORT }}
+    protocol: TCP
+    targetPort: {{ .Values.env.PORT }}
