@@ -1,0 +1,20 @@
+image:
+  RELEASE: ghcr.io/kubero-dev/ladder:v0.0.11
+  
+env:
+  PORT: 8080
+  PREFORK: "false"
+  USER_AGENT: "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
+  X_FORWARDED_FOR:
+  USERPASS: ""
+  LOG_URLS: "true"
+  DISABLE_FORM: "false"
+  FORM_PATH: ""
+  RULESET: "https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml"
+  EXPOSE_RULESET: "true"
+  ALLOWED_DOMAINS: ""
+  ALLOWED_DOMAINS_RULESET: "false"
+
+ingress:
+  HOST: "ladder.domain.com"
+  PORT: 80
