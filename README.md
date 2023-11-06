@@ -60,6 +60,9 @@ curl https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yam
 docker-compose up -d
 ```
 
+### Helm
+See [README.md](/helm-chart/README.md) in helm-chart sub-directory for more information.
+
 ## Usage
 
 ### Browser
