@@ -53,3 +53,17 @@
             removeDOMElement(paywall)
           });
         </script>
+- domain: www.ft.com
+  paths: 
+    - /content
+  injections:
+    - position: head
+      append: | 
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const cookieBanner = document.querySelector('.o-banner__outer');
+            const ribbon = document.querySelector('.js-article-ribbon');
+            const ads = document.querySelector('.o-ads');
+            removeDOMElement(cookieBanner, ads, ribbon);
+          });
+        </script>
