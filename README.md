@@ -3,6 +3,9 @@
 </p>
 
 <h1 align="center">Ladder</h1>
+[![Go Report Card](https://goreportcard.com/badge/github.com/kubero-dev/ladder)](https://goreportcard.com/report/github.com/kubero-dev/ladder)
+[![License](https://img.shields.io/github/license/kubero-dev/ladder.svg)](https://github.com/kubero-dev/ladder/blob/main/LICENSE)
+[![Release](https://img.shields.io/github/v/release/kubero-dev/ladder.svg)](https://github.com/kubero-dev/kubero/releases/latest)
 
 *Ladder is a web proxy to help bypass paywalls.* This is a selfhosted version of [1ft.io](https://1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
 
