@@ -33,11 +33,18 @@ func main() {
 		Help:     "Port the webserver will listen on"})
 
 	pf, _ := strconv.ParseBool(os.Getenv("PREFORK"))
-
 	prefork := parser.Flag("P", "prefork", &argparse.Options{
 		Required: false,
 		Default:  pf,
 		Help:     "This will spawn multiple processes listening"})
+
+	r := os.Getenv("RULESET")
+	ruleset := parser.String("r", "ruleset", &argparse.Options{
+		Required: false,
+		Default:  r,
+		Help:     "Path or URL to your ruleset"})
+
+	handlers.LoadRules(*ruleset)
 
 	err := parser.Parse(os.Args)
 	if err != nil {

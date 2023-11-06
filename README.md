@@ -96,7 +96,7 @@ http://localhost:8080/ruleset
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
-| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
+| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` or `default` |
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |

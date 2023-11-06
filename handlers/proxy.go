@@ -17,8 +17,11 @@ import (
 
 var UserAgent = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
 var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
-var rulesSet = loadRules()
+var rulesSet RuleSet
+
+// var rulesSet = loadRules()
 var allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
+var Aaaa = "aaaa"
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -117,13 +120,18 @@ func getenv(key, fallback string) string {
 	return value
 }
 
-func loadRules() RuleSet {
-	rulesUrl := os.Getenv("RULESET")
+func LoadRules(rulesUrl string) RuleSet {
+	//rulesUrl := os.Getenv("RULESET")
 	if rulesUrl == "" {
 		RulesList := RuleSet{}
 		return RulesList
 	}
-	log.Println("Loading rules")
+
+	if rulesUrl == "default" {
+		rulesUrl = "https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml"
+	}
+
+	log.Println("Loading rules: " + rulesUrl)
 
 	var ruleSet RuleSet
 	if strings.HasPrefix(rulesUrl, "http") {
