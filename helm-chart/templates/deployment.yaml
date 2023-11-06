@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: ladder
+  name: ladder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ladder
+  template:
+    metadata:
+      labels:
+        app: ladder
+    spec:
+      containers:
+      - image: "{{ .Values.image.RELEASE }}"
+        imagePullPolicy: Always
+        name: ladder
+        resources:
+          limits:
+            cpu: 250m
+            memory: 128Mi
+          requests:
+            cpu: 250m
+            memory: 128Mi
+        env:
+          - name: PORT
+            value: "{{ .Values.env.PORT }}"
+          - name: PREFORK
+            value: "{{ .Values.env.PREFORK }}"
+          - name: USER_AGENT
+            value: "{{ .Values.env.USER_AGENT }}"
+          - name: X_FORWARDED_FOR
+            value: "{{ .Values.env.X_FORWARDED_FOR }}"
+          - name: USERPASS
+            value: "{{ .Values.env.USERPASS }}"
+          - name: LOG_URLS
+            value: "{{ .Values.env.LOG_URLS }}"
+          - name: DISABLE_FORM
+            value: "{{ .Values.env.DISABLE_FORM }}"
+          - name: FORM_PATH
+            value: "{{ .Values.env.FORM_PATH }}"
+          - name: RULESET
+            value: "{{ .Values.env.RULESET }}"
+          - name: EXPOSE_RULESET
+            value: "{{ .Values.env.EXPOSE_RULESET }}"
+          - name: ALLOWED_DOMAINS
+            value: "{{ .Values.env.ALLOWED_DOMAINS }}"
+          - name: ALLOWED_DOMAINS_RULESET
+            value: "{{ .Values.env.ALLOWED_DOMAINS_RULESET }}"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
