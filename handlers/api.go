@@ -27,7 +27,8 @@ func Api(c *fiber.Ctx) error {
 		Version: version,
 		Body:    body,
 	}
-	response.Request.Headers = make([]interface{}, 0)
+
+	response.Request.Headers = make([]any, 0, len(req.Header))
 	for k, v := range req.Header {
 		response.Request.Headers = append(response.Request.Headers, map[string]string{
 			"key":   k,
@@ -35,7 +36,7 @@ func Api(c *fiber.Ctx) error {
 		})
 	}
 
-	response.Response.Headers = make([]interface{}, 0)
+	response.Response.Headers = make([]any, 0, len(resp.Header))
 	for k, v := range resp.Header {
 		response.Response.Headers = append(response.Response.Headers, map[string]string{
 			"key":   k,
