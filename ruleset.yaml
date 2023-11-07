@@ -65,5 +65,14 @@
             const ribbon = document.querySelector('.js-article-ribbon');
             const ads = document.querySelector('.o-ads');
             removeDOMElement(cookieBanner, ads, ribbon);
+
+
+            let paywall = document.querySelector('div.js-primary-offers-container');
+            if (paywall) {
+              removeDOMElement(paywall);
+              refreshCurrentTab();
+            }
+            let banners = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner');
+            hideDOMElement(...banners);
           });
         </script>
