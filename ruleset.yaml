@@ -64,8 +64,9 @@
             const cookieBanner = document.querySelector('.o-banner__outer');
             const ribbon = document.querySelector('.js-article-ribbon');
             const ads = document.querySelector('.o-ads');
-            removeDOMElement(cookieBanner, ads, ribbon);
-
+            cookieBanner.remove();
+            ribbon.remove();
+            ads.remove();
 
             let paywall = document.querySelector('div.js-primary-offers-container');
             if (paywall) {
@@ -73,6 +74,8 @@
               refreshCurrentTab();
             }
             let banners = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner');
-            hideDOMElement(...banners);
+            for (const banner of banners) {
+              banner.remove();
+            }
           });
         </script>
