@@ -1,0 +1,17 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ladder-ingress
+spec:
+  rules:
+  - host: "{{ .Values.ingress.HOST }}"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ladder-service
+            port:
+              number: {{ .Values.ingress.PORT }}
