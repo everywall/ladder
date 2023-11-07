@@ -3,6 +3,13 @@
 </p>
 
 <h1 align="center">Ladder</h1>
+<img alt="License" src="https://img.shields.io/github/license/kubero-dev/ladder">
+<img alt="go.mod Go version " src="https://img.shields.io/github/go-mod/go-version/kubero-dev/ladder">
+<img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/kubero-dev/ladder">
+<img alt="GitHub (Pre-)Release Date" src="https://img.shields.io/github/release-date-pre/kubero-dev/ladder">
+<img alt="GitHub Downloads all releases" src="https://img.shields.io/github/downloads/kubero-dev/ladder/total">
+<img alt="GitHub Build Status (with event)" src="https://img.shields.io/github/actions/workflow/status/kubero-dev/ladder/release-binaries.yaml">
+
 
 *Ladder is a web proxy to help bypass paywalls.* This is a selfhosted version of [1ft.io](https://1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
 
@@ -25,7 +32,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
-- [x] Removes most of the ads (unexpected side effect ¯\_(ツ)_/¯ )
+- [x] Removes most of the ads (unexpected side effect ¯\\\_(ツ)_/¯ )
 - [x] Basic Auth
 - [x] Disable logs
 - [x] No Tracking
@@ -72,6 +79,11 @@ See [README.md](/helm-chart/README.md) in helm-chart sub-directory for more info
 
 Or direct by appending the URL to the end of the proxy URL:
 http://localhost:8080/https://www.example.com
+
+Or create a bookmark with the following URL:
+```javascript
+javascript:window.location.href="http://localhost:8080/"+location.href
+```
 
 ### API
 ```bash
