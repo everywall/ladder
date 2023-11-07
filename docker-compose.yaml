@@ -8,6 +8,7 @@ services:
     #command: sh -c ./ladder
     environment:
       - PORT=8080
+      - RULESET=/app/ruleset.yaml
       #- PREFORK=true
       #- X_FORWARDED_FOR=66.249.66.1
       #- USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
@@ -16,6 +17,8 @@ services:
       #- GODEBUG=netdns=go
     ports:
       - "8080:8080"
+    volumes:
+      - ./ruleset.yaml:/app/ruleset.yaml
     deploy:
       resources:
         limits:
