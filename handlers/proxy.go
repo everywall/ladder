@@ -56,7 +56,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, fmt.Errorf("domain not allowed. %s not in %s", u.Host, allowedDomains)
 	}
 
-	if os.Getenv("LOG_URLS	") == "true" {
+	if os.Getenv("LOG_URLS") == "true" {
 		log.Println(u.String() + urlQuery)
 	}
 
