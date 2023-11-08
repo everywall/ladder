@@ -155,14 +155,17 @@ func loadRules() RuleSet {
 		yaml.Unmarshal(yamlFile, &ruleSet)
 	}
 
+	domains := []string{}
 	for _, rule := range ruleSet {
-		//log.Println("Loaded rules for", rule.Domain)
+
+		domains = append(domains, rule.Domain)
+		domains = append(domains, rule.Domains...)
 		if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
-			allowedDomains = append(allowedDomains, rule.Domain)
+			allowedDomains = append(allowedDomains, domains...)
 		}
 	}
 
-	log.Println("Loaded rules for", len(ruleSet), "Domains")
+	log.Println("Loaded ", len(ruleSet), " rules for", len(domains), "Domains")
 	return ruleSet
 }
 
@@ -172,8 +175,8 @@ func applyRules(domain string, path string, body string) string {
 	}
 
 	for _, rule := range rulesSet {
-		// rule.Domain can be multiple domains delimited by "|"
-		domains := strings.Split(rule.Domain, "|")
+		domains := rule.Domains
+		domains = append(domains, rule.Domain)
 		for _, ruleDomain := range domains {
 			if ruleDomain != domain {
 				continue
@@ -217,6 +220,7 @@ type Rule struct {
 
 type RuleSet []struct {
 	Domain      string   `yaml:"domain"`
+	Domains     []string `yaml:"domains,omitempty"`
 	Paths       []string `yaml:"paths,omitempty"`
 	GoogleCache bool     `yaml:"googleCache,omitempty"`
 	RegexRules  []Rule   `yaml:"regexRules"`

@@ -121,12 +121,15 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
 
 ```yaml
 - domain: www.example.com
+  domains:                     # Additional domains to apply the rule
+    - www.example.com
+    - www.beispiel.de
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
   injections:
     - position: head # Position where to inject the code
-      append: | 
+      append: |      # possible keys: append, prepend, replace
         <script>
           window.localStorage.clear();
           console.log("test");
