@@ -7,7 +7,6 @@ import (
 	"ladder/handlers"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/akamensky/argparse"
@@ -23,25 +22,22 @@ func main() {
 
 	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
 
-	p := os.Getenv("PORT")
-	if os.Getenv("PORT") == "" {
-		p = "8080"
-	}
 	port := parser.String("p", "port", &argparse.Options{
 		Required: false,
-		Default:  p,
+		Default:  os.Getenv("PORT"),
 		Help:     "Port the webserver will listen on"})
-
-	pf, _ := strconv.ParseBool(os.Getenv("PREFORK"))
 
 	prefork := parser.Flag("P", "prefork", &argparse.Options{
 		Required: false,
-		Default:  pf,
 		Help:     "This will spawn multiple processes listening"})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
+	}
+
+	if os.Getenv("PREFORK") == "true" {
+		*prefork = true
 	}
 
 	app := fiber.New(

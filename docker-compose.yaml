@@ -3,13 +3,17 @@ services:
   ladder:
     image: ghcr.io/kubero-dev/ladder:latest
     container_name: ladder
-    build: .
+    #build: .
     #restart: always
     #command: sh -c ./ladder
     environment:
       - PORT=8080
       - RULESET=/app/ruleset.yaml
-      #- PREFORK=true
+      #- ALLOWED_DOMAINS_RULESET=false
+      #- EXPOSE_RULESET=true
+      #- PREFORK=false
+      #- DISABLE_FORM=fase
+      #- FORM_PATH=/app/form.html
       #- X_FORWARDED_FOR=66.249.66.1
       #- USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
       #- USERPASS=foo:bar
@@ -19,11 +23,4 @@ services:
       - "8080:8080"
     volumes:
       - ./ruleset.yaml:/app/ruleset.yaml
-    deploy:
-      resources:
-        limits:
-          cpus: "0.50"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
+      - ./handlers/form.html:/app/form.html
