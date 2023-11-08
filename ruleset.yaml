@@ -1,4 +1,7 @@
-- domain: www.example.com
+- domains:
+    - www.example.com
+    - www.beispiel.de
+    - www.example.fr
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
@@ -53,7 +56,16 @@
             removeDOMElement(paywall)
           });
         </script>
-- domain: www.architecturaldigest.com|www.bonappetit.com|www.cntraveler.com|www.epicurious.com|www.gq.com|www.newyorker.com|www.vanityfair.com|www.vogue.com|www.wired.com
+- domains:
+    - www.architecturaldigest.com
+    - www.bonappetit.com
+    - www.cntraveler.com
+    - www.epicurious.com
+    - www.gq.com
+    - www.newyorker.com
+    - www.vanityfair.com
+    - www.vogue.com
+    - www.wired.com
   injections:
     - position: head
       append: |
@@ -63,7 +75,9 @@
             banners.forEach(el => { el.remove(); });
           });
         </script>
-- domain: www.nytimes.com|www.time.com
+- domains:
+    - www.nytimes.com
+    - www.time.com
   injections:
     - position: head
       append: |
@@ -74,7 +88,14 @@
             banners.forEach(el => { el.remove(); });
           });
         </script>
-- domain: www.thestar.com|www.niagarafallsreview.ca|www.stcatharinesstandard.ca|www.thepeterboroughexaminer.com|www.therecord.com|www.thespec.com|www.wellandtribune.ca
+- domains:
+    - www.thestar.com
+    - www.niagarafallsreview.ca
+    - www.stcatharinesstandard.ca
+    - www.thepeterboroughexaminer.com
+    - www.therecord.com
+    - www.thespec.com
+    - www.wellandtribune.ca
   injections:
     - position: head
       append: |
@@ -83,17 +104,11 @@
           document.addEventListener("DOMContentLoaded", () => {
             const paywall = document.querySelectorAll('div.subscriber-offers');
             paywall.forEach(el => { el.remove(); });
-            const subscriber_only = document.querySelectorAll('div.subscriber-only');
-            for (const elem of subscriber_only) {
-              if (elem.classList.contains('encrypted-content') && dompurify_loaded) {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString('<div>' + DOMPurify.sanitize(unscramble(elem.innerText)) + '</div>', 'text/html');
-                const content_new = doc.querySelector('div');
-                elem.parentNode.replaceChild(content_new, elem);
-              }
-              elem.removeAttribute('style');
-              elem.removeAttribute('class');
-            }
+            const subscriber_only = document.querySelectorAll('div.subscriber-only, div[id="site-top-nav-container"], div[id="site-navbar-container"]');
+            subscriber_only.forEach(el => { 
+              el.removeAttribute('class'); 
+              el.removeAttribute('style'); 
+              });
             const banners = document.querySelectorAll('div.subscription-required, div.redacted-overlay, div.subscriber-hide, div.tnt-ads-container');
             banners.forEach(el => { el.remove(); });
             const ads = document.querySelectorAll('div.tnt-ads-container, div[class*="adLabelWrapper"]');

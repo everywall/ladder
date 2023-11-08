@@ -172,41 +172,41 @@ func applyRules(domain string, path string, body string) string {
 	}
 
 	for _, rule := range rulesSet {
-		// rule.Domain can be multiple domains delimited by "|"
-		domains := strings.Split(rule.Domain, "|")
-		for _, ruleDomain := range domains {
-			if ruleDomain != domain {
+		if rule.Domain != "" && rule.Domain != domain {
+			continue
+		}
+		if len(rule.Domains) > 0 {
+			if !StringInSlice(domain, rule.Domains) {
 				continue
 			}
 			if len(rule.Paths) > 0 && !StringInSlice(path, rule.Paths) {
 				continue
 			}
-			for _, regexRule := range rule.RegexRules {
-				re := regexp.MustCompile(regexRule.Match)
-				body = re.ReplaceAllString(body, regexRule.Replace)
+		}
+		for _, regexRule := range rule.RegexRules {
+			re := regexp.MustCompile(regexRule.Match)
+			body = re.ReplaceAllString(body, regexRule.Replace)
+		}
+		for _, injection := range rule.Injections {
+			doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
+			if err != nil {
+				log.Fatal(err)
 			}
-			for _, injection := range rule.Injections {
-				doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
-				if err != nil {
-					log.Fatal(err)
-				}
-				if injection.Replace != "" {
-					doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
-				}
-				if injection.Append != "" {
-					doc.Find(injection.Position).AppendHtml(injection.Append)
-				}
-				if injection.Prepend != "" {
-					doc.Find(injection.Position).PrependHtml(injection.Prepend)
-				}
-				body, err = doc.Html()
-				if err != nil {
-					log.Fatal(err)
-				}
+			if injection.Replace != "" {
+				doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
+			}
+			if injection.Append != "" {
+				doc.Find(injection.Position).AppendHtml(injection.Append)
+			}
+			if injection.Prepend != "" {
+				doc.Find(injection.Position).PrependHtml(injection.Prepend)
+			}
+			body, err = doc.Html()
+			if err != nil {
+				log.Fatal(err)
 			}
 		}
 	}
-
 	return body
 }
 
@@ -216,7 +216,8 @@ type Rule struct {
 }
 
 type RuleSet []struct {
-	Domain      string   `yaml:"domain"`
+	Domain      string   `yaml:"domain,omitempty"`
+	Domains     []string `yaml:"domains,omitempty"`
 	Paths       []string `yaml:"paths,omitempty"`
 	GoogleCache bool     `yaml:"googleCache,omitempty"`
 	RegexRules  []Rule   `yaml:"regexRules"`
