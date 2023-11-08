@@ -9,6 +9,7 @@ services:
     environment:
       - PORT=8080
       - RULESET=/app/ruleset.yaml
+      #- ALLOWED_DOMAINS_RULESET=false
       #- EXPOSE_RULESET=true
       #- PREFORK=false
       #- DISABLE_FORM=fase
