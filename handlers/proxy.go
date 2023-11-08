@@ -159,6 +159,9 @@ func loadRules() RuleSet {
 		//log.Println("Loaded rules for", rule.Domain)
 		if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
 			allowedDomains = append(allowedDomains, rule.Domain)
+			for _, domainRule := range rule.Domains {
+				allowedDomains = append(allowedDomains, domainRule)
+			}
 		}
 	}
 
