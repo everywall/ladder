@@ -142,5 +142,7 @@
             paywall.forEach(el => { el.remove(); });
             const images = document.querySelectorAll('img');
             images.forEach(image => { image.parentElement.style.filter = ''; });
+            const headimage = document.querySelectorAll('div .aspect-custom');
+            headimage.forEach(image => { image.style.filter = ''; });
           });
         </script>
