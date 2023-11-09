@@ -22,9 +22,13 @@ func main() {
 
 	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
 
+	portEnv := os.Getenv("PORT")
+	if os.Getenv("PORT") == "" {
+		portEnv = "8080"
+	}
 	port := parser.String("p", "port", &argparse.Options{
 		Required: false,
-		Default:  os.Getenv("PORT"),
+		Default:  portEnv,
 		Help:     "Port the webserver will listen on"})
 
 	prefork := parser.Flag("P", "prefork", &argparse.Options{
