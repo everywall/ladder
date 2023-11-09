@@ -1,6 +1,12 @@
 - domain: www.example.com
   domains: 
-  - www.beispiel.com
+  - www.beispiel.de
+  googleCache: true
+  headers:
+    x-forwarded-for: none
+    referer: none
+    user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+    cookie: privacy=1
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
@@ -77,6 +83,10 @@
 - domains: 
   - www.nytimes.com
   - www.time.com
+  headers:
+    ueser-agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+    cookie: nyt-a=; nyt-gdpr=0; nyt-geo=DE; nyt-privacy=1
+    referer: https://www.google.com/ 
   injections:
     - position: head
       append: |
@@ -146,3 +156,11 @@
             headimage.forEach(image => { image.style.filter = ''; });
           });
         </script>
+- domain: www.medium.com
+  domains:
+  - medium.com
+  headers:
+    referer: https://t.co/x?amp=1
+    x-forwarded-for: none
+    user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+    cookie: 

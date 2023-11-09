@@ -51,7 +51,7 @@ func TestRewriteHtml(t *testing.T) {
 		</html>
 	`
 
-	actual := rewriteHtml(bodyB, u)
+	actual := rewriteHtml(bodyB, u, Rule{})
 	assert.Equal(t, expected, actual)
 }
 

@@ -47,6 +47,7 @@ func main() {
 	app := fiber.New(
 		fiber.Config{
 			Prefork: *prefork,
+			GETOnly: true,
 		},
 	)
 

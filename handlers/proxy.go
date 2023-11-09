@@ -60,13 +60,45 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		log.Println(u.String() + urlQuery)
 	}
 
+	rule := fetchRule(u.Host, u.Path)
+
+	if rule.GoogleCache {
+		u, err = url.Parse("https://webcache.googleusercontent.com/search?q=cache:" + u.String())
+		if err != nil {
+			return "", nil, nil, err
+		}
+	}
+
 	// Fetch the site
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", u.String()+urlQuery, nil)
-	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("X-Forwarded-For", ForwardedFor)
-	req.Header.Set("Referer", u.String())
-	req.Header.Set("Host", u.Host)
+
+	if rule.Headers.UserAgent != "" {
+		req.Header.Set("User-Agent", rule.Headers.UserAgent)
+	} else {
+		req.Header.Set("User-Agent", UserAgent)
+	}
+
+	if rule.Headers.XForwardedFor != "" {
+		if rule.Headers.XForwardedFor != "none" {
+			req.Header.Set("X-Forwarded-For", rule.Headers.XForwardedFor)
+		}
+	} else {
+		req.Header.Set("X-Forwarded-For", ForwardedFor)
+	}
+
+	if rule.Headers.Referer != "" {
+		if rule.Headers.Referer != "none" {
+			req.Header.Set("Referer", rule.Headers.Referer)
+		}
+	} else {
+		req.Header.Set("Referer", u.String())
+	}
+
+	if rule.Headers.Cookie != "" {
+		req.Header.Set("Cookie", rule.Headers.Cookie)
+	}
+
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -79,11 +111,12 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
-	body := rewriteHtml(bodyB, u)
+	log.Print("rule", rule)
+	body := rewriteHtml(bodyB, u, rule)
 	return body, req, resp, nil
 }
 
-func rewriteHtml(bodyB []byte, u *url.URL) string {
+func rewriteHtml(bodyB []byte, u *url.URL, rule Rule) string {
 	// Rewrite the HTML
 	body := string(bodyB)
 
@@ -104,7 +137,7 @@ func rewriteHtml(bodyB []byte, u *url.URL) string {
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
 
 	if os.Getenv("RULESET") != "" {
-		body = applyRules(u.Host, u.Path, body)
+		body = applyRules(body, rule)
 	}
 	return body
 }
@@ -169,67 +202,57 @@ func loadRules() RuleSet {
 	return ruleSet
 }
 
-func applyRules(domain string, path string, body string) string {
+func fetchRule(domain string, path string) Rule {
 	if len(rulesSet) == 0 {
-		return body
+		return Rule{}
 	}
-
+	rule := Rule{}
 	for _, rule := range rulesSet {
 		domains := rule.Domains
 		domains = append(domains, rule.Domain)
 		for _, ruleDomain := range domains {
-			if ruleDomain != domain {
-				continue
+			if ruleDomain == domain {
+				if len(rule.Paths) > 0 && !StringInSlice(path, rule.Paths) {
+					continue
+				}
+				// return first match
+				return rule
 			}
-			if len(rule.Paths) > 0 && !StringInSlice(path, rule.Paths) {
-				continue
-			}
-			for _, regexRule := range rule.RegexRules {
-				re := regexp.MustCompile(regexRule.Match)
-				body = re.ReplaceAllString(body, regexRule.Replace)
-			}
-			for _, injection := range rule.Injections {
-				doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
-				if err != nil {
-					log.Fatal(err)
-				}
-				if injection.Replace != "" {
-					doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
-				}
-				if injection.Append != "" {
-					doc.Find(injection.Position).AppendHtml(injection.Append)
-				}
-				if injection.Prepend != "" {
-					doc.Find(injection.Position).PrependHtml(injection.Prepend)
-				}
-				body, err = doc.Html()
-				if err != nil {
-					log.Fatal(err)
-				}
-			}
+		}
+	}
+	return rule
+}
+
+func applyRules(body string, rule Rule) string {
+	if len(rulesSet) == 0 {
+		return body
+	}
+
+	for _, regexRule := range rule.RegexRules {
+		re := regexp.MustCompile(regexRule.Match)
+		body = re.ReplaceAllString(body, regexRule.Replace)
+	}
+	for _, injection := range rule.Injections {
+		doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if injection.Replace != "" {
+			doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
+		}
+		if injection.Append != "" {
+			doc.Find(injection.Position).AppendHtml(injection.Append)
+		}
+		if injection.Prepend != "" {
+			doc.Find(injection.Position).PrependHtml(injection.Prepend)
+		}
+		body, err = doc.Html()
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 
 	return body
-}
-
-type Rule struct {
-	Match   string `yaml:"match"`
-	Replace string `yaml:"replace"`
-}
-
-type RuleSet []struct {
-	Domain      string   `yaml:"domain"`
-	Domains     []string `yaml:"domains,omitempty"`
-	Paths       []string `yaml:"paths,omitempty"`
-	GoogleCache bool     `yaml:"googleCache,omitempty"`
-	RegexRules  []Rule   `yaml:"regexRules"`
-	Injections  []struct {
-		Position string `yaml:"position"`
-		Append   string `yaml:"append"`
-		Prepend  string `yaml:"prepend"`
-		Replace  string `yaml:"replace"`
-	} `yaml:"injections"`
 }
 
 func StringInSlice(s string, list []string) bool {
