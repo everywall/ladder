@@ -120,13 +120,13 @@ It is possible to apply custom rules to modify the response. This can be used to
 See in [ruleset.yaml](ruleset.yaml) for an example.
 
 ```yaml
-- domain: www.example.com
+- domain: example.com          # Inbcludes all subdomains
   domains:                     # Additional domains to apply the rule
-    - www.example.com
+    - www.example.de
     - www.beispiel.de
   headers:
     x-forwarded-for: none      # override X-Forwarded-For header or delete with none
-    referer: none              # override Referer header or delete with none   
+    referer: none              # override Referer header or delete with none
     user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
     cookie: privacy=1
   regexRules:

@@ -1,4 +1,4 @@
-- domain: www.example.com
+- domain: example.com
   domains: 
   - www.beispiel.de
   googleCache: true
@@ -156,9 +156,7 @@
             headimage.forEach(image => { image.style.filter = ''; });
           });
         </script>
-- domain: www.medium.com
-  domains:
-  - medium.com
+- domain: medium.com
   headers:
     referer: https://t.co/x?amp=1
     x-forwarded-for: none

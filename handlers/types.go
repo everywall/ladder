@@ -8,7 +8,7 @@ type Regex struct {
 type RuleSet []Rule
 
 type Rule struct {
-	Domain  string   `yaml:"domain"`
+	Domain  string   `yaml:"domain,omitempty"`
 	Domains []string `yaml:"domains,omitempty"`
 	Paths   []string `yaml:"paths,omitempty"`
 	Headers struct {

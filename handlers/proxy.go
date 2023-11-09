@@ -209,9 +209,11 @@ func fetchRule(domain string, path string) Rule {
 	rule := Rule{}
 	for _, rule := range rulesSet {
 		domains := rule.Domains
-		domains = append(domains, rule.Domain)
+		if rule.Domain != "" {
+			domains = append(domains, rule.Domain)
+		}
 		for _, ruleDomain := range domains {
-			if ruleDomain == domain {
+			if ruleDomain == domain || strings.HasSuffix(domain, ruleDomain) {
 				if len(rule.Paths) > 0 && !StringInSlice(path, rule.Paths) {
 					continue
 				}
