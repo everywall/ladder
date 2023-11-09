@@ -1,24 +1,26 @@
 - domain: www.example.com
+  domains: 
+  - www.beispiel.com
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
       replace: <script $1 script="/https://www.example.com/$3"
   injections:
     - position: head # Position where to inject the code
-      append: | 
+      append: |
         <script>
           window.localStorage.clear();
           console.log("test");
           alert("Hello!");
         </script>
     - position: h1
-      replace: | 
+      replace: |
         <h1>An example with a ladder ;-)</h1>
 - domain: www.americanbanker.com
-  paths: 
+  paths:
     - /news
   injections:
     - position: head
-      append: | 
+      append: |
         <script>
           document.addEventListener("DOMContentLoaded", () => {
             const inlineGate = document.querySelector('.inline-gate');
@@ -30,7 +32,7 @@
           });
         </script>
 - domain: www.nzz.ch
-  paths: 
+  paths:
     - /international
     - /sport
     - /wirtschaft
@@ -46,10 +48,99 @@
     - /finanze
   injections:
     - position: head
-      append: | 
+      append: |
         <script>
           document.addEventListener("DOMContentLoaded", () => {
             const paywall = document.querySelector('.dynamic-regwall');
             removeDOMElement(paywall)
+          });
+        </script>
+- domains: 
+  - www.architecturaldigest.com
+  - www.bonappetit.com
+  - www.cntraveler.com
+  - www.epicurious.com
+  - www.gq.com
+  - www.newyorker.com
+  - www.vanityfair.com
+  - www.vogue.com
+  - www.wired.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('.paywall-bar, div[class^="MessageBannerWrapper-"');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>
+- domains: 
+  - www.nytimes.com
+  - www.time.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('div[data-testid="inline-message"], div[id^="ad-"], div[id^="leaderboard-"], div.expanded-dock, div.pz-ad-box, div[id="top-wrapper"], div[id="bottom-wrapper"]');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>
+- domains: 
+  - www.thestar.com
+  - www.niagarafallsreview.ca
+  - www.stcatharinesstandard.ca
+  - www.thepeterboroughexaminer.com
+  - www.therecord.com
+  - www.thespec.com
+  - www.wellandtribune.ca
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            const paywall = document.querySelectorAll('div.subscriber-offers');
+            paywall.forEach(el => { el.remove(); });
+            const subscriber_only = document.querySelectorAll('div.subscriber-only');
+            for (const elem of subscriber_only) {
+              if (elem.classList.contains('encrypted-content') && dompurify_loaded) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString('<div>' + DOMPurify.sanitize(unscramble(elem.innerText)) + '</div>', 'text/html');
+                const content_new = doc.querySelector('div');
+                elem.parentNode.replaceChild(content_new, elem);
+              }
+              elem.removeAttribute('style');
+              elem.removeAttribute('class');
+            }
+            const banners = document.querySelectorAll('div.subscription-required, div.redacted-overlay, div.subscriber-hide, div.tnt-ads-container');
+            banners.forEach(el => { el.remove(); });
+            const ads = document.querySelectorAll('div.tnt-ads-container, div[class*="adLabelWrapper"]');
+            ads.forEach(el => { el.remove(); });
+            const recommendations = document.querySelectorAll('div[id^="tncms-region-article"]');
+            recommendations.forEach(el => { el.remove(); });
+          });
+        </script>
+- domain: www.usatoday.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('div.roadblock-container, .gnt_nb, [aria-label="advertisement"], div[id="main-frame-error"]');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>
+- domain: www.washingtonpost.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            let paywall = document.querySelectorAll('div[data-qa$="-ad"], div[id="leaderboard-wrapper"], div[data-qa="subscribe-promo"]');
+            paywall.forEach(el => { el.remove(); });
+            const images = document.querySelectorAll('img');
+            images.forEach(image => { image.parentElement.style.filter = ''; });
           });
         </script>
