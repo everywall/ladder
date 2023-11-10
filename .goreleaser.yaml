@@ -33,10 +33,10 @@ changelog:
 #brews:
 #  -
 #    repository:
-#      owner: kubero-dev
+#      owner: everywall
 #      name: homebrew-ladder
 #      token: "{{ .Env.GORELEASER_GITHUB_TOKEN }}"
-#    homepage: "https://www.kubero.dev"
-#    description: "Manage your kubero applications with the CLI"
+#    homepage: "https://www.everyladder.dev"
+#    description: "Manage your everyladder applications modify every website"
 #    test: |
-#      system "#{bin}/kubero", "--version"
+#      system "#{bin}/everyladder", "--version"

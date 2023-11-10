@@ -1,6 +1,6 @@
 apiVersion: v2
 name: ladder
-description: A helm chart to deploy kubero-dev/ladder 
+description: A helm chart to deploy everywall/ladder 
 type: application
 version: "1.0"
 appVersion: "v0.0.11"

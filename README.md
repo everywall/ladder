@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">Ladder</h1>
-<div><img alt="License" src="https://img.shields.io/github/license/kubero-dev/ladder"> <img alt="go.mod Go version " src="https://img.shields.io/github/go-mod/go-version/kubero-dev/ladder"> <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/kubero-dev/ladder"> <img alt="GitHub (Pre-)Release Date" src="https://img.shields.io/github/release-date-pre/kubero-dev/ladder"> <img alt="GitHub Downloads all releases" src="https://img.shields.io/github/downloads/kubero-dev/ladder/total"> <img alt="GitHub Build Status (with event)" src="https://img.shields.io/github/actions/workflow/status/kubero-dev/ladder/release-binaries.yaml"></div>
+<div><img alt="License" src="https://img.shields.io/github/license/everywall/ladder"> <img alt="go.mod Go version " src="https://img.shields.io/github/go-mod/go-version/everywall/ladder"> <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/everywall/ladder"> <img alt="GitHub (Pre-)Release Date" src="https://img.shields.io/github/release-date-pre/everywall/ladder"> <img alt="GitHub Downloads all releases" src="https://img.shields.io/github/downloads/everywall/ladder/total"> <img alt="GitHub Build Status (with event)" src="https://img.shields.io/github/actions/workflow/status/everywall/ladder/release-binaries.yaml"></div>
 
 
 *Ladder is a web proxy to help bypass paywalls.* This is a selfhosted version of [1ft.io](https://1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
@@ -23,7 +23,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] Fetch RAW HTML
 - [x] Custom User Agent
 - [x] Custom X-Forwarded-For IP
-- [x] [Docker container](https://github.com/kubero-dev/ladder/pkgs/container/ladder) (amd64, arm64)
+- [x] [Docker container](https://github.com/everywall/ladder/pkgs/container/ladder) (amd64, arm64)
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
@@ -47,18 +47,18 @@ Some sites do not expose their content to search engines, which means that the p
 > **Warning:** If your instance will be publicly accessible, make sure to enable Basic Auth. This will prevent unauthorized users from using your proxy. If you do not enable Basic Auth, anyone can use your proxy to browse nasty/illegal stuff. And you will be responsible for it.
 
 ### Binary
-1) Download binary [here](https://github.com/kubero-dev/ladder/releases/latest)
+1) Download binary [here](https://github.com/everywall/ladder/releases/latest)
 2) Unpack and run the binary `./ladder`
 3) Open Browser (Default: http://localhost:8080)
 
 ### Docker
 ```bash
-docker run -p 8080:8080 -d --name ladder ghcr.io/kubero-dev/ladder:latest
+docker run -p 8080:8080 -d --name ladder ghcr.io/everywall/ladder:latest
 ```
 
 ### Docker Compose
 ```bash
-curl https://raw.githubusercontent.com/kubero-dev/ladder/main/docker-compose.yaml --output docker-compose.yaml
+curl https://raw.githubusercontent.com/everywall/ladder/main/docker-compose.yaml --output docker-compose.yaml
 docker-compose up -d
 ```
 
@@ -106,7 +106,7 @@ http://localhost:8080/ruleset
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
-| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
+| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/everywall/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |

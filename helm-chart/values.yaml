@@ -1,5 +1,5 @@
 image:
-  RELEASE: ghcr.io/kubero-dev/ladder:v0.0.11
+  RELEASE: ghcr.io/everywall/ladder:latest
   
 env:
   PORT: 8080
@@ -10,7 +10,7 @@ env:
   LOG_URLS: "true"
   DISABLE_FORM: "false"
   FORM_PATH: ""
-  RULESET: "https://raw.githubusercontent.com/kubero-dev/ladder/main/ruleset.yaml"
+  RULESET: "https://raw.githubusercontent.com/everywall/ladder/main/ruleset.yaml"
   EXPOSE_RULESET: "true"
   ALLOWED_DOMAINS: ""
   ALLOWED_DOMAINS_RULESET: "false"

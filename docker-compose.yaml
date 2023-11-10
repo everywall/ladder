@@ -1,7 +1,7 @@
 version: '3'
 services:
   ladder:
-    image: ghcr.io/kubero-dev/ladder:latest
+    image: ghcr.io/everywall/ladder:latest
     container_name: ladder
     #build: .
     #restart: always
