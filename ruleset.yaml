@@ -1,6 +1,6 @@
 - domain: example.com
-  domains:
-    - www.beispiel.de
+  domains: 
+  - www.beispiel.de
   googleCache: true
   headers:
     x-forwarded-for: none
@@ -61,16 +61,16 @@
             removeDOMElement(paywall)
           });
         </script>
-- domains:
-    - www.architecturaldigest.com
-    - www.bonappetit.com
-    - www.cntraveler.com
-    - www.epicurious.com
-    - www.gq.com
-    - www.newyorker.com
-    - www.vanityfair.com
-    - www.vogue.com
-    - www.wired.com
+- domains: 
+  - www.architecturaldigest.com
+  - www.bonappetit.com
+  - www.cntraveler.com
+  - www.epicurious.com
+  - www.gq.com
+  - www.newyorker.com
+  - www.vanityfair.com
+  - www.vogue.com
+  - www.wired.com
   injections:
     - position: head
       append: |
@@ -80,13 +80,13 @@
             banners.forEach(el => { el.remove(); });
           });
         </script>
-- domains:
-    - www.nytimes.com
-    - www.time.com
+- domains: 
+  - www.nytimes.com
+  - www.time.com
   headers:
     ueser-agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
     cookie: nyt-a=; nyt-gdpr=0; nyt-geo=DE; nyt-privacy=1
-    referer: https://www.google.com/
+    referer: https://www.google.com/ 
   injections:
     - position: head
       append: |
@@ -97,14 +97,14 @@
             banners.forEach(el => { el.remove(); });
           });
         </script>
-- domains:
-    - www.thestar.com
-    - www.niagarafallsreview.ca
-    - www.stcatharinesstandard.ca
-    - www.thepeterboroughexaminer.com
-    - www.therecord.com
-    - www.thespec.com
-    - www.wellandtribune.ca
+- domains: 
+  - www.thestar.com
+  - www.niagarafallsreview.ca
+  - www.stcatharinesstandard.ca
+  - www.thepeterboroughexaminer.com
+  - www.therecord.com
+  - www.thespec.com
+  - www.wellandtribune.ca
   injections:
     - position: head
       append: |
