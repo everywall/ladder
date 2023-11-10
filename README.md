@@ -128,6 +128,7 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
     x-forwarded-for: none      # override X-Forwarded-For header or delete with none
     referer: none              # override Referer header or delete with none
     user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+    content-security-policy: script-src 'self'; # override response header
     cookie: privacy=1
   regexRules:
     - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"

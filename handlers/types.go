@@ -16,6 +16,7 @@ type Rule struct {
 		XForwardedFor string `yaml:"x-forwarded-for,omitempty"`
 		Referer       string `yaml:"referer,omitempty"`
 		Cookie        string `yaml:"cookie,omitempty"`
+		CSP           string `yaml:"content-security-policy,omitempty"`
 	} `yaml:"headers,omitempty"`
 	GoogleCache bool    `yaml:"googleCache,omitempty"`
 	RegexRules  []Regex `yaml:"regexRules"`

@@ -33,6 +33,8 @@ func ProxySite(c *fiber.Ctx) error {
 	}
 
 	c.Set("Content-Type", resp.Header.Get("Content-Type"))
+	c.Set("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
+
 	return c.SendString(body)
 }
 
@@ -109,6 +111,10 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	bodyB, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", nil, nil, err
+	}
+
+	if rule.Headers.CSP != "" {
+		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 
 	log.Print("rule", rule)
