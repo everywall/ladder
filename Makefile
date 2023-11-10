@@ -1,7 +1,9 @@
 lint:
 	gofumpt -l -w .
-	golangci-lint run
+	golangci-lint run -c .golangci-lint.yaml
+
 	go mod tidy
+	go clean
 
 install-linters:
 	go install mvdan.cc/gofumpt@latest
