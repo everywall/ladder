@@ -33,9 +33,9 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [x] No Tracking
 - [x] Limit the proxy to a list of domains
 - [x] Expose Ruleset to other ladders
+- [x] Fetch from Google Cache
 - [ ] Optional TOR proxy
 - [ ] A key to share only one URL
-- [ ] Fetch from Google Cache if not available
 
 ### Limitations
 Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please consider buying a subscription for the site.
