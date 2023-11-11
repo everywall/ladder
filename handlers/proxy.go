@@ -15,10 +15,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var UserAgent = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-var ForwardedFor = getenv("X_FORWARDED_FOR", "66.249.66.1")
-var rulesSet = loadRules()
-var allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
+var (
+	UserAgent      = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+	ForwardedFor   = getenv("X_FORWARDED_FOR", "66.249.66.1")
+	rulesSet       = loadRules()
+	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
+)
 
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
@@ -39,7 +41,6 @@ func ProxySite(c *fiber.Ctx) error {
 }
 
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
-
 	urlQuery := "?"
 	if len(queries) > 0 {
 		for k, v := range queries {
@@ -102,7 +103,6 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	resp, err := client.Do(req)
-
 	if err != nil {
 		return "", nil, nil, err
 	}
@@ -136,7 +136,7 @@ func rewriteHtml(bodyB []byte, u *url.URL, rule Rule) string {
 	reScript := regexp.MustCompile(scriptPattern)
 	body = reScript.ReplaceAllString(body, fmt.Sprintf(`<script $1 script="%s$3"`, "/https://"+u.Host+"/"))
 
-	//body = strings.ReplaceAll(body, "srcset=\"/", "srcset=\"/https://"+u.Host+"/") // TODO: Needs a regex to rewrite the URL's
+	// body = strings.ReplaceAll(body, "srcset=\"/", "srcset=\"/https://"+u.Host+"/") // TODO: Needs a regex to rewrite the URL's
 	body = strings.ReplaceAll(body, "href=\"/", "href=\"/https://"+u.Host+"/")
 	body = strings.ReplaceAll(body, "url('/", "url('/https://"+u.Host+"/")
 	body = strings.ReplaceAll(body, "url(/", "url(/https://"+u.Host+"/")

@@ -3,11 +3,11 @@ package main
 import (
 	_ "embed"
 	"fmt"
-
-	"ladder/handlers"
 	"log"
 	"os"
 	"strings"
+
+	"ladder/handlers"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -19,7 +19,6 @@ import (
 var faviconData string
 
 func main() {
-
 	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
 
 	portEnv := os.Getenv("PORT")
@@ -29,11 +28,13 @@ func main() {
 	port := parser.String("p", "port", &argparse.Options{
 		Required: false,
 		Default:  portEnv,
-		Help:     "Port the webserver will listen on"})
+		Help:     "Port the webserver will listen on",
+	})
 
 	prefork := parser.Flag("P", "prefork", &argparse.Options{
 		Required: false,
-		Help:     "This will spawn multiple processes listening"})
+		Help:     "This will spawn multiple processes listening",
+	})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -82,5 +83,4 @@ func main() {
 	app.Get("/*", handlers.ProxySite)
 
 	log.Fatal(app.Listen(":" + *port))
-
 }

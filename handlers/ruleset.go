@@ -8,7 +8,6 @@ import (
 )
 
 func Ruleset(c *fiber.Ctx) error {
-
 	if os.Getenv("EXPOSE_RULESET") == "false" {
 		c.SendStatus(fiber.StatusForbidden)
 		return c.SendString("Rules Disabled")
