@@ -117,7 +117,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 
-	log.Print("rule", rule)
+	//log.Print("rule", rule) TODO: Add a debug mode to print the rule
 	body := rewriteHtml(bodyB, u, rule)
 	return body, req, resp, nil
 }
