@@ -2,12 +2,12 @@ package handlers
 
 import (
 	_ "embed"
-
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
 
+//nolint:all
 //go:embed VERSION
 var version string
 
