@@ -22,9 +22,56 @@ var (
 	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 )
 
+// extracts a URL from the request ctx. If the URL in the request
+// is a relative path, it reconstructs the full URL using the referer header.
+func extractUrl(c *fiber.Ctx) (string, error) {
+	reqUrl := c.Params("*")
+
+	// Extract the actual path from req ctx
+	urlQuery, err := url.Parse(reqUrl)
+	if err != nil {
+		return "", fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
+	}
+
+	isRelativePath := urlQuery.Scheme == ""
+
+	// eg: https://localhost:8080/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
+	if isRelativePath {
+		// Parse the referer URL from the request header.
+		refererUrl, err := url.Parse(c.Get("referer"))
+		if err != nil {
+			return "", fmt.Errorf("error parsing referer URL from req: '%s': %v", reqUrl, err)
+		}
+
+		// Extract the real url from referer path
+		realUrl, err := url.Parse(strings.TrimPrefix(refererUrl.Path, "/"))
+		if err != nil {
+			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
+		}
+
+		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
+		fullUrl := &url.URL{
+			Scheme:   realUrl.Scheme,
+			Host:     realUrl.Host,
+			Path:     urlQuery.Path,
+			RawQuery: urlQuery.RawQuery,
+		}
+		log.Println(fullUrl.String())
+		return fullUrl.String(), nil
+	}
+
+	// default behavior:
+	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
+	return urlQuery.String(), nil
+
+}
+
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
-	url := c.Params("*")
+	url, err := extractUrl(c)
+	if err != nil {
+		log.Println("ERROR In URL extraction:", err)
+	}
 
 	queries := c.Queries()
 	body, _, resp, err := fetchSite(url, queries)
@@ -104,7 +151,6 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	if err != nil {
 		return "", nil, nil, err
 	}
-	log.Println("fetch URI: %", url)
 
 	// Fetch the site
 	client := &http.Client{}
