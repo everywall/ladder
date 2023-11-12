@@ -25,7 +25,12 @@ var (
 // extracts a URL from the request ctx. If the URL in the request
 // is a relative path, it reconstructs the full URL using the referer header.
 func extractUrl(c *fiber.Ctx) (string, error) {
-	reqUrl := c.Params("*")
+	// try to extract url-encoded
+	reqUrl, err := url.QueryUnescape(c.Params("*"))
+	if err != nil {
+		// fallback
+		reqUrl = c.Params("*")
+	}
 
 	// Extract the actual path from req ctx
 	urlQuery, err := url.Parse(reqUrl)
@@ -199,6 +204,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	if rule.Headers.CSP != "" {
+		log.Println(rule.Headers.CSP)
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 
