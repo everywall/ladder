@@ -163,3 +163,24 @@
     user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
     content-security-policy: script-src 'self';
     cookie: 
+- domain: www.ft.com
+  headers:
+    referer: https://t.co/x?amp=1
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const styleTags = document.querySelectorAll('link[rel="stylesheet"]');
+            styleTags.forEach(el => { 
+              const href = el.getAttribute('href').substring(1);
+              const updatedHref = href.replace(/(https?:\/\/.+?)\/{2,}/, '$1/');
+              console.log(updatedHref);
+              el.setAttribute('href', updatedHref);
+            });
+            setTimeout(() => {
+              const cookie = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner, .o-message');
+              cookie.forEach(el => { el.remove(); });
+            }, 1000);
+          })
+        </script>
