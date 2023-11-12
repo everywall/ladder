@@ -56,8 +56,12 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 			Path:     urlQuery.Path,
 			RawQuery: urlQuery.RawQuery,
 		}
-		log.Println(fullUrl.String())
+
+		if os.Getenv("LOG_URLS") == "true" {
+			log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+		}
 		return fullUrl.String(), nil
+
 	}
 
 	// default behavior:
@@ -119,6 +123,7 @@ func modifyURL(uri string, rule Rule) (string, error) {
 			return "", err
 		}
 	}
+
 	return newUrl.String(), nil
 }
 
