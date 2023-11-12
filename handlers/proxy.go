@@ -40,6 +40,41 @@ func ProxySite(c *fiber.Ctx) error {
 	return c.SendString(body)
 }
 
+func modifyURL(uri string, rule Rule) (string, error) {
+	newUrl, err := url.Parse(uri)
+	if err != nil {
+		return "", err
+	}
+
+	for _, urlMod := range rule.UrlMods.Domain {
+		re := regexp.MustCompile(urlMod.Match)
+		newUrl.Host = re.ReplaceAllString(newUrl.Host, urlMod.Replace)
+	}
+
+	for _, urlMod := range rule.UrlMods.Path {
+		re := regexp.MustCompile(urlMod.Match)
+		newUrl.Path = re.ReplaceAllString(newUrl.Path, urlMod.Replace)
+	}
+
+	v := newUrl.Query()
+	for _, query := range rule.UrlMods.Query {
+		if query.Value == "" {
+			v.Del(query.Key)
+			continue
+		}
+		v.Set(query.Key, query.Value)
+	}
+	newUrl.RawQuery = v.Encode()
+
+	if rule.GoogleCache {
+		newUrl, err = url.Parse("https://webcache.googleusercontent.com/search?q=cache:" + newUrl.String())
+		if err != nil {
+			return "", err
+		}
+	}
+	return newUrl.String(), nil
+}
+
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
 	urlQuery := "?"
 	if len(queries) > 0 {
@@ -63,18 +98,17 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		log.Println(u.String() + urlQuery)
 	}
 
+	// Modify the URI according to ruleset
 	rule := fetchRule(u.Host, u.Path)
-
-	if rule.GoogleCache {
-		u, err = url.Parse("https://webcache.googleusercontent.com/search?q=cache:" + u.String())
-		if err != nil {
-			return "", nil, nil, err
-		}
+	url, err := modifyURL(u.String()+urlQuery, rule)
+	if err != nil {
+		return "", nil, nil, err
 	}
+	log.Println("fetch URI: %", url)
 
 	// Fetch the site
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", u.String()+urlQuery, nil)
+	req, _ := http.NewRequest("GET", url, nil)
 
 	if rule.Headers.UserAgent != "" {
 		req.Header.Set("User-Agent", rule.Headers.UserAgent)
