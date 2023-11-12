@@ -175,7 +175,6 @@
             styleTags.forEach(el => { 
               const href = el.getAttribute('href').substring(1);
               const updatedHref = href.replace(/(https?:\/\/.+?)\/{2,}/, '$1/');
-              console.log(updatedHref);
               el.setAttribute('href', updatedHref);
             });
             setTimeout(() => {
