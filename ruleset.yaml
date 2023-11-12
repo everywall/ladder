@@ -178,7 +178,7 @@
               el.setAttribute('href', updatedHref);
             });
             setTimeout(() => {
-              const cookie = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner, .o-message');
+              const cookie = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner, .o-message, .article__content-sign-up');
               cookie.forEach(el => { el.remove(); });
             }, 1000);
           })
