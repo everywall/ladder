@@ -120,7 +120,7 @@ It is possible to apply custom rules to modify the response or the requested URL
 See in [ruleset.yaml](ruleset.yaml) for an example.
 
 ```yaml
-- domain: example.com          # Inbcludes all subdomains
+- domain: example.com          # Includes all subdomains
   domains:                     # Additional domains to apply the rule
     - www.example.de
     - www.beispiel.de
