@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ladder</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -21,7 +22,7 @@
                 <input type="text" id="inputField" placeholder="Proxy Search" name="inputField" class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700" required autofocus>
             </div>
         </form>
-        <footer class="mt-10 text-center text-slate-600 dark:text-slate-400">
+        <footer class="mt-10 text-center text-slate-600 dark:text-slate-400 mx-4">
             <p>
                 Code Licensed Under GPL v3.0 |
                 <a href="https://github.com/everywall/ladder" class="hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300">View Source</a> |
@@ -31,9 +32,6 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            M.AutoInit();
-        });
         document.getElementById('inputForm').addEventListener('submit', function (e) {
             e.preventDefault();
             let url = document.getElementById('inputField').value;

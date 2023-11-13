@@ -120,7 +120,7 @@ It is possible to apply custom rules to modify the response. This can be used to
 See in [ruleset.yaml](ruleset.yaml) for an example.
 
 ```yaml
-- domain: example.com          # Inbcludes all subdomains
+- domain: example.com          # Includes all subdomains
   domains:                     # Additional domains to apply the rule
     - www.example.de
     - www.beispiel.de
@@ -154,5 +154,5 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
         <h1>My Custom Title</h1>
     - position: .left-content article # Position where to inject the code into DOM
       prepend: | 
-        <h2>Suptitle</h2>
+        <h2>Subtitle</h2>
 ```
