@@ -154,8 +154,8 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
         <h1>My Custom Title</h1>
     - position: .left-content article # Position where to inject the code into DOM
       prepend: | 
-        <h2>Suptitle</h2>
-- domain: tagesspiegel.de
+        <h2>Subtitle</h2>
+- domain: demo.com
   headers:
     content-security-policy: script-src 'self';
     user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
@@ -165,8 +165,8 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
         value: 1 
     domain:             
       - match: www      # regex to match part of domain
-        replace: amp    # (this would modify the domain from www.tagesspiegel.de to amp.tagesspielgel.de)
+        replace: amp    # (this would modify the domain from www.demo.de to amp.demo.de)
     path:               
       - match: ^        # regex to match part of path
-        replace: /amp/  # (modify the url from https://www.tagesspiegel.de/internationales/ to https://www.tagesspiegel.de/amp/internationales/)
+        replace: /amp/  # (modify the url from https://www.demo.com/article/ to https://www.demo.de/amp/article/)
 ```
