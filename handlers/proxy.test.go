@@ -2,6 +2,7 @@
 package handlers
 
 import (
+	"ladder/pkg/ruleset"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -13,7 +14,7 @@ import (
 
 func TestProxySite(t *testing.T) {
 	app := fiber.New()
-	app.Get("/:url", ProxySite)
+	app.Get("/:url", ProxySite(""))
 
 	req := httptest.NewRequest("GET", "/https://example.com", nil)
 	resp, err := app.Test(req)
@@ -51,7 +52,7 @@ func TestRewriteHtml(t *testing.T) {
 		</html>
 	`
 
-	actual := rewriteHtml(bodyB, u, Rule{})
+	actual := rewriteHtml(bodyB, u, ruleset.Rule{})
 	assert.Equal(t, expected, actual)
 }
 
