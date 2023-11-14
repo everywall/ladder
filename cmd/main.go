@@ -79,7 +79,6 @@ func main() {
 
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
-	app.Get("ruleset", handlers.Raw)
 	app.Get("/*", handlers.ProxySite)
 
 	log.Fatal(app.Listen(":" + *port))
