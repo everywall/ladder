@@ -22,9 +22,65 @@ var (
 	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 )
 
+// extracts a URL from the request ctx. If the URL in the request
+// is a relative path, it reconstructs the full URL using the referer header.
+func extractUrl(c *fiber.Ctx) (string, error) {
+	// try to extract url-encoded
+	reqUrl, err := url.QueryUnescape(c.Params("*"))
+	if err != nil {
+		// fallback
+		reqUrl = c.Params("*")
+	}
+
+	// Extract the actual path from req ctx
+	urlQuery, err := url.Parse(reqUrl)
+	if err != nil {
+		return "", fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
+	}
+
+	isRelativePath := urlQuery.Scheme == ""
+
+	// eg: https://localhost:8080/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
+	if isRelativePath {
+		// Parse the referer URL from the request header.
+		refererUrl, err := url.Parse(c.Get("referer"))
+		if err != nil {
+			return "", fmt.Errorf("error parsing referer URL from req: '%s': %v", reqUrl, err)
+		}
+
+		// Extract the real url from referer path
+		realUrl, err := url.Parse(strings.TrimPrefix(refererUrl.Path, "/"))
+		if err != nil {
+			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
+		}
+
+		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
+		fullUrl := &url.URL{
+			Scheme:   realUrl.Scheme,
+			Host:     realUrl.Host,
+			Path:     urlQuery.Path,
+			RawQuery: urlQuery.RawQuery,
+		}
+
+		if os.Getenv("LOG_URLS") == "true" {
+			log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+		}
+		return fullUrl.String(), nil
+
+	}
+
+	// default behavior:
+	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
+	return urlQuery.String(), nil
+
+}
+
 func ProxySite(c *fiber.Ctx) error {
 	// Get the url from the URL
-	url := c.Params("*")
+	url, err := extractUrl(c)
+	if err != nil {
+		log.Println("ERROR In URL extraction:", err)
+	}
 
 	queries := c.Queries()
 	body, _, resp, err := fetchSite(url, queries)
@@ -38,6 +94,42 @@ func ProxySite(c *fiber.Ctx) error {
 	c.Set("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
 
 	return c.SendString(body)
+}
+
+func modifyURL(uri string, rule Rule) (string, error) {
+	newUrl, err := url.Parse(uri)
+	if err != nil {
+		return "", err
+	}
+
+	for _, urlMod := range rule.UrlMods.Domain {
+		re := regexp.MustCompile(urlMod.Match)
+		newUrl.Host = re.ReplaceAllString(newUrl.Host, urlMod.Replace)
+	}
+
+	for _, urlMod := range rule.UrlMods.Path {
+		re := regexp.MustCompile(urlMod.Match)
+		newUrl.Path = re.ReplaceAllString(newUrl.Path, urlMod.Replace)
+	}
+
+	v := newUrl.Query()
+	for _, query := range rule.UrlMods.Query {
+		if query.Value == "" {
+			v.Del(query.Key)
+			continue
+		}
+		v.Set(query.Key, query.Value)
+	}
+	newUrl.RawQuery = v.Encode()
+
+	if rule.GoogleCache {
+		newUrl, err = url.Parse("https://webcache.googleusercontent.com/search?q=cache:" + newUrl.String())
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return newUrl.String(), nil
 }
 
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
@@ -63,18 +155,16 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		log.Println(u.String() + urlQuery)
 	}
 
+	// Modify the URI according to ruleset
 	rule := fetchRule(u.Host, u.Path)
-
-	if rule.GoogleCache {
-		u, err = url.Parse("https://webcache.googleusercontent.com/search?q=cache:" + u.String())
-		if err != nil {
-			return "", nil, nil, err
-		}
+	url, err := modifyURL(u.String()+urlQuery, rule)
+	if err != nil {
+		return "", nil, nil, err
 	}
 
 	// Fetch the site
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", u.String()+urlQuery, nil)
+	req, _ := http.NewRequest("GET", url, nil)
 
 	if rule.Headers.UserAgent != "" {
 		req.Header.Set("User-Agent", rule.Headers.UserAgent)
@@ -114,6 +204,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	if rule.Headers.CSP != "" {
+		log.Println(rule.Headers.CSP)
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 

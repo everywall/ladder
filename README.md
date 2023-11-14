@@ -17,7 +17,7 @@ Freedom of information is an essential pillar of democracy and informed decision
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
-- [x] Apply domain based ruleset/code to modify response
+- [x] Apply domain based ruleset/code to modify response / requested URL
 - [x] Keep site browsable
 - [x] API
 - [x] Fetch RAW HTML
@@ -115,7 +115,7 @@ http://localhost:8080/ruleset
 
 ### Ruleset
 
-It is possible to apply custom rules to modify the response. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file that contains a list of rules for each domain and is loaded on startup
+It is possible to apply custom rules to modify the response or the requested URL. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file that contains a list of rules for each domain and is loaded on startup
 
 See in [ruleset.yaml](ruleset.yaml) for an example.
 
@@ -154,5 +154,19 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
         <h1>My Custom Title</h1>
     - position: .left-content article # Position where to inject the code into DOM
       prepend: | 
-        <h2>Subtitle</h2>
+        <h2>Suptitle</h2>
+- domain: tagesspiegel.de
+  headers:
+    content-security-policy: script-src 'self';
+    user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+  urlMods:              # Modify the URL
+    query:              
+      - key: amp        # (this will append ?amp=1 to the URL)
+        value: 1 
+    domain:             
+      - match: www      # regex to match part of domain
+        replace: amp    # (this would modify the domain from www.tagesspiegel.de to amp.tagesspielgel.de)
+    path:               
+      - match: ^        # regex to match part of path
+        replace: /amp/  # (modify the url from https://www.tagesspiegel.de/internationales/ to https://www.tagesspiegel.de/amp/internationales/)
 ```
