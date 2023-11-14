@@ -159,7 +159,7 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
 
 ## Development
 
-To run a development server:
+To run a development server at http://localhost:8080:
 
 ```bash
 RULETSET='RULESET="./ruleset.yaml" go run cmd/main.go'
