@@ -17,6 +17,7 @@ import (
 
 //go:embed favicon.ico
 var faviconData string
+//go:embed styles.css
 var cssData embed.FS
 
 func main() {
