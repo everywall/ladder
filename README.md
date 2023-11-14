@@ -156,3 +156,13 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
       prepend: | 
         <h2>Subtitle</h2>
 ```
+
+## Development
+
+To run a development server:
+
+```bash
+RULETSET='RULESET="./ruleset.yaml" go run cmd/main.go'
+```
+
+This project uses [pnpm](https://pnpm.io/) to build a stylesheet with the [Tailwind CSS](https://tailwindcss.com/) classes. For local development, if you modify styles in `form.html`, run `pnpm build` to generate a new stylesheet.
