@@ -20,6 +20,10 @@ type Regex struct {
 	Match   string `yaml:"match"`
 	Replace string `yaml:"replace"`
 }
+type KV struct {
+	Key   string `yaml:"key"`
+	Value string `yaml:"value"`
+}
 
 type RuleSet []Rule
 
@@ -36,7 +40,14 @@ type Rule struct {
 	} `yaml:"headers,omitempty"`
 	GoogleCache bool    `yaml:"googleCache,omitempty"`
 	RegexRules  []Regex `yaml:"regexRules"`
-	Injections  []struct {
+
+	UrlMods struct {
+		Domain []Regex `yaml:"domain"`
+		Path   []Regex `yaml:"path"`
+		Query  []KV    `yaml:"query"`
+	} `yaml:"urlMods"`
+
+	Injections []struct {
 		Position string `yaml:"position"`
 		Append   string `yaml:"append"`
 		Prepend  string `yaml:"prepend"`
