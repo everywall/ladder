@@ -8,6 +8,11 @@ on:
 
 jobs:
   tailwindbuilder:
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+      
     runs-on: ubuntu-latest
     steps:
       -
@@ -24,7 +29,7 @@ jobs:
       -
         name: Commit generated stylesheet
         run: |
-          if git diff cmd/styles.css --quiet; then
+          if git diff --quiet cmd/styles.css; then
             echo "No changes to commit."
             exit 0
           else
