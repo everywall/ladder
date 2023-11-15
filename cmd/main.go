@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "embed"
+	"embed"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +17,8 @@ import (
 
 //go:embed favicon.ico
 var faviconData string
+//go:embed styles.css
+var cssData embed.FS
 
 func main() {
 	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
@@ -80,6 +82,16 @@ func main() {
 	}
 
 	app.Get("/", handlers.Form)
+	app.Get("/styles.css", func(c *fiber.Ctx) error {
+		cssData, err := cssData.ReadFile("styles.css")
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
+		}
+		c.Set("Content-Type", "text/css")
+		return c.Send(cssData)
+	})
+	app.Get("ruleset", handlers.Ruleset)
+
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite(*ruleset))

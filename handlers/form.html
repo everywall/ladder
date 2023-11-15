@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ladder</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/styles.css">
 </head>
 
 <body class="antialiased text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900">
@@ -20,12 +20,12 @@
         <form id="inputForm" method="get" class="mx-4 relative">
             <div>
                 <input type="text" id="inputField" placeholder="Proxy Search" name="inputField" class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700" required autofocus>
-                <button id="clearButton" type="button" aria-label="Clear Search" title="Clear Search" class="hidden absolute inset-y-0 right-0 flex items-center pr-2 hover:text-slate-400 hover:dark:text-slate-300" tabindex="-1">
+                <button id="clearButton" type="button" aria-label="Clear Search" title="Clear Search" class="hidden absolute inset-y-0 right-0 items-center pr-2 hover:text-slate-400 hover:dark:text-slate-300" tabindex="-1">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round""><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
             </div>
         </form>
-        <footer class="mt-10 text-center text-slate-600 dark:text-slate-400 mx-4">
+        <footer class="mt-10 mx-4 text-center text-slate-600 dark:text-slate-400">
             <p>
                 Code Licensed Under GPL v3.0 |
                 <a href="https://github.com/everywall/ladder" class="hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300">View Source</a> |

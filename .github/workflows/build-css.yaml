@@ -1,0 +1,42 @@
+name: Build Tailwind CSS
+
+on:
+  push:
+    paths:
+      - "handlers/form.html"
+  workflow_dispatch:
+
+jobs:
+  tailwindbuilder:
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+      
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      -
+        name: Build Tailwind CSS
+        run: pnpm build
+      -
+        name: Commit generated stylesheet
+        run: |
+          if git diff --quiet cmd/styles.css; then
+            echo "No changes to commit."
+            exit 0
+          else
+            echo "Changes detected, committing..."
+            git config --global user.name "Github action"
+            git config --global user.email "username@users.noreply.github.com"
+            git add cmd
+            git commit -m "Generated stylesheet"
+            git push
+          fi
