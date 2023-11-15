@@ -24,7 +24,7 @@ jobs:
       -
         name: Commit generated stylesheet
         run: |
-          if git diff --quiet; then
+          if git diff cmd/styles.css --quiet; then
             echo "No changes to commit."
             exit 0
           else
