@@ -90,6 +90,7 @@ func ProxySite(c *fiber.Ctx) error {
 		return c.SendString(err.Error())
 	}
 
+	c.Set("Cookie", "")
 	c.Set("Content-Type", resp.Header.Get("Content-Type"))
 	c.Set("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
 
