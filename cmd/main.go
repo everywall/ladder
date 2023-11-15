@@ -38,6 +38,11 @@ func main() {
 		Help:     "This will spawn multiple processes listening",
 	})
 
+	ruleset := parser.String("r", "ruleset", &argparse.Options{
+		Required: false,
+		Help:     "File, Directory or URL to a ruleset.yml. Overrides RULESET environment variable.",
+	})
+
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -89,7 +94,6 @@ func main() {
 
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
-	app.Get("/*", handlers.ProxySite)
-
+	app.Get("/*", handlers.ProxySite(*ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }
