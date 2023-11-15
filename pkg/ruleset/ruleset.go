@@ -66,7 +66,7 @@ func NewRulesetFromEnv() RuleSet {
 	}
 	ruleSet, err := NewRuleset(rulesPath)
 	if err != nil {
-		log.Panicln(ruleSet)
+		log.Println(err)
 	}
 	return ruleSet
 }
@@ -79,11 +79,12 @@ func NewRuleset(rulePaths string) (RuleSet, error) {
 	errs := []error{}
 
 	rp := strings.Split(rulePaths, ";")
+	var remoteRegex = regexp.MustCompile(`^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)`)
 	for _, rule := range rp {
 		rulePath := strings.Trim(rule, " ")
 		var err error
 
-		isRemote, _ := regexp.MatchString(`^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)`, rulePath)
+		isRemote := remoteRegex.MatchString(rulePath)
 		if isRemote {
 			err = ruleSet.loadRulesFromRemoteFile(rulePath)
 		} else {
@@ -91,14 +92,14 @@ func NewRuleset(rulePaths string) (RuleSet, error) {
 		}
 
 		if err != nil {
-			e := errors.New(fmt.Sprintf("WARN: failed to load ruleset from ''%s", rulePath))
+			e := fmt.Errorf("WARN: failed to load ruleset from '%s'", rulePath)
 			errs = append(errs, errors.Join(e, err))
 			continue
 		}
 	}
 
 	if len(errs) != 0 {
-		e := errors.New(fmt.Sprintf("WARN: failed to load %d rulesets", len(rp)))
+		e := fmt.Errorf("WARN: failed to load %d rulesets", len(rp))
 		errs = append(errs, e)
 		// panic if the user specified a local ruleset, but it wasn't found on disk
 		// don't fail silently
@@ -160,14 +161,14 @@ func (rs *RuleSet) loadRulesFromLocalDir(path string) error {
 func (rs *RuleSet) loadRulesFromLocalFile(path string) error {
 	yamlFile, err := os.ReadFile(path)
 	if err != nil {
-		e := errors.New(fmt.Sprintf("failed to read rules from local file: '%s'", path))
+		e := fmt.Errorf("failed to read rules from local file: '%s'", path)
 		return errors.Join(e, err)
 	}
 
 	var r RuleSet
 	err = yaml.Unmarshal(yamlFile, &r)
 	if err != nil {
-		e := errors.New(fmt.Sprintf("failed to load rules from local file, possible syntax error in '%s'", path))
+		e := fmt.Errorf("failed to load rules from local file, possible syntax error in '%s'", path)
 		ee := errors.Join(e, err)
 		if _, ok := os.LookupEnv("DEBUG"); ok {
 			debugPrintRule(string(yamlFile), ee)
@@ -185,13 +186,13 @@ func (rs *RuleSet) loadRulesFromRemoteFile(rulesUrl string) error {
 	var r RuleSet
 	resp, err := http.Get(rulesUrl)
 	if err != nil {
-		e := errors.New(fmt.Sprintf("failed to load rules from remote url '%s'", rulesUrl))
+		e := fmt.Errorf("failed to load rules from remote url '%s'", rulesUrl)
 		return errors.Join(e, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		e := errors.New(fmt.Sprintf("failed to load rules from remote url (%s) on '%s'", resp.Status, rulesUrl))
+		e := fmt.Errorf("failed to load rules from remote url (%s) on '%s'", resp.Status, rulesUrl)
 		return errors.Join(e, err)
 	}
 
@@ -210,7 +211,7 @@ func (rs *RuleSet) loadRulesFromRemoteFile(rulesUrl string) error {
 	err = yaml.NewDecoder(reader).Decode(&r)
 
 	if err != nil {
-		e := errors.New(fmt.Sprintf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error", rulesUrl, resp.Status))
+		e := fmt.Errorf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error", rulesUrl, resp.Status)
 		ee := errors.Join(e, err)
 		return ee
 	}
