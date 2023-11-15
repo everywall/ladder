@@ -38,9 +38,9 @@ Freedom of information is an essential pillar of democracy and informed decision
 - [ ] A key to share only one URL
 
 ### Limitations
-Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please consider buying a subscription for the site.
-
 Some sites do not expose their content to search engines, which means that the proxy cannot access the content. A future version will try to fetch the content from Google Cache.
+
+Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please consider buying a subscription for the site.
 
 ## Installation
 
@@ -176,7 +176,7 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
 To run a development server at http://localhost:8080:
 
 ```bash
-RULESET="./ruleset.yaml" go run cmd/main.go'
+RULESET="./ruleset.yaml" go run cmd/main.go
 ```
 
 This project uses [pnpm](https://pnpm.io/) to build a stylesheet with the [Tailwind CSS](https://tailwindcss.com/) classes. For local development, if you modify styles in `form.html`, run `pnpm build` to generate a new stylesheet.
