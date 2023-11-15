@@ -1,0 +1,24 @@
+- domain: www.nzz.ch
+  paths:
+    - /international
+    - /sport
+    - /wirtschaft
+    - /technologie
+    - /feuilleton
+    - /zuerich
+    - /wissenschaft
+    - /gesellschaft
+    - /panorama
+    - /mobilitaet
+    - /reisen
+    - /meinung
+    - /finanze
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const paywall = document.querySelector('.dynamic-regwall');
+            removeDOMElement(paywall)
+          });
+        </script>

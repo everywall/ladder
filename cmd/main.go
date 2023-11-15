@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"ladder/handlers"
+	"ladder/handlers/cli"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -17,6 +18,7 @@ import (
 
 //go:embed favicon.ico
 var faviconData string
+
 //go:embed styles.css
 var cssData embed.FS
 
@@ -40,12 +42,35 @@ func main() {
 
 	ruleset := parser.String("r", "ruleset", &argparse.Options{
 		Required: false,
-		Help:     "File, Directory or URL to a ruleset.yml. Overrides RULESET environment variable.",
+		Help:     "File, Directory or URL to a ruleset.yaml. Overrides RULESET environment variable.",
+	})
+
+	mergeRulesets := parser.Flag("", "merge-rulesets", &argparse.Options{
+		Required: false,
+		Help:     "Compiles a directory of yaml files into a single ruleset.yaml. Requires --ruleset arg.",
+	})
+	mergeRulesetsGzip := parser.Flag("", "merge-rulesets-gzip", &argparse.Options{
+		Required: false,
+		Help:     "Compiles a directory of yaml files into a single ruleset.gz Requires --ruleset arg.",
+	})
+	mergeRulesetsOutput := parser.String("", "merge-rulesets-output", &argparse.Options{
+		Required: false,
+		Help:     "Specify output file for --merge-rulesets and --merge-rulesets-gzip. Requires --ruleset and --merge-rulesets args.",
 	})
 
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
+	}
+
+	// utility cli flag to compile ruleset directory into single ruleset.yaml
+	if *mergeRulesets || *mergeRulesetsGzip {
+		err = cli.HandleRulesetMerge(ruleset, mergeRulesets, mergeRulesetsGzip, mergeRulesetsOutput)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		os.Exit(0)
 	}
 
 	if os.Getenv("PREFORK") == "true" {

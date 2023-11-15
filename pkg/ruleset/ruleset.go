@@ -39,20 +39,20 @@ type Rule struct {
 		CSP           string `yaml:"content-security-policy,omitempty"`
 	} `yaml:"headers,omitempty"`
 	GoogleCache bool    `yaml:"googleCache,omitempty"`
-	RegexRules  []Regex `yaml:"regexRules"`
+	RegexRules  []Regex `yaml:"regexRules,omitempty"`
 
 	UrlMods struct {
-		Domain []Regex `yaml:"domain"`
-		Path   []Regex `yaml:"path"`
-		Query  []KV    `yaml:"query"`
-	} `yaml:"urlMods"`
+		Domain []Regex `yaml:"domain,omitempty"`
+		Path   []Regex `yaml:"path,omitempty"`
+		Query  []KV    `yaml:"queryomitempty"`
+	} `yaml:"urlMods,omitempty"`
 
 	Injections []struct {
-		Position string `yaml:"position"`
-		Append   string `yaml:"append"`
-		Prepend  string `yaml:"prepend"`
-		Replace  string `yaml:"replace"`
-	} `yaml:"injections"`
+		Position string `yaml:"position,omitempty"`
+		Append   string `yaml:"append,omitempty"`
+		Prepend  string `yaml:"prepend,omitempty"`
+		Replace  string `yaml:"replace,omitempty"`
+	} `yaml:"injections,omitempty"`
 }
 
 // NewRulesetFromEnv creates a new RuleSet based on the RULESET environment variable.
