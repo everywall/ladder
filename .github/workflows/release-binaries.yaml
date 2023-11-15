@@ -22,7 +22,11 @@ jobs:
       -
         name: Set version
         run: |
-          echo -n $(git describe --tags --abbrev=0) > handlers/VERSION
+          VERSION=$(git describe --tags --abbrev=0)
+          echo -n $VERSION > handlers/VERSION
+          sed -i 's\VERSION\${VERSION}\g' handlers/form.html
+          echo handlers/form.html >> .gitignore
+          echo .gitignore >> .gitignore
       -
         name: Set up Go
         uses: actions/setup-go@v3

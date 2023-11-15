@@ -176,6 +176,7 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
 To run a development server at http://localhost:8080:
 
 ```bash
+echo "DEV" > handler/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
 ```
 
