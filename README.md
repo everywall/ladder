@@ -170,3 +170,13 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
       - match: ^        # regex to match part of path
         replace: /amp/  # (modify the url from https://www.demo.com/article/ to https://www.demo.de/amp/article/)
 ```
+
+## Development
+
+To run a development server at http://localhost:8080:
+
+```bash
+RULETSET='RULESET="./ruleset.yaml" go run cmd/main.go'
+```
+
+This project uses [pnpm](https://pnpm.io/) to build a stylesheet with the [Tailwind CSS](https://tailwindcss.com/) classes. For local development, if you modify styles in `form.html`, run `pnpm build` to generate a new stylesheet.
