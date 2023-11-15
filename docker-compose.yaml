@@ -9,10 +9,11 @@ services:
     environment:
       - PORT=8080
       - RULESET=/app/ruleset.yaml
+      #- ALLOWED_DOMAINS=example.com,example.org
       #- ALLOWED_DOMAINS_RULESET=false
       #- EXPOSE_RULESET=true
       #- PREFORK=false
-      #- DISABLE_FORM=fase
+      #- DISABLE_FORM=false
       #- FORM_PATH=/app/form.html
       #- X_FORWARDED_FOR=66.249.66.1
       #- USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)

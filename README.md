@@ -106,7 +106,7 @@ http://localhost:8080/ruleset
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
-| `RULESET` | URL to a ruleset file | `https://raw.githubusercontent.com/everywall/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` |
+| `RULESET` | Path or URL to a ruleset file, accepts local directories | `https://raw.githubusercontent.com/everywall/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` or `/path/to/my/rules/` |
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
@@ -176,6 +176,7 @@ See in [ruleset.yaml](ruleset.yaml) for an example.
 To run a development server at http://localhost:8080:
 
 ```bash
+echo "dev" > handlers/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
 ```
 

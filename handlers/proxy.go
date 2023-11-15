@@ -107,9 +107,9 @@ func ProxySite(rulesetPath string) fiber.Handler {
 			return c.SendString(err.Error())
 		}
 
-	c.Cookie(&fiber.Cookie{})
-	c.Set("Content-Type", resp.Header.Get("Content-Type"))
-	c.Set("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
+		c.Cookie(&fiber.Cookie{})
+		c.Set("Content-Type", resp.Header.Get("Content-Type"))
+		c.Set("Content-Security-Policy", resp.Header.Get("Content-Security-Policy"))
 
 		return c.SendString(body)
 	}
