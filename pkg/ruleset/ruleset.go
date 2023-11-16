@@ -44,7 +44,7 @@ type Rule struct {
 	UrlMods struct {
 		Domain []Regex `yaml:"domain,omitempty"`
 		Path   []Regex `yaml:"path,omitempty"`
-		Query  []KV    `yaml:"queryomitempty"`
+		Query  []KV    `yaml:"query,omitempty"`
 	} `yaml:"urlMods,omitempty"`
 
 	Injections []struct {
