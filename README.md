@@ -48,7 +48,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 
 ### Binary
 1) Download binary [here](https://github.com/everywall/ladder/releases/latest)
-2) Unpack and run the binary `./ladder`
+2) Unpack and run the binary `./ladder -r https://t.ly/14PSf`
 3) Open Browser (Default: http://localhost:8080)
 
 ### Docker
@@ -106,7 +106,7 @@ http://localhost:8080/ruleset
 | `LOG_URLS` | Log fetched URL's | `true` |
 | `DISABLE_FORM` | Disables URL Form Frontpage | `false` |
 | `FORM_PATH` | Path to custom Form HTML | `` |
-| `RULESET` | Path or URL to a ruleset file, accepts local directories | `https://raw.githubusercontent.com/everywall/ladder/main/ruleset.yaml` or `/path/to/my/rules.yaml` or `/path/to/my/rules/` |
+| `RULESET` | Path or URL to a ruleset file, accepts local directories | `https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml` or `/path/to/my/rules.yaml` or `/path/to/my/rules/` |
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
@@ -115,9 +115,10 @@ http://localhost:8080/ruleset
 
 ### Ruleset
 
-It is possible to apply custom rules to modify the response or the requested URL. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file that contains a list of rules for each domain and is loaded on startup
+It is possible to apply custom rules to modify the response or the requested URL. This can be used to remove unwanted or modify elements from the page. The ruleset is a YAML file, a directory with YAML Files, or an URL to a YAML file that contains a list of rules for each domain. These rules are loaded on startup.
 
-See in [ruleset.yaml](ruleset.yaml) for an example.
+There is a basic ruleset available in a separate repository [ruleset.yaml](https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml). Feel free to add your own rules and create a pull request.
+
 
 ```yaml
 - domain: example.com          # Includes all subdomains

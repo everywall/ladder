@@ -1,0 +1,23 @@
+- domain: example.com
+  domains: 
+  - www.beispiel.de
+  googleCache: true
+  headers:
+    x-forwarded-for: none
+    referer: none
+    user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+    cookie: privacy=1
+  regexRules:
+    - match: <script\s+([^>]*\s+)?src="(/)([^"]*)"
+      replace: <script $1 script="/https://www.example.com/$3"
+  injections:
+    - position: head # Position where to inject the code
+      append: |
+        <script>
+          window.localStorage.clear();
+          console.log("test");
+          alert("Hello!");
+        </script>
+    - position: h1
+      replace: |
+        <h1>An example with a ladder ;-)</h1>
