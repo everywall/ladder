@@ -1,0 +1,14 @@
+- domain: www.washingtonpost.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            let paywall = document.querySelectorAll('div[data-qa$="-ad"], div[id="leaderboard-wrapper"], div[data-qa="subscribe-promo"]');
+            paywall.forEach(el => { el.remove(); });
+            const images = document.querySelectorAll('img');
+            images.forEach(image => { image.parentElement.style.filter = ''; });
+            const headimage = document.querySelectorAll('div .aspect-custom');
+            headimage.forEach(image => { image.style.filter = ''; });
+          });
+        </script>

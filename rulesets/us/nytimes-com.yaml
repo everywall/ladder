@@ -1,0 +1,17 @@
+- domains: 
+  - www.nytimes.com
+  - www.time.com
+  headers:
+    ueser-agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+    cookie: nyt-a=; nyt-gdpr=0; nyt-geo=DE; nyt-privacy=1
+    referer: https://www.google.com/ 
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('div[data-testid="inline-message"], div[id^="ad-"], div[id^="leaderboard-"], div.expanded-dock, div.pz-ad-box, div[id="top-wrapper"], div[id="bottom-wrapper"]');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>

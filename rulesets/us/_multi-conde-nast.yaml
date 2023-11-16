@@ -1,0 +1,19 @@
+- domains: 
+  - www.architecturaldigest.com
+  - www.bonappetit.com
+  - www.cntraveler.com
+  - www.epicurious.com
+  - www.gq.com
+  - www.newyorker.com
+  - www.vanityfair.com
+  - www.vogue.com
+  - www.wired.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('.paywall-bar, div[class^="MessageBannerWrapper-"');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>

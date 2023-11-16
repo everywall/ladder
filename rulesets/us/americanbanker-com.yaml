@@ -1,0 +1,16 @@
+- domain: americanbanker.com
+  paths:
+    - /news
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const inlineGate = document.querySelector('.inline-gate');
+            if (inlineGate) {
+              inlineGate.classList.remove('inline-gate');
+              const inlineGated = document.querySelectorAll('.inline-gated');
+              for (const elem of inlineGated) { elem.classList.remove('inline-gated'); }
+            }
+          });
+        </script>

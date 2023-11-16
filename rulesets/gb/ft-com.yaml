@@ -1,0 +1,20 @@
+- domain: www.ft.com
+  headers:
+    referer: https://t.co/x?amp=1
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const styleTags = document.querySelectorAll('link[rel="stylesheet"]');
+            styleTags.forEach(el => { 
+              const href = el.getAttribute('href').substring(1);
+              const updatedHref = href.replace(/(https?:\/\/.+?)\/{2,}/, '$1/');
+              el.setAttribute('href', updatedHref);
+            });
+            setTimeout(() => {
+              const cookie = document.querySelectorAll('.o-cookie-message, .js-article-ribbon, .o-ads, .o-banner, .o-message, .article__content-sign-up');
+              cookie.forEach(el => { el.remove(); });
+            }, 1000);
+          })
+        </script>

@@ -1,0 +1,35 @@
+- domains: 
+  - www.thestar.com
+  - www.niagarafallsreview.ca
+  - www.stcatharinesstandard.ca
+  - www.thepeterboroughexaminer.com
+  - www.therecord.com
+  - www.thespec.com
+  - www.wellandtribune.ca
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            const paywall = document.querySelectorAll('div.subscriber-offers');
+            paywall.forEach(el => { el.remove(); });
+            const subscriber_only = document.querySelectorAll('div.subscriber-only');
+            for (const elem of subscriber_only) {
+              if (elem.classList.contains('encrypted-content') && dompurify_loaded) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString('<div>' + DOMPurify.sanitize(unscramble(elem.innerText)) + '</div>', 'text/html');
+                const content_new = doc.querySelector('div');
+                elem.parentNode.replaceChild(content_new, elem);
+              }
+              elem.removeAttribute('style');
+              elem.removeAttribute('class');
+            }
+            const banners = document.querySelectorAll('div.subscription-required, div.redacted-overlay, div.subscriber-hide, div.tnt-ads-container');
+            banners.forEach(el => { el.remove(); });
+            const ads = document.querySelectorAll('div.tnt-ads-container, div[class*="adLabelWrapper"]');
+            ads.forEach(el => { el.remove(); });
+            const recommendations = document.querySelectorAll('div[id^="tncms-region-article"]');
+            recommendations.forEach(el => { el.remove(); });
+          });
+        </script>
