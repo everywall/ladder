@@ -1,0 +1,10 @@
+- domain: www.usatoday.com
+  injections:
+    - position: head
+      append: |
+        <script>
+          document.addEventListener("DOMContentLoaded", () => {
+            const banners = document.querySelectorAll('div.roadblock-container, .gnt_nb, [aria-label="advertisement"], div[id="main-frame-error"]');
+            banners.forEach(el => { el.remove(); });
+          });
+        </script>

@@ -1,0 +1,9 @@
+# loads amp version of page
+- domain: tagesspiegel.de
+  headers:
+    content-security-policy: script-src 'self';
+    user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
+  urlMods:
+    query:
+      - key: amp
+        value: 1
