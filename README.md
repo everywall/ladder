@@ -53,7 +53,7 @@ Certain sites may display missing images or encounter formatting issues. This ca
 
 ### Docker
 ```bash
-docker run -p 8080:8080 -d --name ladder ghcr.io/everywall/ladder:latest
+docker run -p 8080:8080 -d --env RULESET=https://t.ly/14PSf --name ladder ghcr.io/everywall/ladder:latest
 ```
 
 ### Docker Compose
