@@ -14,7 +14,7 @@ import (
 
 func TestProxySite(t *testing.T) {
 	app := fiber.New()
-	app.Get("/:url", ProxySite(""))
+	app.Get("/:url", NewProxySiteHandler(nil))
 
 	req := httptest.NewRequest("GET", "/https://example.com", nil)
 	resp, err := app.Test(req)

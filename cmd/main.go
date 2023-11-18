@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"ladder/handlers"
-	"ladder/handlers/cli"
+	"ladder/internal/cli"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -39,6 +39,13 @@ func main() {
 		Required: false,
 		Help:     "This will spawn multiple processes listening",
 	})
+
+	verbose := parser.Flag("v", "verbose", &argparse.Options{
+		Required: false,
+		Help:     "Adds verbose logging",
+	})
+
+	// TODO: add version flag that reads from handers/VERSION
 
 	ruleset := parser.String("r", "ruleset", &argparse.Options{
 		Required: false,
@@ -84,6 +91,7 @@ func main() {
 		},
 	)
 
+	// TODO: move to cmd/auth.go
 	userpass := os.Getenv("USERPASS")
 	if userpass != "" {
 		userpass := strings.Split(userpass, ":")
@@ -94,6 +102,7 @@ func main() {
 		}))
 	}
 
+	// TODO: move to handlers/favicon.go
 	app.Use(favicon.New(favicon.Config{
 		Data: []byte(faviconData),
 		URL:  "/favicon.ico",
@@ -107,6 +116,8 @@ func main() {
 	}
 
 	app.Get("/", handlers.Form)
+
+	// TODO: move this logic to handers/styles.go
 	app.Get("/styles.css", func(c *fiber.Ctx) error {
 		cssData, err := cssData.ReadFile("styles.css")
 		if err != nil {
@@ -115,10 +126,17 @@ func main() {
 		c.Set("Content-Type", "text/css")
 		return c.Send(cssData)
 	})
+
 	app.Get("ruleset", handlers.Ruleset)
 
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
-	app.Get("/*", handlers.ProxySite(*ruleset))
+
+	proxyOpts := &handlers.ProxyOptions{
+		Verbose:     *verbose,
+		RulesetPath: *ruleset,
+	}
+
+	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
 	log.Fatal(app.Listen(":" + *port))
 }
