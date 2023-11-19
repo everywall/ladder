@@ -1,4 +1,4 @@
-package rqm
+package requestmodifers
 
 import (
 	"context"

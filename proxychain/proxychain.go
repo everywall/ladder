@@ -14,14 +14,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-var defaultClient *http.Client
-
-func DefaultClient() {
-	defaultClient = &http.Client{
-		Timeout: 15,
-	}
-}
-
 /*
 ProxyChain manages the process of forwarding an HTTP request to an upstream server,
 applying request and response modifications along the way.
@@ -40,21 +32,22 @@ applying request and response modifications along the way.
 
 import (
 
-	"ladder/internal/proxychain/rqm"
-	"ladder/internal/proxychain/rsm"
+	rx "ladder/pkg/proxychain/requestmodifers"
+	tx "ladder/pkg/proxychain/responsemodifers"
 	"ladder/internal/proxychain"
 
 )
 
 proxychain.NewProxyChain().
 
-	SetCtx(c).
-	AddRuleset(&rs).
+	SetFiberCtx(c).
 	SetRequestModifications(
-		rqm.BlockOutgoingCookies(),
+		rx.BlockOutgoingCookies(),
+		rx.SpoofOrigin(),
+		rx.SpoofReferrer(),
 	).
 	SetResultModifications(
-		rsm.BlockIncomingCookies(),
+		tx.BlockIncomingCookies(),
 	).
 	Execute()
 
@@ -90,12 +83,12 @@ type ProxyChain struct {
 	Client               *http.Client
 	Request              *http.Request
 	Response             *http.Response
-	Body                 []byte
+	Body                 io.Reader
 	requestModifications []RequestModification
 	resultModifications  []ResponseModification
-	ruleset              *ruleset.RuleSet
-	verbose              bool
-	_abort_err           error
+	Ruleset              *ruleset.RuleSet
+	debugMode            bool
+	abortErr             error
 }
 
 // a ProxyStrategy is a pre-built proxychain with purpose-built defaults
@@ -123,23 +116,16 @@ func (chain *ProxyChain) AddRequestModifications(mods ...RequestModification) *P
 	return chain
 }
 
-// SetResultModifications sets the ProxyChain's response modifers
+// AddResponseModifications sets the ProxyChain's response modifers
 // the modifier will not fire until ProxyChain.Execute() is run.
-func (chain *ProxyChain) SetResultModifications(mods ...ResponseModification) *ProxyChain {
+func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) *ProxyChain {
 	chain.resultModifications = mods
-	return chain
-}
-
-// AddResultModifications adds to the ProxyChain's response modifers
-// the modifier will not fire until ProxyChain.Execute() is run.
-func (chain *ProxyChain) AddResultModifications(mods ...ResponseModification) *ProxyChain {
-	chain.resultModifications = append(chain.resultModifications, mods...)
 	return chain
 }
 
 // Adds a ruleset to ProxyChain
 func (chain *ProxyChain) AddRuleset(rs *ruleset.RuleSet) *ProxyChain {
-	chain.ruleset = rs
+	chain.Ruleset = rs
 	// TODO: add _applyRuleset method
 	return chain
 }
@@ -178,20 +164,16 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 
 // _execute sends the request for the ProxyChain and returns the raw body only
 // the caller is responsible for returning a response back to the requestor
-// the caller is also responsible for calling pxc._reset() when they are done with the body
-func (chain *ProxyChain) _execute() (*[]byte, error) {
-	chain._validate_ctx_is_set()
-	if chain._abort_err != nil {
-		return nil, chain._abort_err
-	}
-	if chain.Context == nil {
-		return nil, errors.New("request ctx not set. Use ProxyChain.SetCtx()")
+// the caller is also responsible for calling chain._reset() when they are done with the body
+func (chain *ProxyChain) _execute() (io.Reader, error) {
+	if chain.validateCtxIsSet() != nil {
+		return nil, chain.abortErr
 	}
 	if chain.Request.URL.Scheme == "" {
 		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
 	}
 
-	// Apply requestModifications to proxychain (pxc)
+	// Apply requestModifications to proxychain
 	for _, applyRequestModificationsTo := range chain.requestModifications {
 		err := applyRequestModificationsTo(chain)
 		if err != nil {
@@ -205,13 +187,8 @@ func (chain *ProxyChain) _execute() (*[]byte, error) {
 		return nil, chain.abort(err)
 	}
 	chain.Response = resp
+	chain.Body = chain.Response.Body
 
-	// Buffer response into memory
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, chain.abort(err)
-	}
-	chain.Body = body
 	defer resp.Body.Close()
 
 	/* todo: move to rsm
@@ -220,7 +197,7 @@ func (chain *ProxyChain) _execute() (*[]byte, error) {
 	}
 	*/
 
-	// Apply ResponseModifiers to proxychain (pxc)
+	// Apply ResponseModifiers to proxychain
 	for _, applyResultModificationsTo := range chain.resultModifications {
 		err := applyResultModificationsTo(chain)
 		if err != nil {
@@ -228,7 +205,7 @@ func (chain *ProxyChain) _execute() (*[]byte, error) {
 		}
 	}
 
-	return &chain.Body, nil
+	return chain.Body, nil
 }
 
 // Execute sends the request for the ProxyChain and returns the request to the sender
@@ -242,22 +219,7 @@ func (chain *ProxyChain) Execute() error {
 		return err
 	}
 	// Return request back to client
-	return chain.Context.Send(*body)
-}
-
-// ExecuteAPIContent sends the request for the ProxyChain and returns the response body as
-// a structured API response to the client
-// if any step in the ProxyChain fails, the request will abort and a 500 error will
-// be returned to the client
-func (chain *ProxyChain) ExecuteAPIContent() error {
-	defer chain._reset()
-	body, err := chain._execute()
-	if err != nil {
-		return err
-	}
-	// TODO: implement reader API
-	// Return request back to client
-	return chain.Context.Send(*body)
+	return chain.Context.SendStream(body)
 }
 
 // reconstructUrlFromReferer reconstructs the URL using the referer's scheme, host, and the relative path / queries
@@ -312,50 +274,51 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	return reconstructUrlFromReferer(referer, relativePath)
 }
 
-// SetCtx takes the request ctx from the client
+// SetFiberCtx takes the request ctx from the client
 // for the modifiers and execute function to use.
 // it must be set everytime a new request comes through
 // if the upstream request url cannot be extracted from the ctx,
 // a 500 error will be sent back to the client
-func (chain *ProxyChain) SetCtx(ctx *fiber.Ctx) *ProxyChain {
+func (chain *ProxyChain) SetFiberCtx(ctx *fiber.Ctx) *ProxyChain {
 	chain.Context = ctx
 
 	// initialize the request and prepare it for modification
 	req, err := chain._initialize_request()
 	if err != nil {
-		chain._abort_err = chain.abort(err)
+		chain.abortErr = chain.abort(err)
 	}
 	chain.Request = req
 
 	// extract the URL for the request and add it to the new request
 	url, err := chain.extractUrl()
 	if err != nil {
-		chain._abort_err = chain.abort(err)
+		chain.abortErr = chain.abort(err)
 	}
 	chain.Request.URL = url
 
 	return chain
 }
 
-func (pxc *ProxyChain) _validate_ctx_is_set() {
-	if pxc.Context != nil {
-		return
+func (chain *ProxyChain) validateCtxIsSet() error {
+	if chain.Context != nil {
+		return nil
 	}
 	err := errors.New("proxyChain was called without setting a fiber Ctx. Use ProxyChain.SetCtx()")
-	pxc._abort_err = pxc.abort(err)
+	chain.abortErr = chain.abort(err)
+	return chain.abortErr
 }
 
-// SetClient sets a new upstream http client transport
+// SetHttpClient sets a new upstream http client transport
 // useful for modifying TLS
-func (pxc *ProxyChain) SetClient(httpClient *http.Client) *ProxyChain {
-	pxc.Client = httpClient
-	return pxc
+func (chain *ProxyChain) SetHttpClient(httpClient *http.Client) *ProxyChain {
+	chain.Client = httpClient
+	return chain
 }
 
 // SetVerbose changes the logging behavior to print
 // the modification steps and applied rulesets for debugging
-func (chain *ProxyChain) SetVerbose() *ProxyChain {
-	chain.verbose = true
+func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
+	chain.debugMode = isDebugMode
 	return chain
 }
 
@@ -363,8 +326,8 @@ func (chain *ProxyChain) SetVerbose() *ProxyChain {
 // this will prevent Execute from firing and reset the state
 // returns the initial error enriched with context
 func (chain *ProxyChain) abort(err error) error {
-	defer chain._reset()
-	chain._abort_err = err
+	//defer chain._reset()
+	chain.abortErr = err
 	chain.Context.Response().SetStatusCode(500)
 	e := fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
 	chain.Context.SendString(e.Error())
@@ -374,7 +337,7 @@ func (chain *ProxyChain) abort(err error) error {
 
 // internal function to reset state of ProxyChain for reuse
 func (chain *ProxyChain) _reset() {
-	chain._abort_err = nil
+	chain.abortErr = nil
 	chain.Body = nil
 	chain.Request = nil
 	chain.Response = nil
@@ -384,7 +347,6 @@ func (chain *ProxyChain) _reset() {
 // NewProxyChain initializes a new ProxyChain
 func NewProxyChain() *ProxyChain {
 	chain := new(ProxyChain)
-	//px.Client = defaultClient
 	chain.Client = http.DefaultClient
 	return chain
 }

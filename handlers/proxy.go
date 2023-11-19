@@ -12,8 +12,8 @@ import (
 
 	"ladder/pkg/ruleset"
 	"ladder/proxychain"
-	"ladder/proxychain/rqm"
-	"ladder/proxychain/rsm"
+	rx "ladder/proxychain/requestmodifers"
+	tx "ladder/proxychain/responsemodifers"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gofiber/fiber/v2"
@@ -49,19 +49,20 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			rs = r
 		}
 	*/
+	proxychain := proxychain.
+		NewProxyChain().
+		SetDebugLogging(opts.Verbose).
+		SetRequestModifications(
+			rx.DeleteOutgoingCookies(),
+		).
+		AddResponseModifications(
+			tx.DeleteIncomingCookies(),
+		)
 
 	return func(c *fiber.Ctx) error {
-		return proxychain.NewProxyChain().
-			SetCtx(c).
-			//AddRuleset(&rs).
-			SetRequestModifications(
-				rqm.BlockOutgoingCookies(),
-			).
-			SetResultModifications(
-				rsm.BlockIncomingCookies(),
-			).
-			Execute()
+		return proxychain.SetFiberCtx(c).Execute()
 	}
+
 }
 
 func modifyURL(uri string, rule ruleset.Rule) (string, error) {

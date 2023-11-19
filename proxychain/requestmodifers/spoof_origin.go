@@ -1,4 +1,4 @@
-package rqm // ReQuestModifier
+package requestmodifers
 
 import (
 	"ladder/proxychain"
