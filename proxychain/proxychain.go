@@ -214,6 +214,12 @@ func (chain *ProxyChain) _execute() (*[]byte, error) {
 	chain.Body = body
 	defer resp.Body.Close()
 
+	/* todo: move to rsm
+	for k, v := range resp.Header {
+		chain.Context.Set(k, resp.Header.Get(k))
+	}
+	*/
+
 	// Apply ResponseModifiers to proxychain (pxc)
 	for _, applyResultModificationsTo := range chain.resultModifications {
 		err := applyResultModificationsTo(chain)
@@ -348,37 +354,37 @@ func (pxc *ProxyChain) SetClient(httpClient *http.Client) *ProxyChain {
 
 // SetVerbose changes the logging behavior to print
 // the modification steps and applied rulesets for debugging
-func (pxc *ProxyChain) SetVerbose() *ProxyChain {
-	pxc.verbose = true
-	return pxc
+func (chain *ProxyChain) SetVerbose() *ProxyChain {
+	chain.verbose = true
+	return chain
 }
 
 // abort proxychain and return 500 error to client
 // this will prevent Execute from firing and reset the state
 // returns the initial error enriched with context
-func (pxc *ProxyChain) abort(err error) error {
-	defer pxc._reset()
-	pxc._abort_err = err
-	pxc.Context.Response().SetStatusCode(500)
-	e := fmt.Errorf("ProxyChain error for '%s': %s", pxc.Request.URL.String(), err.Error())
-	pxc.Context.SendString(e.Error())
+func (chain *ProxyChain) abort(err error) error {
+	defer chain._reset()
+	chain._abort_err = err
+	chain.Context.Response().SetStatusCode(500)
+	e := fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
+	chain.Context.SendString(e.Error())
 	log.Println(e.Error())
 	return e
 }
 
 // internal function to reset state of ProxyChain for reuse
-func (pxc *ProxyChain) _reset() {
-	pxc._abort_err = nil
-	pxc.Body = nil
-	pxc.Request = nil
-	pxc.Response = nil
-	pxc.Context = nil
-	pxc.Request.URL = nil
+func (chain *ProxyChain) _reset() {
+	chain._abort_err = nil
+	chain.Body = nil
+	chain.Request = nil
+	chain.Response = nil
+	chain.Context = nil
 }
 
 // NewProxyChain initializes a new ProxyChain
 func NewProxyChain() *ProxyChain {
-	px := new(ProxyChain)
-	px.Client = defaultClient
-	return px
+	chain := new(ProxyChain)
+	//px.Client = defaultClient
+	chain.Client = http.DefaultClient
+	return chain
 }

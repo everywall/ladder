@@ -39,19 +39,21 @@ type ProxyOptions struct {
 }
 
 func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
-	var rs ruleset.RuleSet
-	if opts.RulesetPath != "" {
-		r, err := ruleset.NewRuleset(opts.RulesetPath)
-		if err != nil {
-			panic(err)
+	/*
+		var rs ruleset.RuleSet
+		if opts.RulesetPath != "" {
+			r, err := ruleset.NewRuleset(opts.RulesetPath)
+			if err != nil {
+				panic(err)
+			}
+			rs = r
 		}
-		rs = r
-	}
+	*/
 
 	return func(c *fiber.Ctx) error {
 		return proxychain.NewProxyChain().
 			SetCtx(c).
-			AddRuleset(&rs).
+			//AddRuleset(&rs).
 			SetRequestModifications(
 				rqm.BlockOutgoingCookies(),
 			).
