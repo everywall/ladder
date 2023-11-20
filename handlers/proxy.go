@@ -49,17 +49,18 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			rs = r
 		}
 	*/
-	proxychain := proxychain.
-		NewProxyChain().
-		SetDebugLogging(opts.Verbose).
-		SetRequestModifications(
-			rx.DeleteOutgoingCookies(),
-		).
-		AddResponseModifications(
-			tx.DeleteIncomingCookies(),
-		)
 
 	return func(c *fiber.Ctx) error {
+		proxychain := proxychain.
+			NewProxyChain().
+			SetDebugLogging(opts.Verbose).
+			SetRequestModifications(
+				rx.DeleteOutgoingCookies(),
+			).
+			AddResponseModifications(
+				tx.DeleteIncomingCookies(),
+				tx.RewriteHTMLResourceURLs(),
+			)
 		return proxychain.SetFiberCtx(c).Execute()
 	}
 

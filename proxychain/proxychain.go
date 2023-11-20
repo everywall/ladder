@@ -83,7 +83,6 @@ type ProxyChain struct {
 	Client               *http.Client
 	Request              *http.Request
 	Response             *http.Response
-	Body                 io.Reader
 	requestModifications []RequestModification
 	resultModifications  []ResponseModification
 	Ruleset              *ruleset.RuleSet
@@ -131,11 +130,17 @@ func (chain *ProxyChain) AddRuleset(rs *ruleset.RuleSet) *ProxyChain {
 }
 
 func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
+	log.Println("ir 1")
+	if chain.Context == nil {
+		chain.abortErr = chain.abort(errors.New("no context set"))
+		return nil, chain.abortErr
+	}
 	// initialize a request (without url)
 	req, err := http.NewRequest(chain.Context.Method(), "", nil)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("ir 2")
 	chain.Request = req
 	switch chain.Context.Method() {
 	case "GET":
@@ -152,12 +157,16 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 		return nil, fmt.Errorf("unsupported request method from client: '%s'", chain.Context.Method())
 	}
 
-	// copy client request headers to upstream request headers
-	forwardHeaders := func(key []byte, val []byte) {
-		req.Header.Set(string(key), string(val))
-	}
-	clientHeaders := &chain.Context.Request().Header
-	clientHeaders.VisitAll(forwardHeaders)
+	log.Println("ir 3")
+	/*
+		// copy client request headers to upstream request headers
+		forwardHeaders := func(key []byte, val []byte) {
+			req.Header.Set(string(key), string(val))
+		}
+		clientHeaders := &chain.Context.Request().Header
+		clientHeaders.VisitAll(forwardHeaders)
+	*/
+	log.Println("ir 4")
 
 	return req, nil
 }
@@ -166,20 +175,27 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 // the caller is responsible for returning a response back to the requestor
 // the caller is also responsible for calling chain._reset() when they are done with the body
 func (chain *ProxyChain) _execute() (io.Reader, error) {
-	if chain.validateCtxIsSet() != nil {
+	if chain.validateCtxIsSet() != nil || chain.abortErr != nil {
 		return nil, chain.abortErr
+	}
+	if chain.Request == nil {
+		return nil, errors.New("proxychain request not yet initialized")
 	}
 	if chain.Request.URL.Scheme == "" {
 		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
 	}
+	log.Println("A")
 
 	// Apply requestModifications to proxychain
 	for _, applyRequestModificationsTo := range chain.requestModifications {
+		log.Println("AA")
+		log.Println(applyRequestModificationsTo)
 		err := applyRequestModificationsTo(chain)
 		if err != nil {
 			return nil, chain.abort(err)
 		}
 	}
+	log.Println("B")
 
 	// Send Request Upstream
 	resp, err := chain.Client.Do(chain.Request)
@@ -187,9 +203,9 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		return nil, chain.abort(err)
 	}
 	chain.Response = resp
-	chain.Body = chain.Response.Body
+	log.Println("C")
 
-	defer resp.Body.Close()
+	//defer resp.Body.Close()
 
 	/* todo: move to rsm
 	for k, v := range resp.Header {
@@ -204,8 +220,9 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 			return nil, chain.abort(err)
 		}
 	}
+	log.Println("D")
 
-	return chain.Body, nil
+	return chain.Response.Body, nil
 }
 
 // Execute sends the request for the ProxyChain and returns the request to the sender
@@ -214,12 +231,23 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 // be returned to the client
 func (chain *ProxyChain) Execute() error {
 	defer chain._reset()
+	log.Println("1")
 	body, err := chain._execute()
+	log.Println("2")
 	if err != nil {
+		log.Println(err)
 		return err
 	}
+	log.Println("3")
+	log.Println(chain)
+	if chain.Context == nil {
+		return errors.New("no context set")
+	}
 	// Return request back to client
+	chain.Context.Set("content-type", "text/html")
 	return chain.Context.SendStream(body)
+
+	//return chain.Context.SendStream(body)
 }
 
 // reconstructUrlFromReferer reconstructs the URL using the referer's scheme, host, and the relative path / queries
@@ -232,8 +260,10 @@ func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL
 	}
 
 	if realUrl.Scheme == "" || realUrl.Host == "" {
-		return nil, fmt.Errorf("invalid referer URL: %s", referer)
+		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer, relativeUrl)
 	}
+
+	log.Printf("'%s' -> '%s'\n", relativeUrl.String(), realUrl.String())
 
 	return &url.URL{
 		Scheme:   referer.Scheme,
@@ -251,11 +281,13 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	if err != nil {
 		reqUrl = chain.Context.Params("*") // fallback
 	}
+	fmt.Println(reqUrl)
 
 	urlQuery, err := url.Parse(reqUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
 	}
+	fmt.Println(urlQuery)
 
 	// Handle standard paths
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
@@ -338,9 +370,8 @@ func (chain *ProxyChain) abort(err error) error {
 // internal function to reset state of ProxyChain for reuse
 func (chain *ProxyChain) _reset() {
 	chain.abortErr = nil
-	chain.Body = nil
 	chain.Request = nil
-	chain.Response = nil
+	//chain.Response = nil
 	chain.Context = nil
 }
 
