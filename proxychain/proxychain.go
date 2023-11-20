@@ -232,7 +232,7 @@ func (chain *ProxyChain) Execute() error {
 		return errors.New("no context set")
 	}
 	// Return request back to client
-	chain.Context.Set("content-type", "text/html")
+	chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
 	return chain.Context.SendStream(body)
 
 	//return chain.Context.SendStream(body)
