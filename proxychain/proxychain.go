@@ -22,7 +22,8 @@ applying request and response modifications along the way.
     request modifiers (ReqMods) and response modifiers (ResMods) before passing the
     upstream response back to the client.
 
-  - ProxyChains can be reused to avoid memory allocations.
+  - ProxyChains can be reused to avoid memory allocations. However, they are not concurrent-safe
+    so a ProxyChainPool should be used with mutexes to avoid memory errors.
 
 ---
 
@@ -48,6 +49,7 @@ proxychain.NewProxyChain().
 	).
 	SetResultModifications(
 		tx.BlockIncomingCookies(),
+		tx.RewriteHTMLResourceURLs()
 	).
 	Execute()
 
@@ -130,7 +132,6 @@ func (chain *ProxyChain) AddRuleset(rs *ruleset.RuleSet) *ProxyChain {
 }
 
 func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
-	log.Println("ir 1")
 	if chain.Context == nil {
 		chain.abortErr = chain.abort(errors.New("no context set"))
 		return nil, chain.abortErr
@@ -140,7 +141,6 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("ir 2")
 	chain.Request = req
 	switch chain.Context.Method() {
 	case "GET":
@@ -157,7 +157,6 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 		return nil, fmt.Errorf("unsupported request method from client: '%s'", chain.Context.Method())
 	}
 
-	log.Println("ir 3")
 	/*
 		// copy client request headers to upstream request headers
 		forwardHeaders := func(key []byte, val []byte) {
@@ -166,7 +165,6 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 		clientHeaders := &chain.Context.Request().Header
 		clientHeaders.VisitAll(forwardHeaders)
 	*/
-	log.Println("ir 4")
 
 	return req, nil
 }
@@ -184,18 +182,14 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	if chain.Request.URL.Scheme == "" {
 		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
 	}
-	log.Println("A")
 
 	// Apply requestModifications to proxychain
 	for _, applyRequestModificationsTo := range chain.requestModifications {
-		log.Println("AA")
-		log.Println(applyRequestModificationsTo)
 		err := applyRequestModificationsTo(chain)
 		if err != nil {
 			return nil, chain.abort(err)
 		}
 	}
-	log.Println("B")
 
 	// Send Request Upstream
 	resp, err := chain.Client.Do(chain.Request)
@@ -203,7 +197,6 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		return nil, chain.abort(err)
 	}
 	chain.Response = resp
-	log.Println("C")
 
 	//defer resp.Body.Close()
 
@@ -220,7 +213,6 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 			return nil, chain.abort(err)
 		}
 	}
-	log.Println("D")
 
 	return chain.Response.Body, nil
 }
@@ -231,15 +223,11 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 // be returned to the client
 func (chain *ProxyChain) Execute() error {
 	defer chain._reset()
-	log.Println("1")
 	body, err := chain._execute()
-	log.Println("2")
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	log.Println("3")
-	log.Println(chain)
 	if chain.Context == nil {
 		return errors.New("no context set")
 	}
@@ -281,13 +269,11 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	if err != nil {
 		reqUrl = chain.Context.Params("*") // fallback
 	}
-	fmt.Println(reqUrl)
 
 	urlQuery, err := url.Parse(reqUrl)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
 	}
-	fmt.Println(urlQuery)
 
 	// Handle standard paths
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
@@ -327,6 +313,7 @@ func (chain *ProxyChain) SetFiberCtx(ctx *fiber.Ctx) *ProxyChain {
 		chain.abortErr = chain.abort(err)
 	}
 	chain.Request.URL = url
+	fmt.Printf("extracted URL: %s\n", chain.Request.URL)
 
 	return chain
 }
