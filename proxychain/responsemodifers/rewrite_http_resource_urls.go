@@ -11,16 +11,16 @@ import (
 )
 
 type HTMLResourceURLRewriter struct {
-	src    io.Reader
-	buffer *bytes.Buffer 	// buffer to temporarily hold rewritten output for the reader
-	proxyURL    *url.URL    // proxyURL is the URL of the proxy, not the upstream URL
+	src      io.Reader
+	buffer   *bytes.Buffer // buffer to temporarily hold rewritten output for the reader
+	proxyURL *url.URL      // proxyURL is the URL of the proxy, not the upstream URL
 }
 
 func NewHTMLResourceURLRewriter(src io.Reader, proxyURL *url.URL) *HTMLResourceURLRewriter {
 	return &HTMLResourceURLRewriter{
-		src:    	 src,
-		buffer: 	 new(bytes.Buffer),
-		proxyURL:    proxyURL,
+		src:      src,
+		buffer:   new(bytes.Buffer),
+		proxyURL: proxyURL,
 	}
 }
 
@@ -40,28 +40,28 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		return r.buffer.Read(p)
 	}
 
-		tokenizer := html.NewTokenizer(r.src)
-		for {
-			tokenType := tokenizer.Next()
-			if tokenType == html.ErrorToken {
-				err := tokenizer.Err()
-				if err == io.EOF {
-					return 0, io.EOF // End of document
-				}
-				return 0, err // Actual error
+	tokenizer := html.NewTokenizer(r.src)
+	for {
+		tokenType := tokenizer.Next()
+		if tokenType == html.ErrorToken {
+			err := tokenizer.Err()
+			if err == io.EOF {
+				return 0, io.EOF // End of document
 			}
-			token := tokenizer.Token()
-			if tokenType == html.StartTagToken || tokenType == html.SelfClosingTagToken {
-				rewriteToken(&token, r.url)
-			}
-			r.buffer.WriteString(token.String())
-			if r.buffer.Len() > 0 {
-				break
-			}
+			return 0, err // Actual error
+		}
+
+		token := tokenizer.Token()
+		if tokenType == html.StartTagToken || tokenType == html.SelfClosingTagToken {
+			rewriteToken(&token, r.proxyURL)
+		}
+		r.buffer.WriteString(token.String())
+		if r.buffer.Len() > 0 {
+			break
 		}
 	}
+	return r.buffer.Read(p)
 }
-
 
 // RewriteHTMLResourceURLs updates src/href attributes in HTML content to route through the proxy.
 func RewriteHTMLResourceURLs() proxychain.ResponseModification {
@@ -70,45 +70,8 @@ func RewriteHTMLResourceURLs() proxychain.ResponseModification {
 		if ct != "text/html" {
 			return nil
 		}
-
-		// parse dom
-		tokenizer := html.NewTokenizer(chain.Body)
-		var buffer bytes.Buffer
-
-		// traverse dom and proxify existing src/img resource links
-		for {
-			tokenType := tokenizer.Next()
-			switch tokenType {
-			case html.ErrorToken:
-				// End of the document, set the new body
-				chain.Body = io.ReaderFrom(buffer)
-				return nil
-			case html.StartTagToken, html.SelfClosingTagToken:
-				token := tokenizer.Token()
-				// Rewrite the necessary attributes
-				token = rewriteToken(token, u)
-				buffer.WriteString(token.String())
-			case html.TextToken, html.CommentToken, html.DoctypeToken, html.EndTagToken:
-				// Write the token to the buffer as is
-				buffer.WriteString(tokenizer.Token().String())
-			}
-		}
+		// TODO: implement chaining rewriter chaining method
+		// so we can compose multiple body rewriters together
+		return nil
 	}
-}
-
-// rewriteToken rewrites the tokens with URLs to point to the proxy server.
-func rewriteToken(token html.Token, u *url.URL) html.Token {
-	// Define attributes to rewrite, add more as needed such as "srcset"
-	rewriteAttrs := map[string]bool{"href": true, "src": true, "action": true, "srcset": true}
-
-	for i, attr := range token.Attr {
-		_, shouldRewrite := rewriteAttrs[attr.Key]
-		if shouldRewrite {
-			val := attr.Val
-			if strings.HasPrefix(val, "/") {
-				token.Attr[i].Val = "/https://" + u.Host + val
-			}
-		}
-	}
-	return token
 }
