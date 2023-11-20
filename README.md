@@ -14,6 +14,18 @@ Freedom of information is an essential pillar of democracy and informed decision
 
 > **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
 
+### How it works
+
+```mermaid
+sequenceDiagram
+    client->>+ladder: GET
+    ladder-->>ladder: apply RequestModifications
+    ladder->>+website: GET
+    website->>-ladder: 200 OK
+    ladder-->>ladder: apply ResultModifications
+    ladder->>-client: 200 OK
+```
+
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
