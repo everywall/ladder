@@ -87,7 +87,7 @@ func main() {
 	app := fiber.New(
 		fiber.Config{
 			Prefork: *prefork,
-			GETOnly: true,
+			GETOnly: false,
 		},
 	)
 
@@ -138,5 +138,6 @@ func main() {
 	}
 
 	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
+	app.Post("/*", handlers.NewProxySiteHandler(proxyOpts))
 	log.Fatal(app.Listen(":" + *port))
 }

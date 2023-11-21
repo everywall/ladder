@@ -3,21 +3,26 @@
 // fetch("/relative_script.js") -> fetch("http://localhost:8080/relative_script.js")
 (() => {
    function rewriteURL(url) {
+        oldUrl = url 
         if (!url) return url
-        if (url.startsWith(window.location.origin)) return url
 
+        proxyOrigin = globalThis.window.location.origin
+        if (url.startsWith(proxyOrigin)) return url
+
+        const origin = (new URL(decodeURI(globalThis.window.location.pathname.substring(1)))).origin
         if (url.startsWith("//")) {
-            url = `${window.location.origin}/${encodeURIComponent(url.substring(2))}`;
+            url = `/${origin}/${encodeURIComponent(url.substring(2))}`;
         } else if (url.startsWith("/")) {
-            url = `${window.location.origin}/${encodeURIComponent(url.substring(1))}`;
+            url = `/${origin}/${encodeURIComponent(url.substring(1))}`;
         } else if (url.startsWith("http://") || url.startsWith("https://")) {
-            url = `${window.location.origin}/${encodeURIComponent(url)}`;
+            url = `/${origin}/${encodeURIComponent(url)}`;
         }
+        console.log(`rewrite JS URL: ${oldUrl} -> ${url}`)
         return url;
    };
 
    // monkey patch fetch
-   const oldFetch = globalThis.fetch ;
+   const oldFetch = globalThis.fetch;
    globalThis.fetch = async (url, init) => {
         return oldFetch(rewriteURL(url), init)
    }
@@ -27,7 +32,16 @@
    XMLHttpRequest.prototype.open = function(method, url, async = true, user = null, password = null) {
        return oldOpen.call(this, method, rewriteURL(url), async, user, password);
    };
+   const oldSend = XMLHttpRequest.prototype.send;
+   XMLHttpRequest.prototype.send = function(method, url) {
+       return oldSend.call(this, method, rewriteURL(url));
+   };
 
+   // monkey patch service worker registration
+   const oldRegister = ServiceWorkerContainer.prototype.register;
+   ServiceWorkerContainer.prototype.register = function(scriptURL, options) {
+        return oldRegister.call(this, rewriteURL(scriptURL), options)
+   }
 
     // Monkey patch setter methods
     const elements = [

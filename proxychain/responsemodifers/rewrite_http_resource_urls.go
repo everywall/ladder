@@ -2,9 +2,11 @@ package responsemodifers
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"io"
 	"ladder/proxychain"
+	"log"
 	"net/url"
 	"strings"
 
@@ -19,7 +21,7 @@ func init() {
 		"src":         true,
 		"href":        true,
 		"action":      true,
-		"srcset":      true, // TODO: fix
+		"srcset":      true,
 		"poster":      true,
 		"data":        true,
 		"cite":        true,
@@ -45,17 +47,19 @@ type HTMLResourceURLRewriter struct {
 	tokenBuffer           *bytes.Buffer
 	currentTokenIndex     int
 	currentTokenProcessed bool
+	proxyURL              string // ladder URL, not proxied site URL
 }
 
 // NewHTMLResourceURLRewriter creates a new instance of HTMLResourceURLRewriter.
 // It initializes the tokenizer with the provided source and sets the proxy URL.
-func NewHTMLResourceURLRewriter(src io.ReadCloser, baseURL *url.URL) *HTMLResourceURLRewriter {
+func NewHTMLResourceURLRewriter(src io.ReadCloser, baseURL *url.URL, proxyURL string) *HTMLResourceURLRewriter {
 	return &HTMLResourceURLRewriter{
 		tokenizer:         html.NewTokenizer(src),
 		currentToken:      html.Token{},
 		currentTokenIndex: 0,
 		tokenBuffer:       new(bytes.Buffer),
 		baseURL:           baseURL,
+		proxyURL:          proxyURL,
 	}
 }
 
@@ -90,11 +94,18 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		// patch tokens with URLs
 		isTokenWithAttribute := r.currentToken.Type == html.StartTagToken || r.currentToken.Type == html.SelfClosingTagToken
 		if isTokenWithAttribute {
-			patchResourceURL(&r.currentToken, r.baseURL)
+			patchResourceURL(&r.currentToken, r.baseURL, r.proxyURL)
 		}
 
 		r.tokenBuffer.Reset()
 		r.tokenBuffer.WriteString(r.currentToken.String())
+
+		// inject <script> right after <head>
+		isHeadToken := (r.currentToken.Type == html.StartTagToken || r.currentToken.Type == html.SelfClosingTagToken) && r.currentToken.Data == "head"
+		if isHeadToken {
+			injectScript(r.tokenBuffer, rewriteJSResourceUrlsScript)
+		}
+
 		r.currentTokenProcessed = false
 		r.currentTokenIndex = 0
 	}
@@ -105,6 +116,17 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		err = nil // EOF in this context is expected and not an actual error
 	}
 	return n, err
+}
+
+// fetch("/relative_script.js") -> fetch("http://localhost:8080/relative_script.js")
+//
+//go:embed rewrite_js_resource_urls.js
+var rewriteJSResourceUrlsScript string
+
+func injectScript(tokenBuffer *bytes.Buffer, script string) {
+	tokenBuffer.WriteString(
+		fmt.Sprintf("\n<script>\n%s\n</script>\n", script),
+	)
 }
 
 // Root-relative URLs: These are relative to the root path and start with a "/".
@@ -126,7 +148,7 @@ func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	attr.Val = url.QueryEscape(attr.Val)
 	attr.Val = fmt.Sprintf("/%s", attr.Val)
 
-	//log.Printf("root rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+	log.Printf("root rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 // Document-relative URLs: These are relative to the current document's path and don't start with a "/".
@@ -140,14 +162,14 @@ func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	)
 	attr.Val = url.QueryEscape(attr.Val)
 	attr.Val = fmt.Sprintf("/%s", attr.Val)
-	//log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+	log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 // Protocol-relative URLs: These start with "//" and will use the same protocol (http or https) as the current page.
 func handleProtocolRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	attr.Val = strings.TrimPrefix(attr.Val, "/")
 	handleRootRelativePath(attr, baseURL)
-	//log.Printf("proto rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+	log.Printf("proto rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
@@ -165,7 +187,7 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 			strings.TrimPrefix(attr.Val, "/"),
 		),
 	)
-	//log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+	log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
@@ -196,17 +218,20 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 		attr.Val = fmt.Sprintf("%s,", attr.Val)
 	}
 	attr.Val = strings.TrimSuffix(attr.Val, ",")
+
+	log.Printf("srcset url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
-// TODO: figure out how to handle these
-// srcset
-func patchResourceURL(token *html.Token, baseURL *url.URL) {
+func patchResourceURL(token *html.Token, baseURL *url.URL, proxyURL string) {
 	for i := range token.Attr {
 		attr := &token.Attr[i]
 
 		switch {
-		// dont touch attributes except for the ones we defined
+		// don't touch attributes except for the ones we defined
 		case !AttributesToRewrite[attr.Key]:
+			continue
+		// don't double-overwrite the url
+		case strings.HasPrefix(attr.Val, proxyURL):
 			continue
 		case attr.Key == "srcset":
 			handleSrcSet(attr, baseURL)
@@ -255,8 +280,10 @@ func RewriteHTMLResourceURLs() proxychain.ResponseModification {
 		if !strings.HasPrefix(ct, "text/html") {
 			return nil
 		}
+		originalURI := chain.Context.Request().URI()
+		proxyURL := fmt.Sprintf("%s://%s", originalURI.Scheme(), originalURI.Host())
 
-		chain.Response.Body = NewHTMLResourceURLRewriter(chain.Response.Body, chain.Request.URL)
+		chain.Response.Body = NewHTMLResourceURLRewriter(chain.Response.Body, chain.Request.URL, proxyURL)
 		return nil
 	}
 }
