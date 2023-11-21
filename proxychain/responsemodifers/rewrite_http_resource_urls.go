@@ -13,11 +13,12 @@ import (
 	"golang.org/x/net/html"
 )
 
-// Define list of HTML attributes to try to rewrite
-var AttributesToRewrite map[string]bool
+var attributesToRewrite map[string]bool
+var schemeBlacklist map[string]bool
 
 func init() {
-	AttributesToRewrite = map[string]bool{
+	// Define list of HTML attributes to try to rewrite
+	attributesToRewrite = map[string]bool{
 		"src":         true,
 		"href":        true,
 		"action":      true,
@@ -34,6 +35,23 @@ func init() {
 		"codebase":    true,
 		"icon":        true,
 		"pluginspage": true,
+	}
+
+
+	// define URIs to NOT rewrite
+	// for example: don't overwrite <img src="data:image/png;base64;iVBORw...">"
+	schemeBlacklist = map[string]bool {
+		"data": true,
+		"tel": true,
+		"mailto": true,
+		"file": true,
+		"blob": true,
+		"javascript": true,
+		"about": true,
+		"magnet": true,
+		"ws": true,
+		"wss": true,
+		"ftp": true,
 	}
 }
 
@@ -222,16 +240,53 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 	log.Printf("srcset url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
+func isBlackedlistedScheme(url string) bool {
+	spl := strings.Split(url, ":")
+	if len(spl) == 0 {
+		return false
+	}
+	scheme := spl[0]
+	return schemeBlacklist[scheme]
+}
+
 func patchResourceURL(token *html.Token, baseURL *url.URL, proxyURL string) {
 	for i := range token.Attr {
 		attr := &token.Attr[i]
 
 		switch {
 		// don't touch attributes except for the ones we defined
-		case !AttributesToRewrite[attr.Key]:
+		case !attributesToRewrite[attr.Key]:
+			continue
+		// don't rewrite special URIs that don't make network requests
+		case isBlackedlistedScheme(attr.Val):
 			continue
 		// don't double-overwrite the url
 		case strings.HasPrefix(attr.Val, proxyURL):
+			continue
+		// don't overwrite special URIs
+		case strings.HasPrefix(attr.Val, "data:"):
+			continue
+		case strings.HasPrefix(attr.Val, "ftp:"):
+			continue
+		case strings.HasPrefix(attr.Val, "tel:"):
+			continue
+		case strings.HasPrefix(attr.Val, "javascript:"):
+			continue
+		case strings.HasPrefix(attr.Val, "file:"):
+			continue
+		case strings.HasPrefix(attr.Val, "ftp:"):
+			continue
+		case strings.HasPrefix(attr.Val, "mailto:"):
+			continue
+		case strings.HasPrefix(attr.Val, "blob:"):
+			continue
+		case strings.HasPrefix(attr.Val, "about:"):
+			continue
+		case strings.HasPrefix(attr.Val, "magnet:"):
+			continue
+		case strings.HasPrefix(attr.Val, "ws:"):
+			continue
+		case strings.HasPrefix(attr.Val, "wss:"):
 			continue
 		case attr.Key == "srcset":
 			handleSrcSet(attr, baseURL)

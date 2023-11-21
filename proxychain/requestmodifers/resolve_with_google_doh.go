@@ -36,7 +36,7 @@ func resolveWithGoogleDoH(host string) (string, error) {
 	return "", fmt.Errorf("no DoH DNS record found for %s", host)
 }
 
-// ResolveWithGoogleDoH modifies a ProxyChain's client to make the request but resolve the URL
+// ResolveWithGoogleDoH modifies a ProxyChain's client to make the request by resolving the URL
 // using Google's DNS over HTTPs service
 func ResolveWithGoogleDoH() proxychain.RequestModification {
 	return func(px *proxychain.ProxyChain) error {

@@ -251,7 +251,7 @@ func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL
 		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer, relativeUrl)
 	}
 
-	log.Printf("'%s' -> '%s'\n", relativeUrl.String(), realUrl.String())
+	log.Printf("rewrite relative URL using referer: '%s' -> '%s'\n", relativeUrl.String(), realUrl.String())
 
 	return &url.URL{
 		Scheme:   referer.Scheme,
@@ -264,10 +264,19 @@ func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL
 // extractUrl extracts a URL from the request ctx. If the URL in the request
 // is a relative path, it reconstructs the full URL using the referer header.
 func (chain *ProxyChain) extractUrl() (*url.URL, error) {
-	// try to extract url-encoded
-	reqUrl, err := url.QueryUnescape(chain.Context.Params("*"))
-	if err != nil {
-		reqUrl = chain.Context.Params("*") // fallback
+	reqUrl := chain.Context.Params("*")
+
+	// sometimes client requests doubleroot '//'
+	// there is a bug somewhere else, but this is a workaround until we find it
+	if strings.HasPrefix(reqUrl, "/") || strings.HasPrefix(reqUrl, `%2F`) {
+		reqUrl = strings.TrimPrefix(reqUrl, "/")
+		reqUrl = strings.TrimPrefix(reqUrl, `%2F`)
+	}
+
+	// unescape url query
+	uReqUrl, err := url.QueryUnescape(reqUrl)
+	if err == nil {
+		reqUrl = uReqUrl
 	}
 
 	urlQuery, err := url.Parse(reqUrl)
