@@ -18,6 +18,8 @@
    function rewriteURL(url) {
         const oldUrl = url 
         if (!url) return url
+        let isStr = (typeof url.startsWith === 'function')
+        if (!isStr) return url
         // don't rewrite invalid URIs
         try { new URL(url) } catch { return url }
 

@@ -37,21 +37,20 @@ func init() {
 		"pluginspage": true,
 	}
 
-
 	// define URIs to NOT rewrite
 	// for example: don't overwrite <img src="data:image/png;base64;iVBORw...">"
-	schemeBlacklist = map[string]bool {
-		"data": true,
-		"tel": true,
-		"mailto": true,
-		"file": true,
-		"blob": true,
+	schemeBlacklist = map[string]bool{
+		"data":       true,
+		"tel":        true,
+		"mailto":     true,
+		"file":       true,
+		"blob":       true,
 		"javascript": true,
-		"about": true,
-		"magnet": true,
-		"ws": true,
-		"wss": true,
-		"ftp": true,
+		"about":      true,
+		"magnet":     true,
+		"ws":         true,
+		"wss":        true,
+		"ftp":        true,
 	}
 }
 
@@ -63,6 +62,8 @@ type HTMLResourceURLRewriter struct {
 	tokenizer             *html.Tokenizer
 	currentToken          html.Token
 	tokenBuffer           *bytes.Buffer
+	scriptContentBuffer   *bytes.Buffer
+	insideScript          bool
 	currentTokenIndex     int
 	currentTokenProcessed bool
 	proxyURL              string // ladder URL, not proxied site URL
@@ -72,12 +73,14 @@ type HTMLResourceURLRewriter struct {
 // It initializes the tokenizer with the provided source and sets the proxy URL.
 func NewHTMLResourceURLRewriter(src io.ReadCloser, baseURL *url.URL, proxyURL string) *HTMLResourceURLRewriter {
 	return &HTMLResourceURLRewriter{
-		tokenizer:         html.NewTokenizer(src),
-		currentToken:      html.Token{},
-		currentTokenIndex: 0,
-		tokenBuffer:       new(bytes.Buffer),
-		baseURL:           baseURL,
-		proxyURL:          proxyURL,
+		tokenizer:           html.NewTokenizer(src),
+		currentToken:        html.Token{},
+		currentTokenIndex:   0,
+		tokenBuffer:         new(bytes.Buffer),
+		scriptContentBuffer: new(bytes.Buffer),
+		insideScript:        false,
+		baseURL:             baseURL,
+		proxyURL:            proxyURL,
 	}
 }
 
@@ -116,7 +119,29 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		}
 
 		r.tokenBuffer.Reset()
-		r.tokenBuffer.WriteString(r.currentToken.String())
+
+		// unescape script contents, not sure why tokenizer will escape things
+		switch tokenType {
+		case html.StartTagToken:
+			if r.currentToken.Data == "script" {
+				r.insideScript = true
+				r.scriptContentBuffer.Reset() // Reset buffer for new script contents
+			}
+			r.tokenBuffer.WriteString(r.currentToken.String()) // Write the start tag
+		case html.EndTagToken:
+			if r.currentToken.Data == "script" {
+				r.insideScript = false
+				modScript := modifyInlineScript(r.scriptContentBuffer)
+				r.tokenBuffer.WriteString(modScript)
+			}
+			r.tokenBuffer.WriteString(r.currentToken.String())
+		default:
+			if r.insideScript {
+				r.scriptContentBuffer.WriteString(r.currentToken.String())
+			} else {
+				r.tokenBuffer.WriteString(r.currentToken.String())
+			}
+		}
 
 		// inject <script> right after <head>
 		isHeadToken := (r.currentToken.Type == html.StartTagToken || r.currentToken.Type == html.SelfClosingTagToken) && r.currentToken.Data == "head"
@@ -145,6 +170,11 @@ func injectScript(tokenBuffer *bytes.Buffer, script string) {
 	tokenBuffer.WriteString(
 		fmt.Sprintf("\n<script>\n%s\n</script>\n", script),
 	)
+}
+
+// possible ad-blocking / bypassing opportunity here
+func modifyInlineScript(scriptContentBuffer *bytes.Buffer) string {
+	return html.UnescapeString(scriptContentBuffer.String())
 }
 
 // Root-relative URLs: These are relative to the root path and start with a "/".
