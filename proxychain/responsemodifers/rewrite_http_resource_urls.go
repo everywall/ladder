@@ -94,7 +94,7 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		}
 
 		r.tokenBuffer.Reset()
-		r.tokenBuffer.WriteString(r.currentToken.String())
+		r.tokenBuffer.WriteString(html.UnescapeString(r.currentToken.String()))
 		r.currentTokenProcessed = false
 		r.currentTokenIndex = 0
 	}
