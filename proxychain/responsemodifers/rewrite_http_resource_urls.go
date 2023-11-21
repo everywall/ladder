@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"ladder/proxychain"
-	"log"
 	"net/url"
 	"strings"
 
@@ -17,24 +16,22 @@ var AttributesToRewrite map[string]bool
 
 func init() {
 	AttributesToRewrite = map[string]bool{
-		"src":  true,
-		"href": true,
-		/*
-			"action":      true,
-			"srcset":      true,
-			"poster":      true,
-			"data":        true,
-			"cite":        true,
-			"formaction":  true,
-			"background":  true,
-			"usemap":      true,
-			"longdesc":    true,
-			"manifest":    true,
-			"archive":     true,
-			"codebase":    true,
-			"icon":        true,
-			"pluginspage": true,
-		*/
+		"src":         true,
+		"href":        true,
+		"action":      true,
+		"srcset":      true, // TODO: fix
+		"poster":      true,
+		"data":        true,
+		"cite":        true,
+		"formaction":  true,
+		"background":  true,
+		"usemap":      true,
+		"longdesc":    true,
+		"manifest":    true,
+		"archive":     true,
+		"codebase":    true,
+		"icon":        true,
+		"pluginspage": true,
 	}
 }
 
@@ -42,7 +39,7 @@ func init() {
 // It uses an HTML tokenizer to process HTML content and rewrites URLs in src/href attributes.
 // <img src='/relative_path'> -> <img src='/https://proxiedsite.com/relative_path'>
 type HTMLResourceURLRewriter struct {
-	baseURL               string // eg: https://proxiedsite.com  (note, no trailing '/')
+	baseURL               *url.URL
 	tokenizer             *html.Tokenizer
 	currentToken          html.Token
 	tokenBuffer           *bytes.Buffer
@@ -52,7 +49,7 @@ type HTMLResourceURLRewriter struct {
 
 // NewHTMLResourceURLRewriter creates a new instance of HTMLResourceURLRewriter.
 // It initializes the tokenizer with the provided source and sets the proxy URL.
-func NewHTMLResourceURLRewriter(src io.ReadCloser, baseURL string) *HTMLResourceURLRewriter {
+func NewHTMLResourceURLRewriter(src io.ReadCloser, baseURL *url.URL) *HTMLResourceURLRewriter {
 	return &HTMLResourceURLRewriter{
 		tokenizer:         html.NewTokenizer(src),
 		currentToken:      html.Token{},
@@ -110,64 +107,124 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 	return n, err
 }
 
-func patchResourceURL(token *html.Token, baseURL string) {
+// Root-relative URLs: These are relative to the root path and start with a "/".
+func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
+	// doublecheck this is a valid relative URL
+	_, err := url.Parse(fmt.Sprintf("http://localhost.com%s", attr.Val))
+	if err != nil {
+		return
+	}
+
+	//log.Printf("BASEURL patch:  %s\n", baseURL)
+
+	attr.Val = fmt.Sprintf(
+		"/%s://%s/%s",
+		baseURL.Scheme,
+		baseURL.Host,
+		strings.TrimPrefix(attr.Val, "/"),
+	)
+	attr.Val = url.QueryEscape(attr.Val)
+	attr.Val = fmt.Sprintf("/%s", attr.Val)
+
+	//log.Printf("root rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+}
+
+// Document-relative URLs: These are relative to the current document's path and don't start with a "/".
+func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
+	attr.Val = fmt.Sprintf(
+		"%s://%s/%s%s",
+		baseURL.Scheme,
+		strings.Trim(baseURL.Host, "/"),
+		strings.Trim(baseURL.RawPath, "/"),
+		strings.Trim(attr.Val, "/"),
+	)
+	attr.Val = url.QueryEscape(attr.Val)
+	attr.Val = fmt.Sprintf("/%s", attr.Val)
+	//log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+}
+
+// Protocol-relative URLs: These start with "//" and will use the same protocol (http or https) as the current page.
+func handleProtocolRelativePath(attr *html.Attribute, baseURL *url.URL) {
+	attr.Val = strings.TrimPrefix(attr.Val, "/")
+	handleRootRelativePath(attr, baseURL)
+	//log.Printf("proto rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+}
+
+func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
+	// check if valid URL
+	u, err := url.Parse(attr.Val)
+	if err != nil {
+		return
+	}
+	if !(u.Scheme == "http" || u.Scheme == "https") {
+		return
+	}
+	attr.Val = fmt.Sprintf(
+		"/%s",
+		url.QueryEscape(
+			strings.TrimPrefix(attr.Val, "/"),
+		),
+	)
+	//log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+}
+
+func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
+	for i, src := range strings.Split(attr.Val, ",") {
+		src = strings.Trim(src, " ")
+		for j, s := range strings.Split(src, " ") {
+			s = strings.Trim(s, " ")
+			if j == 0 {
+				f := &html.Attribute{Val: s, Key: attr.Key}
+				switch {
+				case strings.HasPrefix(s, "//"):
+					handleProtocolRelativePath(f, baseURL)
+				case strings.HasPrefix(s, "/"):
+					handleRootRelativePath(f, baseURL)
+				case strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://"):
+					handleAbsolutePath(f, baseURL)
+				default:
+					handleDocumentRelativePath(f, baseURL)
+				}
+				s = f.Val
+			}
+			if i == 0 && j == 0 {
+				attr.Val = s
+				continue
+			}
+			attr.Val = fmt.Sprintf("%s %s", attr.Val, s)
+		}
+		attr.Val = fmt.Sprintf("%s,", attr.Val)
+	}
+	attr.Val = strings.TrimSuffix(attr.Val, ",")
+}
+
+// TODO: figure out how to handle these
+// srcset
+func patchResourceURL(token *html.Token, baseURL *url.URL) {
 	for i := range token.Attr {
 		attr := &token.Attr[i]
+
+		switch {
 		// dont touch attributes except for the ones we defined
-		_, exists := AttributesToRewrite[attr.Key]
-		if !exists {
+		case !AttributesToRewrite[attr.Key]:
+			continue
+		case attr.Key == "srcset":
+			handleSrcSet(attr, baseURL)
+			continue
+		case strings.HasPrefix(attr.Val, "//"):
+			handleProtocolRelativePath(attr, baseURL)
+			continue
+		case strings.HasPrefix(attr.Val, "/"):
+			handleRootRelativePath(attr, baseURL)
+			continue
+		case strings.HasPrefix(attr.Val, "https://") || strings.HasPrefix(attr.Val, "http://"):
+			handleAbsolutePath(attr, baseURL)
+			continue
+		default:
+			handleDocumentRelativePath(attr, baseURL)
 			continue
 		}
 
-		isRelativePath := strings.HasPrefix(attr.Val, "/")
-		//log.Printf("PRE '%s'='%s'", attr.Key, attr.Val)
-
-		// double check if attribute is valid http URL before modifying
-		if isRelativePath {
-			_, err := url.Parse(fmt.Sprintf("http://localhost%s", attr.Val))
-			if err != nil {
-				return
-			}
-		} else {
-			u, err := url.Parse(attr.Val)
-			if err != nil {
-				return
-			}
-			if !(u.Scheme == "http" || u.Scheme == "https") {
-				return
-			}
-		}
-
-		// patch relative paths
-		// <img src="/favicon.png"> -> <img src="/http://images.cdn.proxiedsite.com/favicon.png">
-		if isRelativePath {
-			log.Printf("BASEURL patch:  %s\n", baseURL)
-
-			attr.Val = fmt.Sprintf(
-				"/%s/%s",
-				baseURL,
-				//url.QueryEscape(
-				strings.TrimPrefix(attr.Val, "/"),
-				//),
-			)
-
-			log.Printf("url rewritten-> '%s'='%s'", attr.Key, attr.Val)
-			continue
-		}
-
-		// patch absolute paths to relative path pointing to ladder proxy
-		// <img src="http://images.cdn.proxiedsite.com/favicon.png"> -> <img src="/http://images.cdn.proxiedsite.com/favicon.png">
-
-		//log.Printf("abolute patch:  %s\n", attr.Val)
-		attr.Val = fmt.Sprintf(
-			"/%s",
-			//url.QueryEscape(attr.Val),
-			//url.QueryEscape(
-			strings.TrimPrefix(attr.Val, "/"),
-			//),
-			//attr.Val,
-		)
-		log.Printf("url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 	}
 }
 
@@ -199,15 +256,7 @@ func RewriteHTMLResourceURLs() proxychain.ResponseModification {
 			return nil
 		}
 
-		// should be site being requested to proxy
-		baseUrl := fmt.Sprintf("%s://%s", chain.Request.URL.Scheme, chain.Request.URL.Host)
-		/*
-			log.Println("--------------------")
-			log.Println(baseUrl)
-			log.Println("--------------------")
-		*/
-
-		chain.Response.Body = NewHTMLResourceURLRewriter(chain.Response.Body, baseUrl)
+		chain.Response.Body = NewHTMLResourceURLRewriter(chain.Response.Body, chain.Request.URL)
 		return nil
 	}
 }

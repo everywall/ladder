@@ -26,6 +26,7 @@ func masqueradeAsTrustedBot(botUA string, botIP string) proxychain.RequestModifi
 			SpoofUserAgent(botUA),
 			SpoofXForwardedFor(botIP),
 			SpoofReferrer(""),
+			SpoofOrigin(""),
 		)
 		return nil
 	}

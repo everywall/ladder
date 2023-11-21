@@ -56,6 +56,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
 				rx.DeleteOutgoingCookies(),
+				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
 				tx.DeleteIncomingCookies(),
