@@ -20,21 +20,28 @@
         if (!url) return url
         let isStr = (typeof url.startsWith === 'function')
         if (!isStr) return url
-        // don't rewrite invalid URIs
-        try { new URL(url) } catch { return url }
 
         // don't rewrite special URIs
         if (blacklistedSchemes.includes(url)) return url;
 
-        // don't double rewrite
         //const proxyOrigin = globalThis.window.location.origin;
-        const proxyOrigin = `PROXY_ORIGIN_INJECT_FROM_GOLANG`;
+        const proxyOrigin = "R_PROXYURL";
+        //const origin = (new URL(decodeURIComponent(globalThis.window.location.pathname.substring(1)))).origin
+        const origin = "R_BASEURL";
+
+        // don't rewrite invalid URIs
+        try { new URL(url, origin) } catch { return url }
+
+        // don't double rewrite
         if (url.startsWith(proxyOrigin)) return url;
         if (url.startsWith(`/${proxyOrigin}`)) return url;
         if (url.startsWith(`/${origin}`)) return url;
+        if (url.startsWith(`/http://`)) return url;
+        if (url.startsWith(`/https://`)) return url;
+        if (url.startsWith(`/http%3A%2F%2F`)) return url;
+        if (url.startsWith(`/https%3A%2F%2F`)) return url;
+        if (url.startsWith(`/%2Fhttp`)) return url;
 
-        //const origin = (new URL(decodeURIComponent(globalThis.window.location.pathname.substring(1)))).origin
-        const origin = `ORIGIN_INJECT_FROM_GOLANG`;
         //console.log(`proxychain: origin: ${origin} // proxyOrigin: ${proxyOrigin} // original: ${oldUrl}`)
 
         if (url.startsWith("//")) {
@@ -50,27 +57,62 @@
         return url;
    };
 
+    // sometimes anti-bot protections like cloudflare or akamai bot manager check if JS is hooked
+    function hideMonkeyPatch(objectOrName, method, originalToString) {
+        let obj;
+        let isGlobalFunction = false;
+    
+        if (typeof objectOrName === 'string') {
+            obj = globalThis[objectOrName];
+            isGlobalFunction = (typeof obj === 'function') && (method === objectOrName);
+        } else {
+            obj = objectOrName;
+        }
+    
+        if (isGlobalFunction) {
+            const originalFunction = obj;
+            globalThis[objectOrName] = function(...args) {
+                return originalFunction.apply(this, args);
+            };
+            globalThis[objectOrName].toString = () => originalToString;
+        } else if (obj && typeof obj[method] === 'function') {
+            const originalMethod = obj[method];
+            obj[method] = function(...args) {
+                return originalMethod.apply(this, args);
+            };
+            obj[method].toString = () => originalToString;
+        } else {
+            console.warn(`proxychain: cannot hide monkey patch: ${method} is not a function on the provided object.`);
+        }
+    }
+
    // monkey patch fetch
-   const oldFetch = globalThis.fetch;
-   globalThis.fetch = async (url, init) => {
+   const oldFetch = fetch;
+   fetch = async (url, init) => {
         return oldFetch(rewriteURL(url), init)
    }
+   hideMonkeyPatch('fetch', 'fetch', 'function fetch() { [native code] }')
 
    // monkey patch xmlhttprequest
    const oldOpen = XMLHttpRequest.prototype.open;
    XMLHttpRequest.prototype.open = function(method, url, async = true, user = null, password = null) {
        return oldOpen.call(this, method, rewriteURL(url), async, user, password);
    };
+   hideMonkeyPatch(XMLHttpRequest.prototype, 'open', 'function(){if("function"==typeof eo)return eo.apply(this,arguments)}');
+
    const oldSend = XMLHttpRequest.prototype.send;
    XMLHttpRequest.prototype.send = function(method, url) {
        return oldSend.call(this, method, rewriteURL(url));
    };
+   hideMonkeyPatch(XMLHttpRequest.prototype, 'send', 'function(){if("function"==typeof eo)return eo.apply(this,arguments)}');
+
 
    // monkey patch service worker registration
    const oldRegister = ServiceWorkerContainer.prototype.register;
    ServiceWorkerContainer.prototype.register = function(scriptURL, options) {
         return oldRegister.call(this, rewriteURL(scriptURL), options)
    }
+   hideMonkeyPatch(ServiceWorkerContainer.prototype, 'register', 'function register() { [native code] }')
 
    // monkey patch URL.toString() method 
    const oldToString = URL.prototype.toString
@@ -78,6 +120,7 @@
         let originalURL = oldToString.call(this)
         return rewriteURL(originalURL)
    }
+   hideMonkeyPatch(URL.prototype, 'toString', 'function toString() { [native code] }')
 
    // monkey patch URL.toJSON() method 
    const oldToJson = URL.prototype.toString
@@ -85,6 +128,7 @@
         let originalURL = oldToJson.call(this)
         return rewriteURL(originalURL)
    }
+   hideMonkeyPatch(URL.prototype, 'toString', 'function toJSON() { [native code] }')
 
    // Monkey patch URL.href getter and setter
     const originalHrefDescriptor = Object.getOwnPropertyDescriptor(URL.prototype, 'href');
@@ -97,6 +141,9 @@
             originalHrefDescriptor.set.call(this, rewriteURL(newValue));
         }
     });
+
+    // TODO: do one more pass of this by manually traversing the DOM
+    // AFTER all the JS and page has loaded just in case 
 
     // Monkey patch setter 
     const elements = [
@@ -166,4 +213,75 @@
             });
         }
     });
+
+
+    // sometimes, libraries will set the Element.innerHTML or Element.outerHTML directly with a string instead of setters.
+    // in this case, we intercept it, create a fake DOM, parse it and then rewrite all attributes that could
+    // contain a URL. Then we return the replacement innerHTML/outerHTML with redirected links.
+    function rewriteInnerHTML(html, elements) {
+        const isRewritingHTMLKey = Symbol.for('isRewritingHTML');
+    
+        // Check if already processing
+        if (document[isRewritingHTMLKey]) {
+            return html;
+        }
+    
+        const tempContainer = document.createElement('div');
+        document[isRewritingHTMLKey] = true;
+    
+        try {
+            tempContainer.innerHTML = html;
+        
+            // Create a map for quick lookup
+            const elementsMap = new Map(elements.map(e => [e.tag, e.attribute]));
+        
+            // Loop-based DOM traversal
+            const nodes = [...tempContainer.querySelectorAll('*')];
+            for (const node of nodes) {
+                const attribute = elementsMap.get(node.tagName.toLowerCase());
+                if (attribute && node.hasAttribute(attribute)) {
+                    const originalUrl = node.getAttribute(attribute);
+                    const rewrittenUrl = rewriteURL(originalUrl);
+                    node.setAttribute(attribute, rewrittenUrl);
+                }
+            }
+    
+            return tempContainer.innerHTML;
+        } finally {
+            // Clear the flag
+            document[isRewritingHTMLKey] = false;
+        }
+    }
+
+
+    // Store original setters
+const originalSetters = {};
+
+    ['innerHTML', 'outerHTML'].forEach(property => {
+        const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, property);
+        if (descriptor && descriptor.set) {
+            originalSetters[property] = descriptor.set;
+
+            Object.defineProperty(Element.prototype, property, {
+                ...descriptor,
+                set(value) {
+                    const isRewritingHTMLKey = Symbol.for('isRewritingHTML');
+                    if (!this[isRewritingHTMLKey]) {
+                        this[isRewritingHTMLKey] = true;
+                        try {
+                            // Use custom logic
+                            descriptor.set.call(this, rewriteInnerHTML(value, elements));
+                        } finally {
+                            this[isRewritingHTMLKey] = false;
+                        }
+                    } else {
+                        // Use original setter in recursive call
+                        originalSetters[property].call(this, value);
+                    }
+                }
+            });
+        }
+    });
+
+
 })();

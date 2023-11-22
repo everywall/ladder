@@ -146,8 +146,8 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		isHeadToken := (r.currentToken.Type == html.StartTagToken || r.currentToken.Type == html.SelfClosingTagToken) && r.currentToken.Data == "head"
 		if isHeadToken {
 			params := map[string]string{
-				"PROXY_ORIGIN_INJECT_FROM_GOLANG": r.proxyURL,
-				"ORIGIN_INJECT_FROM_GOLANG":       fmt.Sprintf("%s://%s", r.baseURL.Scheme, r.baseURL.Host),
+				"R_PROXYURL": r.proxyURL,
+				"R_BASEURL":  fmt.Sprintf("%s://%s", r.baseURL.Scheme, r.baseURL.Host),
 			}
 			injectScriptWithParams(r.tokenBuffer, rewriteJSResourceUrlsScript, params)
 		}
@@ -192,8 +192,10 @@ func modifyInlineScript(scriptContentBuffer *bytes.Buffer) string {
 // Root-relative URLs: These are relative to the root path and start with a "/".
 func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	// doublecheck this is a valid relative URL
+	log.Printf("PROCESSING: key: %s val: %s\n", attr.Key, attr.Val)
 	_, err := url.Parse(fmt.Sprintf("http://localhost.com%s", attr.Val))
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -251,35 +253,51 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 }
 
 func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
-	for i, src := range strings.Split(attr.Val, ",") {
-		src = strings.Trim(src, " ")
-		for j, s := range strings.Split(src, " ") {
-			s = strings.Trim(s, " ")
-			if j == 0 {
-				f := &html.Attribute{Val: s, Key: attr.Key}
-				switch {
-				case strings.HasPrefix(s, "//"):
-					handleProtocolRelativePath(f, baseURL)
-				case strings.HasPrefix(s, "/"):
-					handleRootRelativePath(f, baseURL)
-				case strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://"):
-					handleAbsolutePath(f, baseURL)
-				default:
-					handleDocumentRelativePath(f, baseURL)
-				}
-				s = f.Val
-			}
-			if i == 0 && j == 0 {
-				attr.Val = s
-				continue
-			}
-			attr.Val = fmt.Sprintf("%s %s", attr.Val, s)
-		}
-		attr.Val = fmt.Sprintf("%s,", attr.Val)
-	}
-	attr.Val = strings.TrimSuffix(attr.Val, ",")
+	var srcSetBuilder strings.Builder
+	srcSetItems := strings.Split(attr.Val, ",")
 
+	for i, srcItem := range srcSetItems {
+		srcParts := strings.Fields(srcItem) // Fields splits around whitespace, trimming them
+
+		if len(srcParts) == 0 {
+			continue // skip empty items
+		}
+
+		// Process URL part
+		urlPart := processURLPart(srcParts[0], baseURL)
+
+		// First srcset item without a descriptor
+		if i == 0 && (len(srcParts) == 1 || !strings.HasSuffix(srcParts[1], "x")) {
+			srcSetBuilder.WriteString(urlPart)
+		} else {
+			srcSetBuilder.WriteString(fmt.Sprintf("%s %s", urlPart, srcParts[1]))
+		}
+
+		if i < len(srcSetItems)-1 {
+			srcSetBuilder.WriteString(",") // Add comma for all but last item
+		}
+	}
+
+	attr.Val = srcSetBuilder.String()
 	log.Printf("srcset url rewritten-> '%s'='%s'", attr.Key, attr.Val)
+}
+
+// only for srcset
+func processURLPart(urlPart string, baseURL *url.URL) string {
+	f := &html.Attribute{Val: urlPart, Key: "src"}
+
+	switch {
+	case strings.HasPrefix(urlPart, "//"):
+		handleProtocolRelativePath(f, baseURL)
+	case strings.HasPrefix(urlPart, "/"):
+		handleRootRelativePath(f, baseURL)
+	case strings.HasPrefix(urlPart, "https://"), strings.HasPrefix(urlPart, "http://"):
+		handleAbsolutePath(f, baseURL)
+	default:
+		handleDocumentRelativePath(f, baseURL)
+	}
+
+	return f.Val
 }
 
 func isBlackedlistedScheme(url string) bool {

@@ -248,7 +248,7 @@ func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL
 	}
 
 	if realUrl.Scheme == "" || realUrl.Host == "" {
-		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer, relativeUrl)
+		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer.String(), relativeUrl.String())
 	}
 
 	log.Printf("rewrite relative URL using referer: '%s' -> '%s'\n", relativeUrl.String(), realUrl.String())

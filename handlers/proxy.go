@@ -57,7 +57,8 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
 				rx.DeleteOutgoingCookies(),
-				rx.SpoofReferrerFromTwitterPost(),
+				//rx.RequestArchiveIs(),
+				rx.MasqueradeAsGoogleBot(),
 			).
 			AddResponseModifications(
 				tx.DeleteIncomingCookies(),
