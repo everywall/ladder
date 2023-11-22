@@ -261,6 +261,22 @@ func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL
 	}, nil
 }
 
+// prevents calls like: http://localhost:8080/http://localhost:8080
+func preventRecursiveProxyRequest(urlQuery *url.URL, baseProxyURL string) *url.URL {
+	u := urlQuery.String()
+	isRecursive := strings.HasPrefix(u, baseProxyURL) || u == baseProxyURL
+	if !isRecursive {
+		return urlQuery
+	}
+
+	fixedURL, err := url.Parse(strings.TrimPrefix(strings.TrimPrefix(urlQuery.String(), baseProxyURL), "/"))
+	if err != nil {
+		log.Printf("proxychain: failed to fix recursive request: '%s' -> '%s\n'", baseProxyURL, u)
+		return urlQuery
+	}
+	return preventRecursiveProxyRequest(fixedURL, baseProxyURL)
+}
+
 // extractUrl extracts a URL from the request ctx. If the URL in the request
 // is a relative path, it reconstructs the full URL using the referer header.
 func (chain *ProxyChain) extractUrl() (*url.URL, error) {
@@ -283,6 +299,11 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
 	}
+
+	// prevent recursive proxy requests
+	fullURL := chain.Context.Request().URI()
+	proxyURL := fmt.Sprintf("%s://%s", fullURL.Scheme(), fullURL.Host())
+	urlQuery = preventRecursiveProxyRequest(urlQuery, proxyURL)
 
 	// Handle standard paths
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
