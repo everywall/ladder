@@ -57,13 +57,14 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
 				rx.DeleteOutgoingCookies(),
+				rx.SpoofReferrerFromTwitterPost(),
 			).
 			AddResponseModifications(
 				tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
 			).
 			Execute()
-			
+
 		return proxychain
 	}
 

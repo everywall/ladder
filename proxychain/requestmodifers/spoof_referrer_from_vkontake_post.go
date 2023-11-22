@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromVkontaktePost modifies the referrer header
 // pretending to be from a vkontakte post (popular in Russia)
-func SpoofReferrerFromVkontaktePost(url string) proxychain.RequestModification {
+func SpoofReferrerFromVkontaktePost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://away.vk.com/"),

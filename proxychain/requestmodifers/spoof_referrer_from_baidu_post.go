@@ -10,7 +10,7 @@ import (
 
 // SpoofReferrerFromBaiduSearch modifies the referrer header
 // pretending to be from a BaiduSearch
-func SpoofReferrerFromBaiduSearch(url string) proxychain.RequestModification {
+func SpoofReferrerFromBaiduSearch() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		// https://www.baidu.com/link?url=5biIeDvUIihawf3Zbbysach2Xn4H3w3FzO6LZKgSs-B5Yt4M4RUFikokOk5zetf2&wd=&eqid=9da80d8208009b8480000706655d5ed6
 		referrer := fmt.Sprintf("https://baidu.com/link?url=%s", generateRandomBaiduURL())

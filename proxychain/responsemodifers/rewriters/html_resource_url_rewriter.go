@@ -145,7 +145,11 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 		// inject <script> right after <head>
 		isHeadToken := (r.currentToken.Type == html.StartTagToken || r.currentToken.Type == html.SelfClosingTagToken) && r.currentToken.Data == "head"
 		if isHeadToken {
-			injectScript(r.tokenBuffer, rewriteJSResourceUrlsScript)
+			params := map[string]string{
+				"PROXY_ORIGIN_INJECT_FROM_GOLANG": r.proxyURL,
+				"ORIGIN_INJECT_FROM_GOLANG":       fmt.Sprintf("%s://%s", r.baseURL.Scheme, r.baseURL.Host),
+			}
+			injectScriptWithParams(r.tokenBuffer, rewriteJSResourceUrlsScript, params)
 		}
 
 		r.currentTokenProcessed = false
@@ -166,6 +170,19 @@ func (r *HTMLResourceURLRewriter) Read(p []byte) (int, error) {
 var rewriteJSResourceUrlsScript string
 
 func injectScript(tokenBuffer *bytes.Buffer, script string) {
+	tokenBuffer.WriteString(
+		fmt.Sprintf("\n<script>\n%s\n</script>\n", script),
+	)
+}
+
+func injectScriptWithParams(tokenBuffer *bytes.Buffer, script string, params map[string]string) {
+	for old, new := range params {
+		script = strings.ReplaceAll(
+			script,
+			fmt.Sprintf("`${%s}`", old),
+			fmt.Sprintf("`${%s}`", new),
+		)
+	}
 	tokenBuffer.WriteString(
 		fmt.Sprintf("\n<script>\n%s\n</script>\n", script),
 	)

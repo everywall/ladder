@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromTumblrPost modifies the referrer header
 // pretending to be from a tumblr post
-func SpoofReferrerFromTumblrPost(url string) proxychain.RequestModification {
+func SpoofReferrerFromTumblrPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://www.tumblr.com/"),

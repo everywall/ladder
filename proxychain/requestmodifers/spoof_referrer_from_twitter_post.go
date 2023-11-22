@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromTwitterPost modifies the referrer header
 // pretending to be from a twitter post
-func SpoofReferrerFromTwitterPost(url string) proxychain.RequestModification {
+func SpoofReferrerFromTwitterPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://t.co/"),

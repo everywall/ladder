@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromRedditPost modifies the referrer header
 // pretending to be from a reddit post
-func SpoofReferrerFromRedditPost(url string) proxychain.RequestModification {
+func SpoofReferrerFromRedditPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://www.reddit.com/"),

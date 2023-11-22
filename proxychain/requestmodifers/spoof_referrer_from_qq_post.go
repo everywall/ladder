@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromQQPost modifies the referrer header
 // pretending to be from a QQ post (popular social media in China)
-func SpoofReferrerFromQQPost(url string) proxychain.RequestModification {
+func SpoofReferrerFromQQPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://new.qq.com/'"),

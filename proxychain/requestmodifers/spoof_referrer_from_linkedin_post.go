@@ -6,7 +6,7 @@ import (
 
 // SpoofReferrerFromLinkedInPost modifies the referrer header
 // pretending to be from a linkedin post
-func SpoofReferrerFromLinkedInPost(url string) proxychain.RequestModification {
+func SpoofReferrerFromLinkedInPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddRequestModifications(
 			SpoofReferrer("https://www.linkedin.com/"),
