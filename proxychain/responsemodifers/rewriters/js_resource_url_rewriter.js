@@ -28,13 +28,13 @@
 
         // don't double rewrite
         //const proxyOrigin = globalThis.window.location.origin;
-        const proxyOrigin = `${PROXY_ORIGIN_INJECT_FROM_GOLANG}`;
+        const proxyOrigin = `PROXY_ORIGIN_INJECT_FROM_GOLANG`;
         if (url.startsWith(proxyOrigin)) return url;
         if (url.startsWith(`/${proxyOrigin}`)) return url;
         if (url.startsWith(`/${origin}`)) return url;
 
         //const origin = (new URL(decodeURIComponent(globalThis.window.location.pathname.substring(1)))).origin
-        const origin = `${ORIGIN_INJECT_FROM_GOLANG}`;
+        const origin = `ORIGIN_INJECT_FROM_GOLANG`;
         //console.log(`proxychain: origin: ${origin} // proxyOrigin: ${proxyOrigin} // original: ${oldUrl}`)
 
         if (url.startsWith("//")) {

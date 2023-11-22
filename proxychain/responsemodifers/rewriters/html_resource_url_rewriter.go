@@ -177,11 +177,7 @@ func injectScript(tokenBuffer *bytes.Buffer, script string) {
 
 func injectScriptWithParams(tokenBuffer *bytes.Buffer, script string, params map[string]string) {
 	for old, new := range params {
-		script = strings.ReplaceAll(
-			script,
-			fmt.Sprintf("`${%s}`", old),
-			fmt.Sprintf("`${%s}`", new),
-		)
+		script = strings.ReplaceAll(script, old, new)
 	}
 	tokenBuffer.WriteString(
 		fmt.Sprintf("\n<script>\n%s\n</script>\n", script),
