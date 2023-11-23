@@ -4,6 +4,9 @@ import (
 	"ladder/proxychain"
 )
 
+// TODO: handle edge case where CSP is specified in meta tag:
+// <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
+
 // BypassContentSecurityPolicy modifies response headers to prevent the browser
 // from enforcing any CSP restrictions. This should run at the end of the chain.
 func BypassContentSecurityPolicy() proxychain.ResponseModification {

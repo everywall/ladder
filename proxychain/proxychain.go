@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"ladder/pkg/ruleset"
+	rr "ladder/proxychain/responsemodifers/rewriters"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -35,6 +36,7 @@ import (
 
 	rx "ladder/pkg/proxychain/requestmodifers"
 	tx "ladder/pkg/proxychain/responsemodifers"
+	"ladder/pkg/proxychain/responsemodifers/rewriters"
 	"ladder/internal/proxychain"
 
 )
@@ -87,6 +89,7 @@ type ProxyChain struct {
 	Response             *http.Response
 	requestModifications []RequestModification
 	resultModifications  []ResponseModification
+	htmlTokenRewriters   []rr.IHTMLTokenRewriter
 	Ruleset              *ruleset.RuleSet
 	debugMode            bool
 	abortErr             error
@@ -167,75 +170,6 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 	*/
 
 	return req, nil
-}
-
-// _execute sends the request for the ProxyChain and returns the raw body only
-// the caller is responsible for returning a response back to the requestor
-// the caller is also responsible for calling chain._reset() when they are done with the body
-func (chain *ProxyChain) _execute() (io.Reader, error) {
-	if chain.validateCtxIsSet() != nil || chain.abortErr != nil {
-		return nil, chain.abortErr
-	}
-	if chain.Request == nil {
-		return nil, errors.New("proxychain request not yet initialized")
-	}
-	if chain.Request.URL.Scheme == "" {
-		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
-	}
-
-	// Apply requestModifications to proxychain
-	for _, applyRequestModificationsTo := range chain.requestModifications {
-		err := applyRequestModificationsTo(chain)
-		if err != nil {
-			return nil, chain.abort(err)
-		}
-	}
-
-	// Send Request Upstream
-	resp, err := chain.Client.Do(chain.Request)
-	if err != nil {
-		return nil, chain.abort(err)
-	}
-	chain.Response = resp
-
-	//defer resp.Body.Close()
-
-	/* todo: move to rsm
-	for k, v := range resp.Header {
-		chain.Context.Set(k, resp.Header.Get(k))
-	}
-	*/
-
-	// Apply ResponseModifiers to proxychain
-	for _, applyResultModificationsTo := range chain.resultModifications {
-		err := applyResultModificationsTo(chain)
-		if err != nil {
-			return nil, chain.abort(err)
-		}
-	}
-
-	return chain.Response.Body, nil
-}
-
-// Execute sends the request for the ProxyChain and returns the request to the sender
-// and resets the fields so that the ProxyChain can be reused.
-// if any step in the ProxyChain fails, the request will abort and a 500 error will
-// be returned to the client
-func (chain *ProxyChain) Execute() error {
-	defer chain._reset()
-	body, err := chain._execute()
-	if err != nil {
-		log.Println(err)
-		return err
-	}
-	if chain.Context == nil {
-		return errors.New("no context set")
-	}
-	// Return request back to client
-	chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
-	return chain.Context.SendStream(body)
-
-	//return chain.Context.SendStream(body)
 }
 
 // reconstructUrlFromReferer reconstructs the URL using the referer's scheme, host, and the relative path / queries
@@ -322,6 +256,13 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	return reconstructUrlFromReferer(referer, relativePath)
 }
 
+// AddBodyRewriter adds a HTMLTokenRewriter to the chain
+// HTMLTokenRewriters modify the body response by parsing the HTML
+func (chain *ProxyChain) AddHTMLTokenRewriter(rr rr.IHTMLTokenRewriter) *ProxyChain {
+	chain.htmlTokenRewriters = append(chain.htmlTokenRewriters, rr)
+	return chain
+}
+
 // SetFiberCtx takes the request ctx from the client
 // for the modifiers and execute function to use.
 // it must be set everytime a new request comes through
@@ -397,4 +338,87 @@ func NewProxyChain() *ProxyChain {
 	chain := new(ProxyChain)
 	chain.Client = http.DefaultClient
 	return chain
+}
+
+/// ========================================================================================================
+
+// _execute sends the request for the ProxyChain and returns the raw body only
+// the caller is responsible for returning a response back to the requestor
+// the caller is also responsible for calling chain._reset() when they are done with the body
+func (chain *ProxyChain) _execute() (io.Reader, error) {
+	if chain.validateCtxIsSet() != nil || chain.abortErr != nil {
+		return nil, chain.abortErr
+	}
+	if chain.Request == nil {
+		return nil, errors.New("proxychain request not yet initialized")
+	}
+	if chain.Request.URL.Scheme == "" {
+		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
+	}
+
+	// Apply requestModifications to proxychain
+	for _, applyRequestModificationsTo := range chain.requestModifications {
+		err := applyRequestModificationsTo(chain)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+	}
+
+	// Send Request Upstream
+	resp, err := chain.Client.Do(chain.Request)
+	if err != nil {
+		return nil, chain.abort(err)
+	}
+	chain.Response = resp
+
+	/* todo: move to rsm
+	for k, v := range resp.Header {
+		chain.Context.Set(k, resp.Header.Get(k))
+	}
+	*/
+
+	// Apply ResponseModifiers to proxychain
+	for _, applyResultModificationsTo := range chain.resultModifications {
+		err := applyResultModificationsTo(chain)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+	}
+
+	// stream request back to client, possibly rewriting the body
+	if len(chain.htmlTokenRewriters) == 0 {
+		return chain.Response.Body, nil
+	}
+
+	ct := chain.Response.Header.Get("content-type")
+	switch {
+	case strings.HasPrefix(ct, "text/html"):
+		fmt.Println("fooox")
+		return rr.NewHTMLRewriter(chain.Response.Body, chain.htmlTokenRewriters), nil
+	default:
+		return chain.Response.Body, nil
+	}
+
+}
+
+// Execute sends the request for the ProxyChain and returns the request to the sender
+// and resets the fields so that the ProxyChain can be reused.
+// if any step in the ProxyChain fails, the request will abort and a 500 error will
+// be returned to the client
+func (chain *ProxyChain) Execute() error {
+	defer chain._reset()
+	body, err := chain._execute()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	if chain.Context == nil {
+		return errors.New("no context set")
+	}
+
+	// Return request back to client
+	chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+	return chain.Context.SendStream(body)
+
+	//return chain.Context.SendStream(body)
 }
