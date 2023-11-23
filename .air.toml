@@ -14,7 +14,7 @@ tmp_dir = "tmp"
   follow_symlink = false
   full_bin = "RULESET=./ruleset.yaml ./tmp/main"
   include_dir = []
-  include_ext = ["go", "tpl", "tmpl", "html"]
+  include_ext = ["go", "tpl", "tmpl", "yaml", "html"]
   include_file = []
   kill_delay = "0s"
   log = "build-errors.log"
