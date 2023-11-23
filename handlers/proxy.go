@@ -56,15 +56,16 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				//rx.DeleteOutgoingCookies(),
+				rx.DeleteOutgoingCookies(),
 				//rx.RequestArchiveIs(),
 				rx.MasqueradeAsGoogleBot(),
 			).
 			AddResponseModifications(
-				//tx.DeleteIncomingCookies(),
-				tx.RewriteHTMLResourceURLs(),
 				tx.BypassCORS(),
 				tx.BypassContentSecurityPolicy(),
+				tx.DeleteIncomingCookies(),
+				tx.RewriteHTMLResourceURLs(),
+				tx.PatchDynamicResourceURLs(),
 			).
 			Execute()
 

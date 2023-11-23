@@ -2,6 +2,19 @@
 // Also overrides the attribute setter prototype to modify the request URLs
 // fetch("/relative_script.js") -> fetch("http://localhost:8080/relative_script.js")
 (() => {
+
+    // ============== PARAMS ===========================
+	// if the original request was: http://localhost:8080/http://proxiedsite.com/foo/bar
+	// proxyOrigin is http://localhost:8080
+    const proxyOrigin = "{{PROXY_ORIGIN}}";
+    //const proxyOrigin = globalThis.window.location.origin;
+
+	// if the original request was: http://localhost:8080/http://proxiedsite.com/foo/bar
+	// origin is http://proxiedsite.com
+    const origin = "{{ORIGIN}}";
+    //const origin = (new URL(decodeURIComponent(globalThis.window.location.pathname.substring(1)))).origin
+    // ============== END PARAMS ======================
+
    const blacklistedSchemes = [
     "ftp:",
     "mailto:",
@@ -23,11 +36,6 @@
 
         // don't rewrite special URIs
         if (blacklistedSchemes.includes(url)) return url;
-
-        //const proxyOrigin = globalThis.window.location.origin;
-        const proxyOrigin = "R_PROXYURL";
-        //const origin = (new URL(decodeURIComponent(globalThis.window.location.pathname.substring(1)))).origin
-        const origin = "R_BASEURL";
 
         // don't rewrite invalid URIs
         try { new URL(url, origin) } catch { return url }

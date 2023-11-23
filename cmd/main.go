@@ -86,8 +86,9 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			Prefork: *prefork,
-			GETOnly: false,
+			Prefork:        *prefork,
+			GETOnly:        false,
+			ReadBufferSize: 4096 * 4, // increase max header size
 		},
 	)
 

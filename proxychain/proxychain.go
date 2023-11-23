@@ -256,8 +256,11 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	return reconstructUrlFromReferer(referer, relativePath)
 }
 
-// AddBodyRewriter adds a HTMLTokenRewriter to the chain
-// HTMLTokenRewriters modify the body response by parsing the HTML
+// AddBodyRewriter adds a HTMLTokenRewriter to the chain.
+//   - HTMLTokenRewriters modify the body response by parsing the HTML
+//     and making changes to the DOM as it streams to the client
+//   - In most cases, you don't need to use this method. It's usually called by
+//     a ResponseModifier to batch queue changes for performance reasons.
 func (chain *ProxyChain) AddHTMLTokenRewriter(rr rr.IHTMLTokenRewriter) *ProxyChain {
 	chain.htmlTokenRewriters = append(chain.htmlTokenRewriters, rr)
 	return chain
