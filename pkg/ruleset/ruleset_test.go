@@ -33,6 +33,7 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 		c.SendString(validYAML)
 		return nil
 	})
+
 	app.Get("/invalid-config.yml", func(c *fiber.Ctx) error {
 		c.SendString(invalidYAML)
 		return nil
@@ -40,10 +41,12 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 
 	app.Get("/valid-config.gz", func(c *fiber.Ctx) error {
 		c.Set("Content-Type", "application/octet-stream")
+
 		rs, err := loadRuleFromString(validYAML)
 		if err != nil {
 			t.Errorf("failed to load valid yaml from string: %s", err.Error())
 		}
+
 		s, err := rs.GzipYaml()
 		if err != nil {
 			t.Errorf("failed to load gzip serialize yaml: %s", err.Error())
@@ -70,15 +73,18 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to load plaintext ruleset from http server: %s", err.Error())
 	}
+
 	assert.Equal(t, rs[0].Domain, "example.com")
 
 	rs, err = NewRuleset("http://127.0.0.1:9999/valid-config.gz")
 	if err != nil {
 		t.Errorf("failed to load gzipped ruleset from http server: %s", err.Error())
 	}
+
 	assert.Equal(t, rs[0].Domain, "example.com")
 
 	os.Setenv("RULESET", "http://127.0.0.1:9999/valid-config.gz")
+
 	rs = NewRulesetFromEnv()
 	if !assert.Equal(t, rs[0].Domain, "example.com") {
 		t.Error("expected no errors loading ruleset from gzip url using environment variable, but got one")
@@ -88,10 +94,14 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 func loadRuleFromString(yaml string) (RuleSet, error) {
 	// Create a temporary file and load it
 	tmpFile, _ := os.CreateTemp("", "ruleset*.yaml")
+
 	defer os.Remove(tmpFile.Name())
+
 	tmpFile.WriteString(yaml)
+
 	rs := RuleSet{}
 	err := rs.loadRulesFromLocalFile(tmpFile.Name())
+
 	return rs, err
 }
 
@@ -101,6 +111,7 @@ func TestLoadRulesFromLocalFile(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to load rules from valid YAML: %s", err)
 	}
+
 	assert.Equal(t, rs[0].Domain, "example.com")
 	assert.Equal(t, rs[0].RegexRules[0].Match, "^http:")
 	assert.Equal(t, rs[0].RegexRules[0].Replace, "https:")
@@ -118,30 +129,39 @@ func TestLoadRulesFromLocalDir(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temporary directory: %s", err)
 	}
+
 	defer os.RemoveAll(baseDir)
 
 	// Create a nested subdirectory
 	nestedDir := filepath.Join(baseDir, "nested")
-	err = os.Mkdir(nestedDir, 0755)
+	err = os.Mkdir(nestedDir, 0o755)
+
 	if err != nil {
 		t.Fatalf("Failed to create nested directory: %s", err)
 	}
 
 	// Create a nested subdirectory
 	nestedTwiceDir := filepath.Join(nestedDir, "nestedTwice")
-	err = os.Mkdir(nestedTwiceDir, 0755)
+	err = os.Mkdir(nestedTwiceDir, 0o755)
+	if err != nil {
+		t.Fatalf("Failed to create twice-nested directory: %s", err)
+	}
 
 	testCases := []string{"test.yaml", "test2.yaml", "test-3.yaml", "test 4.yaml", "1987.test.yaml.yml", "foobar.example.com.yaml", "foobar.com.yml"}
 	for _, fileName := range testCases {
 		filePath := filepath.Join(nestedDir, "2x-"+fileName)
-		os.WriteFile(filePath, []byte(validYAML), 0644)
+		os.WriteFile(filePath, []byte(validYAML), 0o644)
+
 		filePath = filepath.Join(nestedDir, fileName)
-		os.WriteFile(filePath, []byte(validYAML), 0644)
+		os.WriteFile(filePath, []byte(validYAML), 0o644)
+
 		filePath = filepath.Join(baseDir, "base-"+fileName)
-		os.WriteFile(filePath, []byte(validYAML), 0644)
+		os.WriteFile(filePath, []byte(validYAML), 0o644)
 	}
+
 	rs := RuleSet{}
 	err = rs.loadRulesFromLocalDir(baseDir)
+
 	assert.NoError(t, err)
 	assert.Equal(t, rs.Count(), len(testCases)*3)
 
