@@ -193,4 +193,14 @@ echo "dev" > handlers/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
 ```
 
+### Optional: Live reloading development server with [cosmtrek/air](https://github.com/cosmtrek/air)
+
+Install air according to the [installation instructions](https://github.com/cosmtrek/air#installation). 
+
+Run a development server at http://localhost:8080:
+
+```bash
+air # or the path to air if you haven't added a path alias to your .bashrc or .zshrc
+```
+
 This project uses [pnpm](https://pnpm.io/) to build a stylesheet with the [Tailwind CSS](https://tailwindcss.com/) classes. For local development, if you modify styles in `form.html`, run `pnpm build` to generate a new stylesheet.
