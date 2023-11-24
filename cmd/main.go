@@ -68,10 +68,15 @@ func main() {
 
 	// utility cli flag to compile ruleset directory into single ruleset.yaml
 	if *mergeRulesets || *mergeRulesetsGzip {
-		output, err := os.Create(*mergeRulesetsOutput)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+		output := os.Stdout
+
+		if *mergeRulesetsOutput != "" {
+			output, err = os.Create(*mergeRulesetsOutput)
+			
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 
 		err = cli.HandleRulesetMerge(*ruleset, *mergeRulesets, *mergeRulesetsGzip, output)
