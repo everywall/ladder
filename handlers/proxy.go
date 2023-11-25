@@ -80,7 +80,6 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 	// default behavior:
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
 	return urlQuery.String(), nil
-
 }
 
 func ProxySite(rulesetPath string) fiber.Handler {
@@ -121,18 +120,18 @@ func modifyURL(uri string, rule ruleset.Rule) (string, error) {
 		return "", err
 	}
 
-	for _, urlMod := range rule.UrlMods.Domain {
+	for _, urlMod := range rule.URLMods.Domain {
 		re := regexp.MustCompile(urlMod.Match)
 		newUrl.Host = re.ReplaceAllString(newUrl.Host, urlMod.Replace)
 	}
 
-	for _, urlMod := range rule.UrlMods.Path {
+	for _, urlMod := range rule.URLMods.Path {
 		re := regexp.MustCompile(urlMod.Match)
 		newUrl.Path = re.ReplaceAllString(newUrl.Path, urlMod.Replace)
 	}
 
 	v := newUrl.Query()
-	for _, query := range rule.UrlMods.Query {
+	for _, query := range rule.URLMods.Query {
 		if query.Value == "" {
 			v.Del(query.Key)
 			continue
@@ -223,11 +222,11 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	if rule.Headers.CSP != "" {
-		//log.Println(rule.Headers.CSP)
+		// log.Println(rule.Headers.CSP)
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 
-	//log.Print("rule", rule) TODO: Add a debug mode to print the rule
+	// log.Print("rule", rule) TODO: Add a debug mode to print the rule
 	body := rewriteHtml(bodyB, u, rule)
 	return body, req, resp, nil
 }

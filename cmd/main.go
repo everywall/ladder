@@ -29,6 +29,7 @@ func main() {
 	if os.Getenv("PORT") == "" {
 		portEnv = "8080"
 	}
+
 	port := parser.String("p", "port", &argparse.Options{
 		Required: false,
 		Default:  portEnv,
@@ -49,10 +50,12 @@ func main() {
 		Required: false,
 		Help:     "Compiles a directory of yaml files into a single ruleset.yaml. Requires --ruleset arg.",
 	})
+
 	mergeRulesetsGzip := parser.Flag("", "merge-rulesets-gzip", &argparse.Options{
 		Required: false,
 		Help:     "Compiles a directory of yaml files into a single ruleset.gz Requires --ruleset arg.",
 	})
+
 	mergeRulesetsOutput := parser.String("", "merge-rulesets-output", &argparse.Options{
 		Required: false,
 		Help:     "Specify output file for --merge-rulesets and --merge-rulesets-gzip. Requires --ruleset and --merge-rulesets args.",
@@ -65,7 +68,18 @@ func main() {
 
 	// utility cli flag to compile ruleset directory into single ruleset.yaml
 	if *mergeRulesets || *mergeRulesetsGzip {
-		err = cli.HandleRulesetMerge(ruleset, mergeRulesets, mergeRulesetsGzip, mergeRulesetsOutput)
+		output := os.Stdout
+
+		if *mergeRulesetsOutput != "" {
+			output, err = os.Create(*mergeRulesetsOutput)
+			
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+		}
+
+		err = cli.HandleRulesetMerge(*ruleset, *mergeRulesets, *mergeRulesetsGzip, output)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -87,6 +101,7 @@ func main() {
 	userpass := os.Getenv("USERPASS")
 	if userpass != "" {
 		userpass := strings.Split(userpass, ":")
+
 		app.Use(basicauth.New(basicauth.Config{
 			Users: map[string]string{
 				userpass[0]: userpass[1],
@@ -102,23 +117,28 @@ func main() {
 	if os.Getenv("NOLOGS") != "true" {
 		app.Use(func(c *fiber.Ctx) error {
 			log.Println(c.Method(), c.Path())
+
 			return c.Next()
 		})
 	}
 
 	app.Get("/", handlers.Form)
+
 	app.Get("/styles.css", func(c *fiber.Ctx) error {
 		cssData, err := cssData.ReadFile("styles.css")
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 		}
+
 		c.Set("Content-Type", "text/css")
+
 		return c.Send(cssData)
 	})
-	app.Get("ruleset", handlers.Ruleset)
 
+	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
 	app.Get("api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite(*ruleset))
+
 	log.Fatal(app.Listen(":" + *port))
 }

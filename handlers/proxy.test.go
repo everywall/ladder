@@ -2,11 +2,12 @@
 package handlers
 
 import (
-	"ladder/pkg/ruleset"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"ladder/pkg/ruleset"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"

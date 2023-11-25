@@ -1,6 +1,7 @@
 package ruleset
 
 import (
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
@@ -10,8 +11,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"compress/gzip"
 
 	"gopkg.in/yaml.v3"
 )
@@ -41,7 +40,7 @@ type Rule struct {
 	GoogleCache bool    `yaml:"googleCache,omitempty"`
 	RegexRules  []Regex `yaml:"regexRules,omitempty"`
 
-	UrlMods struct {
+	URLMods struct {
 		Domain []Regex `yaml:"domain,omitempty"`
 		Path   []Regex `yaml:"path,omitempty"`
 		Query  []KV    `yaml:"query,omitempty"`
@@ -55,6 +54,8 @@ type Rule struct {
 	} `yaml:"injections,omitempty"`
 }
 
+var remoteRegex = regexp.MustCompile(`^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)`)
+
 // NewRulesetFromEnv creates a new RuleSet based on the RULESET environment variable.
 // It logs a warning and returns an empty RuleSet if the RULESET environment variable is not set.
 // If the RULESET is set but the rules cannot be loaded, it panics.
@@ -64,10 +65,12 @@ func NewRulesetFromEnv() RuleSet {
 		log.Printf("WARN: No ruleset specified. Set the `RULESET` environment variable to load one for a better success rate.")
 		return RuleSet{}
 	}
+
 	ruleSet, err := NewRuleset(rulesPath)
 	if err != nil {
 		log.Println(err)
 	}
+
 	return ruleSet
 }
 
@@ -75,16 +78,17 @@ func NewRulesetFromEnv() RuleSet {
 // It supports loading rules from both local file paths and remote URLs.
 // Returns a RuleSet and an error if any issues occur during loading.
 func NewRuleset(rulePaths string) (RuleSet, error) {
-	ruleSet := RuleSet{}
-	errs := []error{}
+	var ruleSet RuleSet
+
+	var errs []error
 
 	rp := strings.Split(rulePaths, ";")
-	var remoteRegex = regexp.MustCompile(`^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)`)
 	for _, rule := range rp {
-		rulePath := strings.Trim(rule, " ")
 		var err error
 
+		rulePath := strings.Trim(rule, " ")
 		isRemote := remoteRegex.MatchString(rulePath)
+
 		if isRemote {
 			err = ruleSet.loadRulesFromRemoteFile(rulePath)
 		} else {
@@ -94,6 +98,7 @@ func NewRuleset(rulePaths string) (RuleSet, error) {
 		if err != nil {
 			e := fmt.Errorf("WARN: failed to load ruleset from '%s'", rulePath)
 			errs = append(errs, errors.Join(e, err))
+
 			continue
 		}
 	}
@@ -101,6 +106,7 @@ func NewRuleset(rulePaths string) (RuleSet, error) {
 	if len(errs) != 0 {
 		e := fmt.Errorf("WARN: failed to load %d rulesets", len(rp))
 		errs = append(errs, e)
+
 		// panic if the user specified a local ruleset, but it wasn't found on disk
 		// don't fail silently
 		for _, err := range errs {
@@ -109,10 +115,13 @@ func NewRuleset(rulePaths string) (RuleSet, error) {
 				panic(errors.Join(e, err))
 			}
 		}
+
 		// else, bubble up any errors, such as syntax or remote host issues
 		return ruleSet, errors.Join(errs...)
 	}
+
 	ruleSet.PrintStats()
+
 	return ruleSet, nil
 }
 
@@ -146,13 +155,16 @@ func (rs *RuleSet) loadRulesFromLocalDir(path string) error {
 			log.Printf("WARN: failed to load directory ruleset '%s': %s, skipping", path, err)
 			return nil
 		}
+
 		log.Printf("INFO: loaded ruleset %s\n", path)
+
 		return nil
 	})
 
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -167,42 +179,51 @@ func (rs *RuleSet) loadRulesFromLocalFile(path string) error {
 
 	var r RuleSet
 	err = yaml.Unmarshal(yamlFile, &r)
+
 	if err != nil {
 		e := fmt.Errorf("failed to load rules from local file, possible syntax error in '%s'", path)
 		ee := errors.Join(e, err)
+
 		if _, ok := os.LookupEnv("DEBUG"); ok {
 			debugPrintRule(string(yamlFile), ee)
 		}
+
 		return ee
 	}
+
 	*rs = append(*rs, r...)
+
 	return nil
 }
 
 // loadRulesFromRemoteFile loads rules from a remote URL.
 // It supports plain and gzip compressed content.
 // Returns an error if there's an issue accessing the URL or if there's a syntax error in the YAML.
-func (rs *RuleSet) loadRulesFromRemoteFile(rulesUrl string) error {
+func (rs *RuleSet) loadRulesFromRemoteFile(rulesURL string) error {
 	var r RuleSet
-	resp, err := http.Get(rulesUrl)
+
+	resp, err := http.Get(rulesURL)
 	if err != nil {
-		e := fmt.Errorf("failed to load rules from remote url '%s'", rulesUrl)
+		e := fmt.Errorf("failed to load rules from remote url '%s'", rulesURL)
 		return errors.Join(e, err)
 	}
+
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		e := fmt.Errorf("failed to load rules from remote url (%s) on '%s'", resp.Status, rulesUrl)
+		e := fmt.Errorf("failed to load rules from remote url (%s) on '%s'", resp.Status, rulesURL)
 		return errors.Join(e, err)
 	}
 
 	var reader io.Reader
-	isGzip := strings.HasSuffix(rulesUrl, ".gz") || strings.HasSuffix(rulesUrl, ".gzip") || resp.Header.Get("content-encoding") == "gzip"
+
+	isGzip := strings.HasSuffix(rulesURL, ".gz") || strings.HasSuffix(rulesURL, ".gzip") || resp.Header.Get("content-encoding") == "gzip"
 
 	if isGzip {
 		reader, err = gzip.NewReader(resp.Body)
+
 		if err != nil {
-			return fmt.Errorf("failed to create gzip reader for URL '%s' with status code '%s': %w", rulesUrl, resp.Status, err)
+			return fmt.Errorf("failed to create gzip reader for URL '%s' with status code '%s': %w", rulesURL, resp.Status, err)
 		}
 	} else {
 		reader = resp.Body
@@ -211,12 +232,14 @@ func (rs *RuleSet) loadRulesFromRemoteFile(rulesUrl string) error {
 	err = yaml.NewDecoder(reader).Decode(&r)
 
 	if err != nil {
-		e := fmt.Errorf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error", rulesUrl, resp.Status)
+		e := fmt.Errorf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error", rulesURL, resp.Status)
 		ee := errors.Join(e, err)
+
 		return ee
 	}
 
 	*rs = append(*rs, r...)
+
 	return nil
 }
 
@@ -228,6 +251,7 @@ func (rs *RuleSet) Yaml() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return string(y), nil
 }
 
