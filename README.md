@@ -14,6 +14,18 @@ Freedom of information is an essential pillar of democracy and informed decision
 
 > **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
 
+### How it works
+
+```mermaid
+sequenceDiagram
+    client->>+ladder: GET
+    ladder-->>ladder: apply RequestModifications
+    ladder->>+website: GET
+    website->>-ladder: 200 OK
+    ladder-->>ladder: apply ResultModifications
+    ladder->>-client: 200 OK
+```
+
 ### Features
 - [x] Bypass Paywalls
 - [x] Remove CORS headers from responses, assets, and images ...
@@ -179,6 +191,16 @@ To run a development server at http://localhost:8080:
 ```bash
 echo "dev" > handlers/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
+```
+
+### Optional: Live reloading development server with [cosmtrek/air](https://github.com/cosmtrek/air)
+
+Install air according to the [installation instructions](https://github.com/cosmtrek/air#installation). 
+
+Run a development server at http://localhost:8080:
+
+```bash
+air # or the path to air if you haven't added a path alias to your .bashrc or .zshrc
 ```
 
 This project uses [pnpm](https://pnpm.io/) to build a stylesheet with the [Tailwind CSS](https://tailwindcss.com/) classes. For local development, if you modify styles in `form.html`, run `pnpm build` to generate a new stylesheet.

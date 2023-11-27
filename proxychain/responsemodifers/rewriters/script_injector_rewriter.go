@@ -43,7 +43,7 @@ func (r *ScriptInjectorRewriter) ModifyToken(token *html.Token) (string, string)
 		return "", fmt.Sprintf("\n<script>\ndocument.addEventListener('DOMContentLoaded', () => { %s });\n</script>", r.script)
 
 	case r.execTime == AfterDOMIdle:
-		s := strings.Replace(afterDomIdleScriptInjector, `'SCRIPT_CONTENT_PARAM'`, r.script, 1)
+		s := strings.Replace(afterDomIdleScriptInjector, `'{{AFTER_DOM_IDLE_SCRIPT}}'`, r.script, 1)
 		return "", fmt.Sprintf("\n<script>\n%s\n</script>\n", s)
 
 	default:

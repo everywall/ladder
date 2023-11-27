@@ -1,6 +1,6 @@
 lint:
 	gofumpt -l -w .
-	golangci-lint run -c .golangci-lint.yaml
+	golangci-lint run -c .golangci-lint.yaml --fix
 
 	go mod tidy
 	go clean

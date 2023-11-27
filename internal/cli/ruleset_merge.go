@@ -3,9 +3,9 @@ package cli
 import (
 	"fmt"
 	"io"
-	"io/fs"
-	"ladder/pkg/ruleset"
 	"os"
+
+	"ladder/pkg/ruleset"
 
 	"golang.org/x/term"
 )
@@ -14,32 +14,38 @@ import (
 // Exits the program with an error message if the ruleset path is not provided or if loading the ruleset fails.
 //
 // Parameters:
-// - rulesetPath: A pointer to a string specifying the path to the ruleset file.
-// - mergeRulesets: A pointer to a boolean indicating if a merge operation should be performed.
-// - mergeRulesetsGzip: A pointer to a boolean indicating if the merge should be in Gzip format.
-// - mergeRulesetsOutput: A pointer to a string specifying the output file path. If empty, the output is printed to stdout.
+// - rulesetPath: Specifies the path to the ruleset file.
+// - mergeRulesets: Indicates if a merge operation should be performed.
+// - useGzip: Indicates if the merged rulesets should be gzip-ped.
+// - output: Specifies the output file. If nil, stdout will be used.
 //
 // Returns:
 // - An error if the ruleset loading or merging process fails, otherwise nil.
-func HandleRulesetMerge(rulesetPath *string, mergeRulesets *bool, mergeRulesetsGzip *bool, mergeRulesetsOutput *string) error {
-	if *rulesetPath == "" {
-		*rulesetPath = os.Getenv("RULESET")
+func HandleRulesetMerge(rulesetPath string, mergeRulesets bool, useGzip bool, output *os.File) error {
+	if !mergeRulesets {
+		return nil
 	}
-	if *rulesetPath == "" {
-		fmt.Println("ERROR: no ruleset provided. Try again with --ruleset <ruleset.yaml>")
+
+	if rulesetPath == "" {
+		rulesetPath = os.Getenv("RULESET")
+	}
+
+	if rulesetPath == "" {
+		fmt.Println("error: no ruleset provided. Try again with --ruleset <ruleset.yaml>")
 		os.Exit(1)
 	}
 
-	rs, err := ruleset.NewRuleset(*rulesetPath)
+	rs, err := ruleset.NewRuleset(rulesetPath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if *mergeRulesetsGzip {
-		return gzipMerge(rs, mergeRulesetsOutput)
+	if useGzip {
+		return gzipMerge(rs, output)
 	}
-	return yamlMerge(rs, mergeRulesetsOutput)
+
+	return yamlMerge(rs, output)
 }
 
 // gzipMerge takes a RuleSet and an optional output file path pointer. It compresses the RuleSet into Gzip format.
@@ -48,33 +54,33 @@ func HandleRulesetMerge(rulesetPath *string, mergeRulesets *bool, mergeRulesetsG
 //
 // Parameters:
 // - rs: The ruleset.RuleSet to be compressed.
-// - mergeRulesetsOutput: A pointer to a string specifying the output file path. If empty, the output is directed to stdout.
+// - output: The output for the gzip data. If nil, stdout will be used.
 //
 // Returns:
 // - An error if compression or file writing fails, otherwise nil.
-func gzipMerge(rs ruleset.RuleSet, mergeRulesetsOutput *string) error {
+func gzipMerge(rs ruleset.RuleSet, output io.Writer) error {
 	gzip, err := rs.GzipYaml()
 	if err != nil {
 		return err
 	}
 
-	if *mergeRulesetsOutput != "" {
-		out, err := os.Create(*mergeRulesetsOutput)
-		defer out.Close()
-		_, err = io.Copy(out, gzip)
+	if output != nil {
+		_, err = io.Copy(output, gzip)
 		if err != nil {
 			return err
 		}
 	}
 
 	if term.IsTerminal(int(os.Stdout.Fd())) {
-		println("WARNING: binary output can mess up your terminal. Use '--merge-rulesets-output <ruleset.gz>' or pipe it to a file.")
+		println("warning: binary output can mess up your terminal. Use '--merge-rulesets-output <ruleset.gz>' or pipe it to a file.")
 		os.Exit(1)
 	}
+
 	_, err = io.Copy(os.Stdout, gzip)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -83,23 +89,25 @@ func gzipMerge(rs ruleset.RuleSet, mergeRulesetsOutput *string) error {
 //
 // Parameters:
 // - rs: The ruleset.RuleSet to be converted to YAML.
-// - mergeRulesetsOutput: A pointer to a string specifying the output file path. If empty, the output is printed to stdout.
+// - output: The output for the merged data. If nil, stdout will be used.
 //
 // Returns:
 // - An error if YAML conversion or file writing fails, otherwise nil.
-func yamlMerge(rs ruleset.RuleSet, mergeRulesetsOutput *string) error {
+func yamlMerge(rs ruleset.RuleSet, output io.Writer) error {
 	yaml, err := rs.Yaml()
 	if err != nil {
 		return err
 	}
-	if *mergeRulesetsOutput == "" {
-		fmt.Printf(yaml)
+
+	if output == nil {
+		fmt.Println(yaml)
 		os.Exit(0)
 	}
 
-	err = os.WriteFile(*mergeRulesetsOutput, []byte(yaml), fs.FileMode(os.O_RDWR))
+	_, err = io.WriteString(output, yaml)
 	if err != nil {
-		return fmt.Errorf("ERROR: failed to write merged YAML ruleset to '%s'\n", *mergeRulesetsOutput)
+		return fmt.Errorf("failed to write merged YAML ruleset: %v", err)
 	}
+
 	return nil
 }
