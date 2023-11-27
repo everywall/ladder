@@ -89,6 +89,7 @@ type ProxyChain struct {
 	Response                *http.Response
 	requestModifications    []RequestModification
 	onceRequestModifications []RequestModification
+	onceResultModifications []ResponseModification
 	resultModifications     []ResponseModification
 	htmlTokenRewriters      []rr.IHTMLTokenRewriter
 	Ruleset                 *ruleset.RuleSet
@@ -125,6 +126,13 @@ func (chain *ProxyChain) AddRequestModifications(mods ...RequestModification) *P
 // the modifier will not fire until ProxyChain.Execute() is run and will be removed after it has been applied.
 func (chain *ProxyChain) AddOnceRequestModification(mod ...RequestModification) *ProxyChain {
 	chain.onceRequestModifications = append(chain.onceRequestModifications, mod...)
+	return chain
+}
+
+// AddOnceResponseModification adds a response modifier to the ProxyChain that should only fire once
+// the modifier will not fire until ProxyChain.Execute() is run and will be removed after it has been applied.
+func (chain *ProxyChain) AddOnceResponseModification(mod ...ResponseModification) *ProxyChain {
+	chain.onceResultModifications = append(chain.onceResultModifications, mod...)
 	return chain
 }
 
@@ -365,7 +373,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		}
 	}
 
-	// Apply onceRequestModifications to proxychain and clear them
+	// Apply onceRequestModifications and onceResultModifications to proxychain and clear them
 	for _, applyOnceRequestModificationsTo := range chain.onceRequestModifications {
 		err := applyOnceRequestModificationsTo(chain)
 		if err != nil {
@@ -373,6 +381,14 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		}
 	}
 	chain.onceRequestModifications = nil
+
+	for _, applyOnceResultModificationsTo := range chain.onceResultModifications {
+		err := applyOnceResultModificationsTo(chain)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+	}
+	chain.onceResultModifications = nil
 
 	// Send Request Upstream
 	resp, err := chain.Client.Do(chain.Request)
