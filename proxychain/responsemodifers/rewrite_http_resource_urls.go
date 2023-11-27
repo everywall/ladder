@@ -3,9 +3,10 @@ package responsemodifers
 import (
 	_ "embed"
 	"fmt"
+	"strings"
+
 	"ladder/proxychain"
 	"ladder/proxychain/responsemodifers/rewriters"
-	"strings"
 )
 
 // RewriteHTMLResourceURLs modifies HTTP responses

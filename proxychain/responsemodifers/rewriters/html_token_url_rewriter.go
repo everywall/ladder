@@ -3,18 +3,21 @@ package rewriters
 import (
 	_ "embed"
 	"fmt"
-	"golang.org/x/net/html/atom"
 	"log"
 	"net/url"
 	"regexp"
 	"strings"
 
+	"golang.org/x/net/html/atom"
+
 	"golang.org/x/net/html"
 )
 
-var rewriteAttrs map[string]map[string]bool
-var specialRewriteAttrs map[string]map[string]bool
-var schemeBlacklist map[string]bool
+var (
+	rewriteAttrs        map[string]map[string]bool
+	specialRewriteAttrs map[string]map[string]bool
+	schemeBlacklist     map[string]bool
+)
 
 func init() {
 	// define all tag/attributes which might contain URLs
@@ -66,7 +69,6 @@ func init() {
 		"wss":        true,
 		"ftp":        true,
 	}
-
 }
 
 // HTMLTokenURLRewriter implements HTMLTokenRewriter
@@ -159,10 +161,10 @@ func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
 		return
 	}
 
-	//log.Printf("BASEURL patch:  %s\n", baseURL)
+	// log.Printf("BASEURL patch:  %s\n", baseURL)
 
 	attr.Val = fmt.Sprintf(
-		"/%s://%s/%s",
+		"%s://%s/%s",
 		baseURL.Scheme,
 		baseURL.Host,
 		strings.TrimPrefix(attr.Val, "/"),
@@ -184,7 +186,7 @@ func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 		strings.Trim(attr.Val, "/"),
 	)
 	attr.Val = escape(attr.Val)
-	attr.Val = fmt.Sprintf("/%s", attr.Val)
+	attr.Val = fmt.Sprintf("%s://%s/%s", baseURL.Scheme, baseURL.Host, attr.Val)
 	log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
@@ -199,7 +201,7 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 	if !(u.Scheme == "http" || u.Scheme == "https") {
 		return
 	}
-	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
+	attr.Val = fmt.Sprintf("%s://%s/%s", baseURL.Scheme, baseURL.Host, escape(strings.TrimPrefix(attr.Val, "/")))
 	log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 

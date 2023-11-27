@@ -8,7 +8,7 @@ import (
 // pretending to be from a linkedin post
 func SpoofReferrerFromLinkedInPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddRequestModifications(
+		chain.AddOnceRequestModifications(
 			SpoofReferrer("https://www.linkedin.com/"),
 			SetRequestHeader("sec-fetch-site", "cross-site"),
 			SetRequestHeader("sec-fetch-dest", "document"),

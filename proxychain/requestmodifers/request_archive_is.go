@@ -1,27 +1,28 @@
 package requestmodifers
 
 import (
-	"ladder/proxychain"
+	"fmt"
 	"net/url"
+
+	"ladder/proxychain"
 )
 
-const archivistUrl string = "https://archive.is/latest/"
+const archivistUrl string = "https://archive.is/latest"
 
 // RequestArchiveIs modifies a ProxyChain's URL to request an archived version from archive.is
 func RequestArchiveIs() proxychain.RequestModification {
-	return func(px *proxychain.ProxyChain) error {
-		px.Request.URL.RawQuery = ""
-		newURLString := archivistUrl + px.Request.URL.String()
-		newURL, err := url.Parse(newURLString)
+	return func(chain *proxychain.ProxyChain) error {
+		chain.Request.URL.RawQuery = ""
+		newURL, err := url.Parse(fmt.Sprintf("%s/%s", archivistUrl, chain.Request.URL.String()))
 		if err != nil {
 			return err
 		}
 
 		// archivist seems to sabotage requests from cloudflare's DNS
 		// bypass this just in case
-		px.AddRequestModifications(ResolveWithGoogleDoH())
+		chain.AddOnceRequestModifications(ResolveWithGoogleDoH())
 
-		px.Request.URL = newURL
+		chain.Request.URL = newURL
 		return nil
 	}
 }

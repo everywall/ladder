@@ -1,16 +1,17 @@
 package requestmodifers
 
 import (
-	"ladder/proxychain"
 	"net/url"
+
+	"ladder/proxychain"
 )
 
 // ModifyQueryParams replaces query parameter values in URL's query params in a ProxyChain's URL.
 // If the query param key doesn't exist, it is created.
 func ModifyQueryParams(key string, value string) proxychain.RequestModification {
-	return func(px *proxychain.ProxyChain) error {
-		q := px.Request.URL.Query()
-		px.Request.URL.RawQuery = modifyQueryParams(key, value, q)
+	return func(chain *proxychain.ProxyChain) error {
+		q := chain.Request.URL.Query()
+		chain.Request.URL.RawQuery = modifyQueryParams(key, value, q)
 		return nil
 	}
 }

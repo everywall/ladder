@@ -1,0 +1,3 @@
+[submodule "proxychain/requestmodifers/vendor/ua-parser-js"]
+	path = proxychain/requestmodifers/vendor/ua-parser-js
+	url = https://github.com/faisalman/ua-parser-js.git

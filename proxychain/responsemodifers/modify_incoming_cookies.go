@@ -2,8 +2,9 @@ package responsemodifers
 
 import (
 	"fmt"
-	"ladder/proxychain"
 	"net/http"
+
+	"ladder/proxychain"
 )
 
 // DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server

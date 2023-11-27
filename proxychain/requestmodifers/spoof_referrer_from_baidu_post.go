@@ -2,10 +2,11 @@ package requestmodifers
 
 import (
 	"fmt"
-	"ladder/proxychain"
 	"math/rand"
 	"strings"
 	"time"
+
+	"ladder/proxychain"
 )
 
 // SpoofReferrerFromBaiduSearch modifies the referrer header

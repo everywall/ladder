@@ -31,8 +31,9 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
+				rx.MasqueradeAsGoogleBot(),
 				rx.DeleteOutgoingCookies(),
-				//rx.RequestArchiveIs(),
+				// rx.RequestArchiveIs(),
 				rx.MasqueradeAsGoogleBot(),
 			).
 			AddResponseModifications(

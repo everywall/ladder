@@ -8,7 +8,7 @@ import (
 // pretending to be from a tumblr post
 func SpoofReferrerFromTumblrPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddRequestModifications(
+		chain.AddOnceRequestModifications(
 			SpoofReferrer("https://www.tumblr.com/"),
 			SetRequestHeader("sec-fetch-site", "cross-site"),
 			SetRequestHeader("sec-fetch-dest", "document"),

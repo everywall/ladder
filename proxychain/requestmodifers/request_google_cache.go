@@ -1,8 +1,9 @@
 package requestmodifers
 
 import (
-	"ladder/proxychain"
 	"net/url"
+
+	"ladder/proxychain"
 )
 
 const googleCacheUrl string = "https://webcache.googleusercontent.com/search?q=cache:"

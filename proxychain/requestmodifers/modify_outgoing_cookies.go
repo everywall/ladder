@@ -1,8 +1,9 @@
 package requestmodifers
 
 import (
-	"ladder/proxychain"
 	"net/http"
+
+	"ladder/proxychain"
 )
 
 // SetOutgoingCookie modifes a specific cookie name

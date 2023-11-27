@@ -71,7 +71,6 @@ func (r *HTMLRewriter) Close() error {
 
 // Read processes the HTML content, rewriting URLs and managing the state of tokens.
 func (r *HTMLRewriter) Read(p []byte) (int, error) {
-
 	if r.currentToken == nil || r.currentToken.Data == "" || r.currentTokenProcessed {
 		tokenType := r.tokenizer.Next()
 

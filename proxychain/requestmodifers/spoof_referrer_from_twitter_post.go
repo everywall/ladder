@@ -8,7 +8,7 @@ import (
 // pretending to be from a twitter post
 func SpoofReferrerFromTwitterPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddRequestModifications(
+		chain.AddOnceRequestModifications(
 			SpoofReferrer("https://t.co/"),
 			SetRequestHeader("sec-fetch-site", "cross-site"),
 			SetRequestHeader("sec-fetch-dest", "document"),

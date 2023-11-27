@@ -2,9 +2,10 @@ package responsemodifers
 
 import (
 	_ "embed"
+	"strings"
+
 	"ladder/proxychain"
 	"ladder/proxychain/responsemodifers/rewriters"
-	"strings"
 )
 
 // injectScript modifies HTTP responses
@@ -25,16 +26,16 @@ func injectScript(js string, execTime rewriters.ScriptExecTime) proxychain.Respo
 }
 
 // InjectScriptBeforeDOMContentLoaded modifies HTTP responses to inject a JS before DOM Content is loaded (script tag in head)
-func InjectScriptBeforeDOMContentLoaded(js string, execTime rewriters.ScriptExecTime) proxychain.ResponseModification {
+func InjectScriptBeforeDOMContentLoaded(js string) proxychain.ResponseModification {
 	return injectScript(js, rewriters.BeforeDOMContentLoaded)
 }
 
 // InjectScriptAfterDOMContentLoaded modifies HTTP responses to inject a JS after DOM Content is loaded (script tag in head)
-func InjectScriptAfterDOMContentLoaded(js string, execTime rewriters.ScriptExecTime) proxychain.ResponseModification {
+func InjectScriptAfterDOMContentLoaded(js string) proxychain.ResponseModification {
 	return injectScript(js, rewriters.AfterDOMContentLoaded)
 }
 
 // InjectScriptAfterDOMIdle modifies HTTP responses to inject a JS after the DOM is idle (ie: js framework loaded)
-func InjectScriptAfterDOMIdle(js string, execTime rewriters.ScriptExecTime) proxychain.ResponseModification {
+func InjectScriptAfterDOMIdle(js string) proxychain.ResponseModification {
 	return injectScript(js, rewriters.AfterDOMIdle)
 }

@@ -2,8 +2,9 @@ package requestmodifers
 
 import (
 	"fmt"
-	"ladder/proxychain"
 	"math/rand"
+
+	"ladder/proxychain"
 )
 
 // SpoofReferrerFromWeiboPost modifies the referrer header

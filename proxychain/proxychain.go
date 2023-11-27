@@ -83,18 +83,18 @@ proxychain.NewProxyChain().
 └─────────┘    └────────────────────────┘    └─────────┘
 */
 type ProxyChain struct {
-	Context                 *fiber.Ctx
-	Client                  *http.Client
-	Request                 *http.Request
-	Response                *http.Response
-	requestModifications    []RequestModification
-	onceRequestModifications []RequestModification
-	onceResultModifications []ResponseModification
-	resultModifications     []ResponseModification
-	htmlTokenRewriters      []rr.IHTMLTokenRewriter
-	Ruleset                 *ruleset.RuleSet
-	debugMode               bool
-	abortErr                error
+	Context                   *fiber.Ctx
+	Client                    *http.Client
+	Request                   *http.Request
+	Response                  *http.Response
+	requestModifications      []RequestModification
+	onceRequestModifications  []RequestModification
+	onceResponseModifications []ResponseModification
+	resultModifications       []ResponseModification
+	htmlTokenRewriters        []rr.IHTMLTokenRewriter
+	Ruleset                   *ruleset.RuleSet
+	debugMode                 bool
+	abortErr                  error
 }
 
 // a ProxyStrategy is a pre-built proxychain with purpose-built defaults
@@ -122,17 +122,17 @@ func (chain *ProxyChain) AddRequestModifications(mods ...RequestModification) *P
 	return chain
 }
 
-// AddOnceRequestModification adds a request modifier to the ProxyChain that should only fire once
+// AddOnceRequestModifications adds a request modifier to the ProxyChain that should only fire once
 // the modifier will not fire until ProxyChain.Execute() is run and will be removed after it has been applied.
-func (chain *ProxyChain) AddOnceRequestModification(mod ...RequestModification) *ProxyChain {
-	chain.onceRequestModifications = append(chain.onceRequestModifications, mod...)
+func (chain *ProxyChain) AddOnceRequestModifications(mods ...RequestModification) *ProxyChain {
+	chain.onceRequestModifications = append(chain.onceRequestModifications, mods...)
 	return chain
 }
 
-// AddOnceResponseModification adds a response modifier to the ProxyChain that should only fire once
+// AddOnceResponseModifications adds a response modifier to the ProxyChain that should only fire once
 // the modifier will not fire until ProxyChain.Execute() is run and will be removed after it has been applied.
-func (chain *ProxyChain) AddOnceResponseModification(mod ...ResponseModification) *ProxyChain {
-	chain.onceResultModifications = append(chain.onceResultModifications, mod...)
+func (chain *ProxyChain) AddOnceResponseModifications(mods ...ResponseModification) *ProxyChain {
+	chain.onceResponseModifications = append(chain.onceResponseModifications, mods...)
 	return chain
 }
 
@@ -188,26 +188,25 @@ func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
 	return req, nil
 }
 
-// reconstructUrlFromReferer reconstructs the URL using the referer's scheme, host, and the relative path / queries
-func reconstructUrlFromReferer(referer *url.URL, relativeUrl *url.URL) (*url.URL, error) {
-
+// reconstructURLFromReferer reconstructs the URL using the referer's scheme, host, and the relative path / queries
+func reconstructURLFromReferer(referer *url.URL, relativeURL *url.URL) (*url.URL, error) {
 	// Extract the real url from referer path
-	realUrl, err := url.Parse(strings.TrimPrefix(referer.Path, "/"))
+	realURL, err := url.Parse(strings.TrimPrefix(referer.Path, "/"))
 	if err != nil {
 		return nil, fmt.Errorf("error parsing real URL from referer '%s': %v", referer.Path, err)
 	}
 
-	if realUrl.Scheme == "" || realUrl.Host == "" {
-		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer.String(), relativeUrl.String())
+	if realURL.Scheme == "" || realURL.Host == "" {
+		return nil, fmt.Errorf("invalid referer URL: '%s' on request '%s", referer.String(), relativeURL.String())
 	}
 
-	log.Printf("rewrite relative URL using referer: '%s' -> '%s'\n", relativeUrl.String(), realUrl.String())
+	log.Printf("rewrite relative URL using referer: '%s' -> '%s'\n", relativeURL.String(), realURL.String())
 
 	return &url.URL{
 		Scheme:   referer.Scheme,
 		Host:     referer.Host,
-		Path:     realUrl.Path,
-		RawQuery: realUrl.RawQuery,
+		Path:     realURL.Path,
+		RawQuery: realURL.RawQuery,
 	}, nil
 }
 
@@ -227,27 +226,27 @@ func preventRecursiveProxyRequest(urlQuery *url.URL, baseProxyURL string) *url.U
 	return preventRecursiveProxyRequest(fixedURL, baseProxyURL)
 }
 
-// extractUrl extracts a URL from the request ctx. If the URL in the request
+// extractURL extracts a URL from the request ctx. If the URL in the request
 // is a relative path, it reconstructs the full URL using the referer header.
-func (chain *ProxyChain) extractUrl() (*url.URL, error) {
-	reqUrl := chain.Context.Params("*")
+func (chain *ProxyChain) extractURL() (*url.URL, error) {
+	reqURL := chain.Context.Params("*")
 
 	// sometimes client requests doubleroot '//'
 	// there is a bug somewhere else, but this is a workaround until we find it
-	if strings.HasPrefix(reqUrl, "/") || strings.HasPrefix(reqUrl, `%2F`) {
-		reqUrl = strings.TrimPrefix(reqUrl, "/")
-		reqUrl = strings.TrimPrefix(reqUrl, `%2F`)
+	if strings.HasPrefix(reqURL, "/") || strings.HasPrefix(reqURL, `%2F`) {
+		reqURL = strings.TrimPrefix(reqURL, "/")
+		reqURL = strings.TrimPrefix(reqURL, `%2F`)
 	}
 
 	// unescape url query
-	uReqUrl, err := url.QueryUnescape(reqUrl)
+	uReqURL, err := url.QueryUnescape(reqURL)
 	if err == nil {
-		reqUrl = uReqUrl
+		reqURL = uReqURL
 	}
 
-	urlQuery, err := url.Parse(reqUrl)
+	urlQuery, err := url.Parse(reqURL)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing request URL '%s': %v", reqUrl, err)
+		return nil, fmt.Errorf("error parsing request URL '%s': %v", reqURL, err)
 	}
 
 	// prevent recursive proxy requests
@@ -269,7 +268,7 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error parsing referer URL from req: '%s': %v", relativePath, err)
 	}
-	return reconstructUrlFromReferer(referer, relativePath)
+	return reconstructURLFromReferer(referer, relativePath)
 }
 
 // SetFiberCtx takes the request ctx from the client
@@ -288,7 +287,7 @@ func (chain *ProxyChain) SetFiberCtx(ctx *fiber.Ctx) *ProxyChain {
 	chain.Request = req
 
 	// extract the URL for the request and add it to the new request
-	url, err := chain.extractUrl()
+	url, err := chain.extractURL()
 	if err != nil {
 		chain.abortErr = chain.abort(err)
 	}
@@ -307,9 +306,9 @@ func (chain *ProxyChain) validateCtxIsSet() error {
 	return chain.abortErr
 }
 
-// SetHttpClient sets a new upstream http client transport
+// SetHTTPClient sets a new upstream http client transport
 // useful for modifying TLS
-func (chain *ProxyChain) SetHttpClient(httpClient *http.Client) *ProxyChain {
+func (chain *ProxyChain) SetHTTPClient(httpClient *http.Client) *ProxyChain {
 	chain.Client = httpClient
 	return chain
 }
@@ -325,7 +324,7 @@ func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
 // this will prevent Execute from firing and reset the state
 // returns the initial error enriched with context
 func (chain *ProxyChain) abort(err error) error {
-	//defer chain._reset()
+	// defer chain._reset()
 	chain.abortErr = err
 	chain.Context.Response().SetStatusCode(500)
 	e := fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
@@ -338,7 +337,7 @@ func (chain *ProxyChain) abort(err error) error {
 func (chain *ProxyChain) _reset() {
 	chain.abortErr = nil
 	chain.Request = nil
-	//chain.Response = nil
+	// chain.Response = nil
 	chain.Context = nil
 }
 
@@ -373,22 +372,14 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		}
 	}
 
-	// Apply onceRequestModifications and onceResultModifications to proxychain and clear them
+	// Apply onceRequestModifications to proxychain and clear them
 	for _, applyOnceRequestModificationsTo := range chain.onceRequestModifications {
 		err := applyOnceRequestModificationsTo(chain)
 		if err != nil {
 			return nil, chain.abort(err)
 		}
 	}
-	chain.onceRequestModifications = nil
-
-	for _, applyOnceResultModificationsTo := range chain.onceResultModifications {
-		err := applyOnceResultModificationsTo(chain)
-		if err != nil {
-			return nil, chain.abort(err)
-		}
-	}
-	chain.onceResultModifications = nil
+	chain.onceRequestModifications = []RequestModification{}
 
 	// Send Request Upstream
 	resp, err := chain.Client.Do(chain.Request)
@@ -411,8 +402,16 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		}
 	}
 
-	return chain.Response.Body, nil
+	// Apply onceResponseModifications to proxychain and clear them
+	for _, applyOnceResponseModificationsTo := range chain.onceResponseModifications {
+		err := applyOnceResponseModificationsTo(chain)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+	}
+	chain.onceResponseModifications = []ResponseModification{}
 
+	return chain.Response.Body, nil
 }
 
 // Execute sends the request for the ProxyChain and returns the request to the sender
@@ -434,5 +433,5 @@ func (chain *ProxyChain) Execute() error {
 	chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
 	return chain.Context.SendStream(body)
 
-	//return chain.Context.SendStream(body)
+	// return chain.Context.SendStream(body)
 }

@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"ladder/proxychain"
 	"net"
 	"net/http"
 	"time"
+
+	"ladder/proxychain"
 )
 
 // resolveWithGoogleDoH resolves DNS using Google's DNS-over-HTTPS
