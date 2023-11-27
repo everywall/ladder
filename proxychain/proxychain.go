@@ -90,8 +90,7 @@ type ProxyChain struct {
 	requestModifications      []RequestModification
 	onceRequestModifications  []RequestModification
 	onceResponseModifications []ResponseModification
-	resultModifications       []ResponseModification
-	htmlTokenRewriters        []rr.IHTMLTokenRewriter
+	responseModifications     []ResponseModification
 	Ruleset                   *ruleset.RuleSet
 	debugMode                 bool
 	abortErr                  error
@@ -139,7 +138,7 @@ func (chain *ProxyChain) AddOnceResponseModifications(mods ...ResponseModificati
 // AddResponseModifications sets the ProxyChain's response modifers
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) *ProxyChain {
-	chain.resultModifications = mods
+	chain.responseModifications = mods
 	return chain
 }
 
@@ -339,6 +338,8 @@ func (chain *ProxyChain) _reset() {
 	chain.Request = nil
 	// chain.Response = nil
 	chain.Context = nil
+	chain.onceResponseModifications = []ResponseModification{}
+	chain.onceRequestModifications = []RequestModification{}
 }
 
 // NewProxyChain initializes a new ProxyChain
@@ -395,7 +396,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	*/
 
 	// Apply ResponseModifiers to proxychain
-	for _, applyResultModificationsTo := range chain.resultModifications {
+	for _, applyResultModificationsTo := range chain.responseModifications {
 		err := applyResultModificationsTo(chain)
 		if err != nil {
 			return nil, chain.abort(err)
