@@ -256,16 +256,6 @@ func (chain *ProxyChain) extractUrl() (*url.URL, error) {
 	return reconstructUrlFromReferer(referer, relativePath)
 }
 
-// AddBodyRewriter adds a HTMLTokenRewriter to the chain.
-//   - HTMLTokenRewriters modify the body response by parsing the HTML
-//     and making changes to the DOM as it streams to the client
-//   - In most cases, you don't need to use this method. It's usually called by
-//     a ResponseModifier to batch queue changes for performance reasons.
-func (chain *ProxyChain) AddHTMLTokenRewriter(rr rr.IHTMLTokenRewriter) *ProxyChain {
-	chain.htmlTokenRewriters = append(chain.htmlTokenRewriters, rr)
-	return chain
-}
-
 // SetFiberCtx takes the request ctx from the client
 // for the modifiers and execute function to use.
 // it must be set everytime a new request comes through
@@ -388,19 +378,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		}
 	}
 
-	// stream request back to client, possibly rewriting the body
-	if len(chain.htmlTokenRewriters) == 0 {
-		return chain.Response.Body, nil
-	}
-
-	ct := chain.Response.Header.Get("content-type")
-	switch {
-	case strings.HasPrefix(ct, "text/html"):
-		fmt.Println("fooox")
-		return rr.NewHTMLRewriter(chain.Response.Body, chain.htmlTokenRewriters), nil
-	default:
-		return chain.Response.Body, nil
-	}
+	return chain.Response.Body, nil
 
 }
 

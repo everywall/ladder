@@ -41,14 +41,14 @@ func PatchDynamicResourceURLs() proxychain.ResponseModification {
 			"{{ORIGIN}}": fmt.Sprintf("%s://%s", reqURL.Scheme, reqURL.Host),
 		}
 
-		// the rewriting actually happens in chain.Execute() as the client is streaming the response body back
 		rr := rewriters.NewScriptInjectorRewriterWithParams(
 			patchDynamicResourceURLsScript,
 			rewriters.BeforeDOMContentLoaded,
 			params,
 		)
-		// we just queue it up here
-		chain.AddHTMLTokenRewriter(rr)
+
+		htmlRewriter := rewriters.NewHTMLRewriter(chain.Response.Body, rr)
+		chain.Response.Body = htmlRewriter
 
 		return nil
 	}

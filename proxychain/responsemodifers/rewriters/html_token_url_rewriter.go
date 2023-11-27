@@ -3,6 +3,7 @@ package rewriters
 import (
 	_ "embed"
 	"fmt"
+	"golang.org/x/net/html/atom"
 	"log"
 	"net/url"
 	"regexp"
@@ -128,13 +129,13 @@ func (r *HTMLTokenURLRewriter) ModifyToken(token *html.Token) (string, string) {
 // dispatcher for ModifyURL based on URI type
 func handleURLPart(attr *html.Attribute, baseURL *url.URL) {
 	switch {
-	case strings.HasPrefix(attr.Key, "//"):
+	case strings.HasPrefix(attr.Val, "//"):
 		handleProtocolRelativePath(attr, baseURL)
-	case strings.HasPrefix(attr.Key, "/"):
+	case strings.HasPrefix(attr.Val, "/"):
 		handleRootRelativePath(attr, baseURL)
-	case strings.HasPrefix(attr.Key, "https://"):
+	case strings.HasPrefix(attr.Val, "https://"):
 		handleAbsolutePath(attr, baseURL)
-	case strings.HasPrefix(attr.Key, "http://"):
+	case strings.HasPrefix(attr.Val, "http://"):
 		handleAbsolutePath(attr, baseURL)
 	default:
 		handleDocumentRelativePath(attr, baseURL)
@@ -206,12 +207,12 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 func (r *HTMLTokenURLRewriter) handleSpecialAttr(token *html.Token, attr *html.Attribute, baseURL *url.URL) {
 	switch {
 	// srcset attribute doesn't contain a single URL but a comma-separated list of URLs, each potentially followed by a space and a descriptor (like a width, pixel density, or other conditions).
-	case token.Data == "img" && attr.Key == "srcset":
+	case token.DataAtom == atom.Img && attr.Key == "srcset":
 		handleSrcSet(attr, baseURL)
-	case token.Data == "source" && attr.Key == "srcset":
+	case token.DataAtom == atom.Source && attr.Key == "srcset":
 		handleSrcSet(attr, baseURL)
 	// meta with http-equiv="refresh": The content attribute of a meta tag, when used for a refresh directive, contains a time interval followed by a URL, like content="5;url=http://example.com/".
-	case token.Data == "meta" && attr.Key == "content" && regexp.MustCompile(`^\d+;url=`).MatchString(attr.Val):
+	case token.DataAtom == atom.Meta && attr.Key == "content" && regexp.MustCompile(`^\d+;url=`).MatchString(attr.Val):
 		handleMetaRefresh(attr, baseURL)
 	default:
 		break

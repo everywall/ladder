@@ -25,10 +25,10 @@ func RewriteHTMLResourceURLs() proxychain.ResponseModification {
 		originalURI := chain.Context.Request().URI()
 		proxyURL := fmt.Sprintf("%s://%s", originalURI.Scheme(), originalURI.Host())
 
-		// the rewriting actually happens in chain.Execute() as the client is streaming the response body back
+		// replace http.Response.Body with a readcloser that wraps the original, modifying the html attributes
 		rr := rewriters.NewHTMLTokenURLRewriter(chain.Request.URL, proxyURL)
-		// we just queue it up here
-		chain.AddHTMLTokenRewriter(rr)
+		htmlRewriter := rewriters.NewHTMLRewriter(chain.Response.Body, rr)
+		chain.Response.Body = htmlRewriter
 
 		return nil
 	}

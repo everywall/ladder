@@ -25,7 +25,6 @@ type IHTMLTokenRewriter interface {
 //
 //   - HTMLRewriter reads the http.Response.Body stream,
 //     parsing each HTML token one at a time and making modifications (defined by implementations of IHTMLTokenRewriter)
-//     in a single pass of the tokenizer.
 //
 //   - When ProxyChain.Execute() is called, the response body will be read from the server
 //     and pulled through each ResponseModification which wraps the ProxyChain.Response.Body
@@ -52,7 +51,7 @@ type HTMLRewriter struct {
 //
 // Returns:
 //   - A pointer to an HTMLRewriter, which implements io.ReadCloser, containing the modified HTML content.
-func NewHTMLRewriter(src io.ReadCloser, rewriters []IHTMLTokenRewriter) *HTMLRewriter {
+func NewHTMLRewriter(src io.ReadCloser, rewriters ...IHTMLTokenRewriter) *HTMLRewriter {
 	return &HTMLRewriter{
 		tokenizer:             html.NewTokenizer(src),
 		currentToken:          nil,
