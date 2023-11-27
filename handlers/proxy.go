@@ -31,17 +31,16 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				rx.MasqueradeAsGoogleBot(),
+				rx.MasqueradeAsFacebookBot(),
 				rx.DeleteOutgoingCookies(),
-				// rx.RequestArchiveIs(),
-				rx.MasqueradeAsGoogleBot(),
+			// rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
 				tx.BypassCORS(),
-				tx.BypassContentSecurityPolicy(),
-				tx.DeleteIncomingCookies(),
-				tx.RewriteHTMLResourceURLs(),
-				tx.PatchDynamicResourceURLs(),
+				//tx.BypassContentSecurityPolicy(),
+				//tx.DeleteIncomingCookies(),
+				//tx.RewriteHTMLResourceURLs(),
+				//tx.PatchDynamicResourceURLs(),
 			).
 			Execute()
 

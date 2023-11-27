@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
+	//"net/http"
+	http "github.com/Danny-Dasilva/fhttp"
+
 	"net/url"
 	"strings"
 
-	"ladder/pkg/ruleset"
-	rr "ladder/proxychain/responsemodifers/rewriters"
-
 	"github.com/gofiber/fiber/v2"
+	"ladder/pkg/ruleset"
 )
 
 /*
@@ -85,6 +85,7 @@ proxychain.NewProxyChain().
 type ProxyChain struct {
 	Context                   *fiber.Ctx
 	Client                    *http.Client
+	onceClient                *http.Client
 	Request                   *http.Request
 	Response                  *http.Response
 	requestModifications      []RequestModification
@@ -312,6 +313,13 @@ func (chain *ProxyChain) SetHTTPClient(httpClient *http.Client) *ProxyChain {
 	return chain
 }
 
+// SetOnceHTTPClient sets a new upstream http client transport temporarily
+// and clears it once it is used.
+func (chain *ProxyChain) SetOnceHTTPClient(httpClient *http.Client) *ProxyChain {
+	chain.onceClient = httpClient
+	return chain
+}
+
 // SetVerbose changes the logging behavior to print
 // the modification steps and applied rulesets for debugging
 func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
@@ -340,6 +348,7 @@ func (chain *ProxyChain) _reset() {
 	chain.Context = nil
 	chain.onceResponseModifications = []ResponseModification{}
 	chain.onceRequestModifications = []RequestModification{}
+	//chain.onceClient = nil
 }
 
 // NewProxyChain initializes a new ProxyChain
@@ -355,6 +364,7 @@ func NewProxyChain() *ProxyChain {
 // the caller is responsible for returning a response back to the requestor
 // the caller is also responsible for calling chain._reset() when they are done with the body
 func (chain *ProxyChain) _execute() (io.Reader, error) {
+	// ================== PREFLIGHT CHECKS =============================
 	if chain.validateCtxIsSet() != nil || chain.abortErr != nil {
 		return nil, chain.abortErr
 	}
@@ -365,6 +375,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 		return nil, errors.New("request url not set or invalid. Check ProxyChain ReqMods for issues")
 	}
 
+	// ======== REQUEST MODIFICATIONS :: [client -> ladder] -> upstream -> ladder -> client =============================
 	// Apply requestModifications to proxychain
 	for _, applyRequestModificationsTo := range chain.requestModifications {
 		err := applyRequestModificationsTo(chain)
@@ -382,19 +393,26 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	}
 	chain.onceRequestModifications = []RequestModification{}
 
+	// ======== SEND REQUEST UPSTREAM :: client -> [ladder -> upstream] -> ladder -> client =============================
 	// Send Request Upstream
-	resp, err := chain.Client.Do(chain.Request)
-	if err != nil {
-		return nil, chain.abort(err)
+	if chain.onceClient != nil {
+		// if chain.SetOnceClient() is used, use that client instead of the
+		// default http client temporarily.
+		resp, err := chain.onceClient.Do(chain.Request)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+		chain.Response = resp
+		//chain.onceClient = nil
+	} else {
+		resp, err := chain.Client.Do(chain.Request)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+		chain.Response = resp
 	}
-	chain.Response = resp
 
-	/* todo: move to rsm
-	for k, v := range resp.Header {
-		chain.Context.Set(k, resp.Header.Get(k))
-	}
-	*/
-
+	// ======== APPLY RESPONSE MODIFIERS :: client -> ladder -> [upstream -> ladder] -> client =============================
 	// Apply ResponseModifiers to proxychain
 	for _, applyResultModificationsTo := range chain.responseModifications {
 		err := applyResultModificationsTo(chain)
@@ -412,6 +430,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	}
 	chain.onceResponseModifications = []ResponseModification{}
 
+	// ======== RETURN BODY TO CLIENT :: client -> ladder -> upstream -> [ladder -> client] =============================
 	return chain.Response.Body, nil
 }
 
@@ -430,8 +449,12 @@ func (chain *ProxyChain) Execute() error {
 		return errors.New("no context set")
 	}
 
+	// in case api user did not set or forward content-type, we do it for them
+	if chain.Context.Get("content-type") == "" {
+		chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+	}
+
 	// Return request back to client
-	chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
 	return chain.Context.SendStream(body)
 
 	// return chain.Context.SendStream(body)
