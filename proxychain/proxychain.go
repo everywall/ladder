@@ -83,16 +83,17 @@ proxychain.NewProxyChain().
 └─────────┘    └────────────────────────┘    └─────────┘
 */
 type ProxyChain struct {
-	Context              *fiber.Ctx
-	Client               *http.Client
-	Request              *http.Request
-	Response             *http.Response
-	requestModifications []RequestModification
-	resultModifications  []ResponseModification
-	htmlTokenRewriters   []rr.IHTMLTokenRewriter
-	Ruleset              *ruleset.RuleSet
-	debugMode            bool
-	abortErr             error
+	Context                 *fiber.Ctx
+	Client                  *http.Client
+	Request                 *http.Request
+	Response                *http.Response
+	requestModifications    []RequestModification
+	onceRequestModifications []RequestModification
+	resultModifications     []ResponseModification
+	htmlTokenRewriters      []rr.IHTMLTokenRewriter
+	Ruleset                 *ruleset.RuleSet
+	debugMode               bool
+	abortErr                error
 }
 
 // a ProxyStrategy is a pre-built proxychain with purpose-built defaults
@@ -113,10 +114,17 @@ func (chain *ProxyChain) SetRequestModifications(mods ...RequestModification) *P
 	return chain
 }
 
-// AddRequestModifications sets the ProxyChain's request modifers
+// AddRequestModifications adds more request modifers to the ProxyChain
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddRequestModifications(mods ...RequestModification) *ProxyChain {
 	chain.requestModifications = append(chain.requestModifications, mods...)
+	return chain
+}
+
+// AddOnceRequestModification adds a request modifier to the ProxyChain that should only fire once
+// the modifier will not fire until ProxyChain.Execute() is run and will be removed after it has been applied.
+func (chain *ProxyChain) AddOnceRequestModification(mod ...RequestModification) *ProxyChain {
+	chain.onceRequestModifications = append(chain.onceRequestModifications, mod...)
 	return chain
 }
 
@@ -356,6 +364,15 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 			return nil, chain.abort(err)
 		}
 	}
+
+	// Apply onceRequestModifications to proxychain and clear them
+	for _, applyOnceRequestModificationsTo := range chain.onceRequestModifications {
+		err := applyOnceRequestModificationsTo(chain)
+		if err != nil {
+			return nil, chain.abort(err)
+		}
+	}
+	chain.onceRequestModifications = nil
 
 	// Send Request Upstream
 	resp, err := chain.Client.Do(chain.Request)
