@@ -21,13 +21,11 @@ func MasqueradeAsBingBot() proxychain.RequestModification {
 }
 
 func masqueradeAsTrustedBot(botUA string, botIP string) proxychain.RequestModification {
-	return func(px *proxychain.ProxyChain) error {
-		px.AddRequestModifications(
-			SpoofUserAgent(botUA),
-			SpoofXForwardedFor(botIP),
-			SpoofReferrer(""),
-			SpoofOrigin(""),
-		)
+	return func(chain *proxychain.ProxyChain) error {
+		chain.Request.Header.Set("user-agent", botUA)
+		chain.Request.Header.Set("x-forwarded-for", botIP)
+		chain.Request.Header.Del("referrer")
+		chain.Request.Header.Del("origin")
 		return nil
 	}
 }

@@ -8,12 +8,10 @@ import (
 // pretending to be from a reddit post
 func SpoofReferrerFromRedditPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddRequestModifications(
-			SpoofReferrer("https://www.reddit.com/"),
-			SetRequestHeader("sec-fetch-site", "cross-site"),
-			SetRequestHeader("sec-fetch-dest", "document"),
-			SetRequestHeader("sec-fetch-mode", "navigate"),
-		)
+		chain.Request.Header.Set("referrer", "https://www.reddit.com/")
+		chain.Request.Header.Set("sec-fetch-site", "cross-site")
+		chain.Request.Header.Set("sec-fetch-dest", "document")
+		chain.Request.Header.Set("sec-fetch-mode", "navigate")
 		return nil
 	}
 }

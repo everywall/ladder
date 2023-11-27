@@ -2,6 +2,7 @@ package requestmodifers
 
 import (
 	"ladder/proxychain"
+	"net/url"
 )
 
 // ModifyQueryParams replaces query parameter values in URL's query params in a ProxyChain's URL.
@@ -9,12 +10,16 @@ import (
 func ModifyQueryParams(key string, value string) proxychain.RequestModification {
 	return func(px *proxychain.ProxyChain) error {
 		q := px.Request.URL.Query()
-		if value == "" {
-			q.Del(key)
-			return nil
-		}
-		q.Set(key, value)
-		px.Request.URL.RawQuery = q.Encode()
+		px.Request.URL.RawQuery = modifyQueryParams(key, value, q)
 		return nil
 	}
+}
+
+func modifyQueryParams(key string, value string, q url.Values) string {
+	if value == "" {
+		q.Del(key)
+		return q.Encode()
+	}
+	q.Set(key, value)
+	return q.Encode()
 }

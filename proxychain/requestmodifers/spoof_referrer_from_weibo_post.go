@@ -11,12 +11,10 @@ import (
 func SpoofReferrerFromWeiboPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 		referrer := fmt.Sprintf("http://weibo.com/u/%d", rand.Intn(90001))
-		chain.AddRequestModifications(
-			SpoofReferrer(referrer),
-			SetRequestHeader("sec-fetch-site", "cross-site"),
-			SetRequestHeader("sec-fetch-dest", "document"),
-			SetRequestHeader("sec-fetch-mode", "navigate"),
-		)
+		chain.Request.Header.Set("referrer", referrer)
+		chain.Request.Header.Set("sec-fetch-site", "cross-site")
+		chain.Request.Header.Set("sec-fetch-dest", "document")
+		chain.Request.Header.Set("sec-fetch-mode", "navigate")
 		return nil
 	}
 }

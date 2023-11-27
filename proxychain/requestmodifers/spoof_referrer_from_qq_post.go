@@ -8,12 +8,9 @@ import (
 // pretending to be from a QQ post (popular social media in China)
 func SpoofReferrerFromQQPost() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddRequestModifications(
-			SpoofReferrer("https://new.qq.com/'"),
-			SetRequestHeader("sec-fetch-site", "cross-site"),
-			SetRequestHeader("sec-fetch-dest", "document"),
-			SetRequestHeader("sec-fetch-mode", "navigate"),
-		)
+		chain.Request.Header.Set("referrer", "https://new.qq.com/")
+		chain.Request.Header.Set("sec-fetch-site", "cross-site")
+		chain.Request.Header.Set("sec-fetch-dest", "document")
 		return nil
 	}
 }
