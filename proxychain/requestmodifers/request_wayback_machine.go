@@ -4,20 +4,40 @@ import (
 	"net/url"
 
 	"ladder/proxychain"
+	tx "ladder/proxychain/responsemodifers"
+	"regexp"
 )
 
 const waybackUrl string = "https://web.archive.org/web/"
 
 // RequestWaybackMachine modifies a ProxyChain's URL to request the wayback machine (archive.org) version.
 func RequestWaybackMachine() proxychain.RequestModification {
-	return func(px *proxychain.ProxyChain) error {
-		px.Request.URL.RawQuery = ""
-		newURLString := waybackUrl + px.Request.URL.String()
+	return func(chain *proxychain.ProxyChain) error {
+		chain.Request.URL.RawQuery = ""
+		rURL := preventRecursiveWaybackURLs(chain.Request.URL.String())
+		newURLString := waybackUrl + rURL
 		newURL, err := url.Parse(newURLString)
 		if err != nil {
 			return err
 		}
-		px.Request.URL = newURL
+		chain.Request.URL = newURL
+
+		// cleanup wayback headers
+		script := `["wm-ipp-print", "wm-ipp-base"].forEach(id => { try { document.getElementById(id).remove() } catch{ } })`
+		chain.AddOnceResponseModifications(
+			tx.InjectScriptAfterDOMContentLoaded(script),
+		)
+
 		return nil
 	}
+}
+
+func preventRecursiveWaybackURLs(url string) string {
+	re := regexp.MustCompile(`https:\/\/web\.archive\.org\/web\/\d+\/\*(https?:\/\/.*)`)
+
+	match := re.FindStringSubmatch(url)
+	if match != nil {
+		return match[1]
+	}
+	return url
 }

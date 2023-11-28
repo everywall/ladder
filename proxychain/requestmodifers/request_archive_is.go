@@ -5,6 +5,8 @@ import (
 	"net/url"
 
 	"ladder/proxychain"
+	tx "ladder/proxychain/responsemodifers"
+	"regexp"
 )
 
 const archivistUrl string = "https://archive.is/latest"
@@ -12,8 +14,9 @@ const archivistUrl string = "https://archive.is/latest"
 // RequestArchiveIs modifies a ProxyChain's URL to request an archived version from archive.is
 func RequestArchiveIs() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
+		rURL := preventRecursiveArchivistURLs(chain.Request.URL.String())
 		chain.Request.URL.RawQuery = ""
-		newURL, err := url.Parse(fmt.Sprintf("%s/%s", archivistUrl, chain.Request.URL.String()))
+		newURL, err := url.Parse(fmt.Sprintf("%s/%s", archivistUrl, rURL))
 		if err != nil {
 			return err
 		}
@@ -23,6 +26,22 @@ func RequestArchiveIs() proxychain.RequestModification {
 		chain.AddOnceRequestModifications(ResolveWithGoogleDoH())
 
 		chain.Request.URL = newURL
+
+		// cleanup archivst headers
+		script := `[...document.querySelector("body > center").childNodes].filter(e => e.id != "SOLID").forEach(e => e.remove())`
+		chain.AddResponseModifications(
+			tx.InjectScriptAfterDOMContentLoaded(script),
+		)
 		return nil
 	}
+}
+
+// https://archive.is/20200421201055/https://rt.live/ -> http://rt.live/
+func preventRecursiveArchivistURLs(url string) string {
+	re := regexp.MustCompile(`https?:\/\/archive\.is\/\d+\/(https?:\/\/.*)`)
+	match := re.FindStringSubmatch(url)
+	if match != nil {
+		return match[1]
+	}
+	return url
 }
