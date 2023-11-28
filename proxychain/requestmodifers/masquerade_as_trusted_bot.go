@@ -90,8 +90,7 @@ func masqueradeAsTrustedBot(botUA string, botIP string, ja3 string) proxychain.R
 
 		if ja3 != "" {
 			chain.AddOnceRequestModifications(
-				//SpoofJA3fingerprint(ja3, botUA),
-				SpoofJA3fingerprint(ja3, ""),
+				SpoofJA3fingerprint(ja3, botUA),
 			)
 		}
 

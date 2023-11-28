@@ -2,7 +2,8 @@ package responsemodifers
 
 import (
 	"fmt"
-	"net/http"
+	//"net/http"
+	http "github.com/Danny-Dasilva/fhttp"
 
 	"ladder/proxychain"
 )

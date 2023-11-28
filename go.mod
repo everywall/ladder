@@ -3,7 +3,7 @@ module ladder
 go 1.21.1
 
 require (
-	github.com/Danny-Dasilva/CycleTLS/cycletls v0.0.0-20231128002513-4df48e6bd744
+	github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.23
 	github.com/Danny-Dasilva/fhttp v0.0.0-20231127034941-9494939f30fa
 	github.com/akamensky/argparse v1.4.0
 	github.com/gofiber/fiber/v2 v2.50.0

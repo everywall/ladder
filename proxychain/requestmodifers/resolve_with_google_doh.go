@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"net/http"
-	//http "github.com/Danny-Dasilva/fhttp"
+	//"net/http"
+	http "github.com/Danny-Dasilva/fhttp"
 	"time"
 
 	"ladder/proxychain"

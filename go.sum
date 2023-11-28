@@ -10,6 +10,8 @@ git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGy
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Danny-Dasilva/CycleTLS/cycletls v0.0.0-20231128002513-4df48e6bd744 h1:k3rvW2jPAY5HWey6IuK7rMJhOqN7xOArYl8MjXaqjxA=
 github.com/Danny-Dasilva/CycleTLS/cycletls v0.0.0-20231128002513-4df48e6bd744/go.mod h1:rbto+nJHyL8g0cEO03d+BGlkFnrTQVQmnZboV9wFZKE=
+github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.23 h1:Vi9GW6VwXsJz3TMPD366eH51x6+1LSlAyIBu3mmOASA=
+github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.23/go.mod h1:8k2vgurMNmte+ce8U5VFPaqoTQfYnykQfFqVX4bNxnU=
 github.com/Danny-Dasilva/fhttp v0.0.0-20220418170016-5ea1c560e6a8/go.mod h1:t534vrahRNn9ax1tRiYSUvwJSa9jWaYYgETlfodBPm4=
 github.com/Danny-Dasilva/fhttp v0.0.0-20220524230104-f801520157d6/go.mod h1:2IT2IFG+d+zzFuj3+ksGtVytcCBsF402zMNWHsWhD2U=
 github.com/Danny-Dasilva/fhttp v0.0.0-20231127034941-9494939f30fa h1:NTiEQqte2l3BrrE0WznNwxO2urBhkw2vztdhJq1XVg0=

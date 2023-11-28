@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/http"
-	//http "github.com/Danny-Dasilva/fhttp"
+	//"net/http"
+	http "github.com/Danny-Dasilva/fhttp"
 
 	"net/url"
 	"strings"
