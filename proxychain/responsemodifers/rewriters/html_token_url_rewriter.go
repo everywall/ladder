@@ -89,14 +89,20 @@ func NewHTMLTokenURLRewriter(baseURL *url.URL, proxyURL string) *HTMLTokenURLRew
 }
 
 func (r *HTMLTokenURLRewriter) ShouldModify(token *html.Token) bool {
+	//fmt.Printf("touch token: %s\n", token.String())
 	attrLen := len(token.Attr)
 	if attrLen == 0 {
 		return false
 	}
-	if !(token.Type == html.StartTagToken || token.Type == html.SelfClosingTagToken) {
-		return false
+
+	if token.Type == html.StartTagToken {
+		return true
 	}
-	return true
+
+	if token.Type == html.SelfClosingTagToken {
+		return true
+	}
+	return false
 }
 
 func (r *HTMLTokenURLRewriter) ModifyToken(token *html.Token) (string, string) {
@@ -198,10 +204,10 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 	if err != nil {
 		return
 	}
-	if !(u.Scheme == "http" || u.Scheme == "https") {
+	if u.Scheme != "http" || u.Scheme != "https" {
 		return
 	}
-	attr.Val = fmt.Sprintf("%s://%s/%s", baseURL.Scheme, baseURL.Host, escape(strings.TrimPrefix(attr.Val, "/")))
+	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
 	log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
@@ -234,31 +240,27 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 	srcSetItems := strings.Split(attr.Val, ",")
 
 	for i, srcItem := range srcSetItems {
-		srcParts := strings.Fields(srcItem) // Fields splits around whitespace, trimming them
+		srcParts := strings.Fields(srcItem)
 
 		if len(srcParts) == 0 {
-			continue // skip empty items
+			continue
 		}
 
-		// rewrite each URL part by passing in fake attribute
-		f := &html.Attribute{Val: srcParts[0], Key: "src"}
-		handleURLPart(f, baseURL)
-		urlPart := f.Key
+		fakeAttr := &html.Attribute{Val: srcParts[0], Key: "src"}
+		handleURLPart(fakeAttr, baseURL)
 
-		// First srcset item without a descriptor
-		if i == 0 && (len(srcParts) == 1 || !strings.HasSuffix(srcParts[1], "x")) {
-			srcSetBuilder.WriteString(urlPart)
-		} else {
-			srcSetBuilder.WriteString(fmt.Sprintf("%s %s", urlPart, srcParts[1]))
+		if i > 0 {
+			srcSetBuilder.WriteString(", ")
 		}
 
-		if i < len(srcSetItems)-1 {
-			srcSetBuilder.WriteString(",") // Add comma for all but last item
+		srcSetBuilder.WriteString(fakeAttr.Val)
+		if len(srcParts) > 1 {
+			srcSetBuilder.WriteString(" ")
+			srcSetBuilder.WriteString(strings.Join(srcParts[1:], " "))
 		}
 	}
 
 	attr.Val = srcSetBuilder.String()
-	log.Printf("srcset url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 func escape(str string) string {

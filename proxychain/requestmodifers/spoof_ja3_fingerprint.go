@@ -1,5 +1,15 @@
 package requestmodifers
 
+import "ladder/proxychain"
+
+// TODO: fix
+func SpoofJA3fingerprint(ja3 string, userAgent string) proxychain.RequestModification {
+	return func(chain *proxychain.ProxyChain) error {
+		return nil
+	}
+}
+
+/*
 import (
 	"github.com/Danny-Dasilva/CycleTLS/cycletls"
 	http "github.com/Danny-Dasilva/fhttp"
@@ -44,3 +54,4 @@ func SpoofJA3fingerprintWithProxy(ja3 string, userAgent string, proxy proxy.Cont
 		return nil
 	}
 }
+*/

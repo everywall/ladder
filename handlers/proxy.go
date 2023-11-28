@@ -31,16 +31,27 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				rx.MasqueradeAsFacebookBot(),
-				rx.DeleteOutgoingCookies(),
-			// rx.RequestArchiveIs(),
+				//rx.MasqueradeAsFacebookBot(),
+				rx.MasqueradeAsGoogleBot(),
+				//rx.DeleteOutgoingCookies(),
+				rx.ForwardRequestHeaders(),
+				rx.SetOutgoingCookie("nyt-a", " "),
+				rx.SetOutgoingCookie("nyt-gdpr", "0"),
+				rx.SetOutgoingCookie("nyt-gdpr", "0"),
+				rx.SetOutgoingCookie("nyt-geo", "DE"),
+				rx.SetOutgoingCookie("nyt-privacy", "1"),
+				rx.SpoofReferrerFromGoogleSearch(),
+				//rx.RequestWaybackMachine(),
+				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
 				tx.BypassCORS(),
-				//tx.BypassContentSecurityPolicy(),
+				tx.BypassContentSecurityPolicy(),
 				//tx.DeleteIncomingCookies(),
-				//tx.RewriteHTMLResourceURLs(),
-				//tx.PatchDynamicResourceURLs(),
+				tx.ForwardResponseHeaders(),
+				tx.RewriteHTMLResourceURLs(),
+				tx.PatchDynamicResourceURLs(),
+				//tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			).
 			Execute()
 

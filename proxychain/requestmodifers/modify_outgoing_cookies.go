@@ -1,8 +1,8 @@
 package requestmodifers
 
 import (
-	//"net/http"
-	http "github.com/Danny-Dasilva/fhttp"
+	"net/http"
+	//http "github.com/Danny-Dasilva/fhttp"
 
 	"ladder/proxychain"
 )

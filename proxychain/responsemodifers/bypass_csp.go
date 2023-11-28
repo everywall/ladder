@@ -11,7 +11,7 @@ import (
 // from enforcing any CSP restrictions. This should run at the end of the chain.
 func BypassContentSecurityPolicy() proxychain.ResponseModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddResponseModifications(
+		chain.AddOnceResponseModifications(
 			DeleteResponseHeader("Content-Security-Policy"),
 			DeleteResponseHeader("Content-Security-Policy-Report-Only"),
 			DeleteResponseHeader("X-Content-Security-Policy"),
