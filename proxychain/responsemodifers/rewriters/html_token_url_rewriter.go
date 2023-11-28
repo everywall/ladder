@@ -196,6 +196,7 @@ func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 		relativePath,
 	)
 	attr.Val = escape(attr.Val)
+	attr.Val = fmt.Sprintf("/%s", attr.Val)
 	log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
