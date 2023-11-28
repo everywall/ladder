@@ -29,7 +29,7 @@ func RequestArchiveIs() proxychain.RequestModification {
 
 		// cleanup archivst headers
 		script := `[...document.querySelector("body > center").childNodes].filter(e => e.id != "SOLID").forEach(e => e.remove())`
-		chain.AddResponseModifications(
+		chain.AddOnceResponseModifications(
 			tx.InjectScriptAfterDOMContentLoaded(script),
 		)
 		return nil
