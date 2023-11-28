@@ -35,7 +35,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				rx.SpoofJA3fingerprint(ja3, botUA),
+				rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				//rx.MasqueradeAsFacebookBot(),
 				//rx.MasqueradeAsGoogleBot(),
 				//rx.DeleteOutgoingCookies(),
@@ -50,7 +50,6 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
-
 				//tx.ForwardResponseHeaders(),
 				tx.BypassCORS(),
 				tx.BypassContentSecurityPolicy(),

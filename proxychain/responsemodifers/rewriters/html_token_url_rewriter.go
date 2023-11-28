@@ -82,6 +82,8 @@ type HTMLTokenURLRewriter struct {
 
 // NewHTMLTokenURLRewriter creates a new instance of HTMLResourceURLRewriter.
 // It initializes the tokenizer with the provided source and sets the proxy URL.
+// baseURL might be https://medium.com/foobar
+// proxyURL is http://localhost:8080
 func NewHTMLTokenURLRewriter(baseURL *url.URL, proxyURL string) *HTMLTokenURLRewriter {
 	return &HTMLTokenURLRewriter{
 		baseURL:  baseURL,
@@ -160,6 +162,11 @@ func handleProtocolRelativePath(attr *html.Attribute, baseURL *url.URL) {
 
 // Root-relative URLs: These are relative to the root path and start with a "/".
 func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
+	// Skip processing if it's already in the correct format
+	if strings.HasPrefix(attr.Val, "/http://") || strings.HasPrefix(attr.Val, "/https://") {
+		return
+	}
+
 	// doublecheck this is a valid relative URL
 	log.Printf("PROCESSING: key: %s val: %s\n", attr.Key, attr.Val)
 	_, err := url.Parse(fmt.Sprintf("http://localhost.com%s", attr.Val))
@@ -212,6 +219,8 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 		return
 	}
 	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
+	//attr.Val = fmt.Sprintf("/%s", escape(attr.Val))
+
 	log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 

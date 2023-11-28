@@ -1,8 +1,13 @@
 package requestmodifers
 
+// removed due to using a different TLS spoofing technique
+
+/*
 import (
-	"github.com/Danny-Dasilva/CycleTLS/cycletls"
-	http "github.com/Danny-Dasilva/fhttp"
+	//"github.com/Danny-Dasilva/CycleTLS/cycletls"
+	//http "github.com/Danny-Dasilva/fhttp"
+	//http "github.com/bogdanfinn/fhttp"
+
 	"golang.org/x/net/proxy"
 	"ladder/proxychain"
 )
@@ -14,14 +19,14 @@ import (
 func SpoofJA3fingerprint(ja3 string, userAgent string) proxychain.RequestModification {
 	//fmt.Println(ja3)
 	return func(chain *proxychain.ProxyChain) error {
-		// deep copy existing client while modifying http transport
-		ja3SpoofClient := &http.Client{
-			Transport:     cycletls.NewTransport(ja3, userAgent),
-			Timeout:       chain.Client.Timeout,
-			CheckRedirect: chain.Client.CheckRedirect,
-		}
+			// deep copy existing client while modifying http transport
+			ja3SpoofClient := &http.Client{
+				Transport:     cycletls.NewTransport(ja3, userAgent),
+				Timeout:       chain.Client.Timeout,
+				CheckRedirect: chain.Client.CheckRedirect,
+			}
 
-		chain.SetOnceHTTPClient(ja3SpoofClient)
+			chain.SetOnceHTTPClient(ja3SpoofClient)
 		return nil
 	}
 }
@@ -33,14 +38,15 @@ func SpoofJA3fingerprint(ja3 string, userAgent string) proxychain.RequestModific
 func SpoofJA3fingerprintWithProxy(ja3 string, userAgent string, proxy proxy.ContextDialer) proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
 
-		// deep copy existing client while modifying http transport
-		ja3SpoofClient := &http.Client{
-			Transport:     cycletls.NewTransportWithProxy(ja3, userAgent, proxy),
-			Timeout:       chain.Client.Timeout,
-			CheckRedirect: chain.Client.CheckRedirect,
-		}
+			// deep copy existing client while modifying http transport
+			ja3SpoofClient := &http.Client{
+				Transport:     cycletls.NewTransportWithProxy(ja3, userAgent, proxy),
+				Timeout:       chain.Client.Timeout,
+				CheckRedirect: chain.Client.CheckRedirect,
+			}
 
-		chain.SetOnceHTTPClient(ja3SpoofClient)
+			chain.SetOnceHTTPClient(ja3SpoofClient)
 		return nil
 	}
 }
+*/

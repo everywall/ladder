@@ -3,8 +3,6 @@ module ladder
 go 1.21.1
 
 require (
-	github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.23
-	github.com/Danny-Dasilva/fhttp v0.0.0-20231127034941-9494939f30fa
 	github.com/akamensky/argparse v1.4.0
 	github.com/gofiber/fiber/v2 v2.50.0
 	github.com/stretchr/testify v1.8.4
@@ -12,13 +10,14 @@ require (
 )
 
 require (
-	github.com/Danny-Dasilva/utls v0.0.0-20220604023528-30cb107b834e // indirect
+	github.com/bogdanfinn/fhttp v0.5.24 // indirect
+	github.com/bogdanfinn/tls-client v1.6.1 // indirect
+	github.com/bogdanfinn/utls v1.5.16 // indirect
 	github.com/cloudflare/circl v1.3.6 // indirect
-	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/gaukas/godicttls v0.0.4 // indirect
-	github.com/gorilla/websocket v1.5.1 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/quic-go/quic-go v0.40.0 // indirect
-	github.com/refraction-networking/utls v1.5.4 // indirect
+	github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5 // indirect
 	golang.org/x/crypto v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )

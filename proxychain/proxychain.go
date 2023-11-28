@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"io"
 	"log"
+	//"time"
+
 	//"net/http"
-	http "github.com/Danny-Dasilva/fhttp"
+	//"github.com/Danny-Dasilva/CycleTLS/cycletls"
+	//http "github.com/Danny-Dasilva/fhttp"
+	http "github.com/bogdanfinn/fhttp"
+	tls_client "github.com/bogdanfinn/tls-client"
+	//"github.com/bogdanfinn/tls-client/profiles"
 
 	"net/url"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
 	"ladder/pkg/ruleset"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 /*
@@ -84,8 +91,8 @@ proxychain.NewProxyChain().
 */
 type ProxyChain struct {
 	Context                   *fiber.Ctx
-	Client                    *http.Client
-	onceClient                *http.Client
+	Client                    HTTPClient
+	onceClient                HTTPClient
 	Request                   *http.Request
 	Response                  *http.Response
 	requestModifications      []RequestModification
@@ -107,6 +114,23 @@ type RequestModification func(*ProxyChain) error
 // A ResponseModification is a function that should operate on the
 // ProxyChain Res (http result) & Body (buffered http response body) field
 type ResponseModification func(*ProxyChain) error
+
+// abstraction over HTTPClient
+type HTTPClient interface {
+	GetCookies(u *url.URL) []*http.Cookie
+	SetCookies(u *url.URL, cookies []*http.Cookie)
+	SetCookieJar(jar http.CookieJar)
+	GetCookieJar() http.CookieJar
+	SetProxy(proxyUrl string) error
+	GetProxy() string
+	SetFollowRedirect(followRedirect bool)
+	GetFollowRedirect() bool
+	CloseIdleConnections()
+	Do(req *http.Request) (*http.Response, error)
+	Get(url string) (resp *http.Response, err error)
+	Head(url string) (resp *http.Response, err error)
+	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+}
 
 // SetRequestModifications sets the ProxyChain's request modifers
 // the modifier will not fire until ProxyChain.Execute() is run.
@@ -308,14 +332,14 @@ func (chain *ProxyChain) validateCtxIsSet() error {
 
 // SetHTTPClient sets a new upstream http client transport
 // useful for modifying TLS
-func (chain *ProxyChain) SetHTTPClient(httpClient *http.Client) *ProxyChain {
+func (chain *ProxyChain) SetHTTPClient(httpClient HTTPClient) *ProxyChain {
 	chain.Client = httpClient
 	return chain
 }
 
 // SetOnceHTTPClient sets a new upstream http client transport temporarily
 // and clears it once it is used.
-func (chain *ProxyChain) SetOnceHTTPClient(httpClient *http.Client) *ProxyChain {
+func (chain *ProxyChain) SetOnceHTTPClient(httpClient HTTPClient) *ProxyChain {
 	chain.onceClient = httpClient
 	return chain
 }
@@ -354,8 +378,20 @@ func (chain *ProxyChain) _reset() {
 // NewProxyChain initializes a new ProxyChain
 func NewProxyChain() *ProxyChain {
 	chain := new(ProxyChain)
-	//chain.Client = http.DefaultClient
-	chain.Client = &http.Client{}
+
+	options := []tls_client.HttpClientOption{
+		tls_client.WithTimeoutSeconds(20),
+		tls_client.WithRandomTLSExtensionOrder(),
+		//tls_client.WithClientProfile(profiles.Chrome_117),
+		//tls_client.WithNotFollowRedirects(),
+		//tls_client.WithCookieJar(jar), // create cookieJar instance and pass it as argument
+	}
+	client, err := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
+	if err != nil {
+		panic(err)
+	}
+	chain.Client = client
+
 	return chain
 }
 
