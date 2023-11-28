@@ -24,6 +24,7 @@ func init() {
 func ForwardResponseHeaders() proxychain.ResponseModification {
 	return func(chain *proxychain.ProxyChain) error {
 
+		//fmt.Println(chain.Response.Header)
 		for uname, headers := range chain.Response.Header {
 			name := strings.ToLower(uname)
 			if forwardBlacklist[name] {
@@ -42,6 +43,7 @@ func ForwardResponseHeaders() proxychain.ResponseModification {
 
 			// forward headers
 			for _, value := range headers {
+				fmt.Println(name, value)
 				chain.Context.Set(name, value)
 			}
 		}

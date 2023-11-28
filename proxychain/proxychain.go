@@ -354,7 +354,8 @@ func (chain *ProxyChain) _reset() {
 // NewProxyChain initializes a new ProxyChain
 func NewProxyChain() *ProxyChain {
 	chain := new(ProxyChain)
-	chain.Client = http.DefaultClient
+	//chain.Client = http.DefaultClient
+	chain.Client = &http.Client{}
 	return chain
 }
 

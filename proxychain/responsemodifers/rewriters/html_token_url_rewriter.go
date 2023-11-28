@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"path"
 	"regexp"
 	"strings"
 
@@ -113,7 +114,7 @@ func (r *HTMLTokenURLRewriter) ModifyToken(token *html.Token) (string, string) {
 		case !rewriteAttrs[token.Data][attr.Key]:
 			continue
 		// don't touch attributes with special URIs (like data:)
-		case schemeBlacklist[strings.Split(attr.Key, ":")[0]]:
+		case schemeBlacklist[strings.Split(attr.Val, ":")[0]]:
 			continue
 		// don't double-overwrite the url
 		case strings.HasPrefix(attr.Val, r.proxyURL):
@@ -184,15 +185,17 @@ func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
 // Document-relative URLs: These are relative to the current document's path and don't start with a "/".
 func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	log.Printf("PROCESSING: key: %s val: %s\n", attr.Key, attr.Val)
+	if strings.HasPrefix(attr.Val, "#") {
+		return
+	}
+	relativePath := path.Join(strings.Trim(baseURL.RawPath, "/"), strings.Trim(attr.Val, "/"))
 	attr.Val = fmt.Sprintf(
-		"%s://%s/%s%s",
+		"%s://%s/%s",
 		baseURL.Scheme,
 		strings.Trim(baseURL.Host, "/"),
-		strings.Trim(baseURL.RawPath, "/"),
-		strings.Trim(attr.Val, "/"),
+		relativePath,
 	)
 	attr.Val = escape(attr.Val)
-	attr.Val = fmt.Sprintf("%s://%s/%s", baseURL.Scheme, baseURL.Host, attr.Val)
 	log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
@@ -204,7 +207,7 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 	if err != nil {
 		return
 	}
-	if u.Scheme != "http" || u.Scheme != "https" {
+	if !(u.Scheme == "http" || u.Scheme == "https") {
 		return
 	}
 	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
@@ -232,7 +235,7 @@ func handleMetaRefresh(attr *html.Attribute, baseURL *url.URL) {
 	url := strings.Split(attr.Val, ";url=")[1]
 	f := &html.Attribute{Val: url, Key: "src"}
 	handleURLPart(f, baseURL)
-	attr.Val = fmt.Sprintf("%s;url=%s", sec, url)
+	attr.Val = fmt.Sprintf("%s;url=%s", sec, f.Val)
 }
 
 func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
@@ -246,14 +249,14 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 			continue
 		}
 
-		fakeAttr := &html.Attribute{Val: srcParts[0], Key: "src"}
-		handleURLPart(fakeAttr, baseURL)
+		f := &html.Attribute{Val: srcParts[0], Key: "src"}
+		handleURLPart(f, baseURL)
 
 		if i > 0 {
 			srcSetBuilder.WriteString(", ")
 		}
 
-		srcSetBuilder.WriteString(fakeAttr.Val)
+		srcSetBuilder.WriteString(f.Val)
 		if len(srcParts) > 1 {
 			srcSetBuilder.WriteString(" ")
 			srcSetBuilder.WriteString(strings.Join(srcParts[1:], " "))
@@ -264,5 +267,6 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 }
 
 func escape(str string) string {
+	//return str
 	return strings.ReplaceAll(url.PathEscape(str), "%2F", "/")
 }

@@ -32,7 +32,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
 				//rx.MasqueradeAsFacebookBot(),
-				rx.MasqueradeAsGoogleBot(),
+				//rx.MasqueradeAsGoogleBot(),
 				//rx.DeleteOutgoingCookies(),
 				rx.ForwardRequestHeaders(),
 				rx.SetOutgoingCookie("nyt-a", " "),
@@ -45,10 +45,10 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
-				tx.BypassCORS(),
-				tx.BypassContentSecurityPolicy(),
-				//tx.DeleteIncomingCookies(),
 				tx.ForwardResponseHeaders(),
+				//tx.BypassCORS(),
+				//tx.BypassContentSecurityPolicy(),
+				//tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
 				tx.PatchDynamicResourceURLs(),
 				//tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
