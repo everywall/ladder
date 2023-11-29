@@ -4,8 +4,8 @@ import (
 	"net/url"
 )
 
-type ProxyChainPool map[url.URL]ProxyChain
+type Pool map[url.URL]ProxyChain
 
-func NewProxyChainPool() ProxyChainPool {
+func NewPool() Pool {
 	return map[url.URL]ProxyChain{}
 }
