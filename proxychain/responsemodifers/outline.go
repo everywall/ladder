@@ -3,10 +3,12 @@ package responsemodifers
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+
 	//"github.com/go-shiori/dom"
 	"github.com/markusmobius/go-trafilatura"
 	//"golang.org/x/net/html"
-	"io"
+
 	"ladder/proxychain"
 	"ladder/proxychain/responsemodifers/api"
 )
@@ -46,5 +48,4 @@ func APIOutline() proxychain.ResponseModification {
 		chain.Response.Body = io.NopCloser(buf)
 		return nil
 	}
-
 }

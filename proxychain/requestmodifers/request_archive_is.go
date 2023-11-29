@@ -3,10 +3,10 @@ package requestmodifers
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 
 	"ladder/proxychain"
 	tx "ladder/proxychain/responsemodifers"
-	"regexp"
 )
 
 const archivistUrl string = "https://archive.is/latest"

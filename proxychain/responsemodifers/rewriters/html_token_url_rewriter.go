@@ -111,6 +111,7 @@ func (r *HTMLTokenURLRewriter) ShouldModify(token *html.Token) bool {
 func (r *HTMLTokenURLRewriter) ModifyToken(token *html.Token) (string, string) {
 	for i := range token.Attr {
 		attr := &token.Attr[i]
+
 		switch {
 		// don't touch tag/attributes that don't contain URIs
 		case !rewriteAttrs[token.Data][attr.Key]:
@@ -192,9 +193,11 @@ func handleRootRelativePath(attr *html.Attribute, baseURL *url.URL) {
 // Document-relative URLs: These are relative to the current document's path and don't start with a "/".
 func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	log.Printf("PROCESSING: key: %s val: %s\n", attr.Key, attr.Val)
+
 	if strings.HasPrefix(attr.Val, "#") {
 		return
 	}
+
 	relativePath := path.Join(strings.Trim(baseURL.RawPath, "/"), strings.Trim(attr.Val, "/"))
 	attr.Val = fmt.Sprintf(
 		"%s://%s/%s",
@@ -204,13 +207,15 @@ func handleDocumentRelativePath(attr *html.Attribute, baseURL *url.URL) {
 	)
 	attr.Val = escape(attr.Val)
 	attr.Val = fmt.Sprintf("/%s", attr.Val)
+
 	log.Printf("doc rel url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
 
 // full URIs beginning with https?://proxiedsite.com
-func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
+func handleAbsolutePath(attr *html.Attribute, _ *url.URL) {
 	// check if valid URL
 	log.Printf("PROCESSING: key: %s val: %s\n", attr.Key, attr.Val)
+
 	u, err := url.Parse(attr.Val)
 	if err != nil {
 		return
@@ -218,6 +223,7 @@ func handleAbsolutePath(attr *html.Attribute, baseURL *url.URL) {
 	if !(u.Scheme == "http" || u.Scheme == "https") {
 		return
 	}
+
 	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
 	//attr.Val = fmt.Sprintf("/%s", escape(attr.Val))
 

@@ -2,6 +2,7 @@ package requestmodifers
 
 import (
 	"fmt"
+
 	"ladder/proxychain"
 	tx "ladder/proxychain/responsemodifers"
 )
@@ -12,7 +13,6 @@ import (
 // if url is "", then the referrer header is removed.
 func SpoofReferrer(url string) proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-
 		// change refer on client side js
 		script := fmt.Sprintf(`document.referrer = "%s"`, url)
 		chain.AddOnceResponseModifications(

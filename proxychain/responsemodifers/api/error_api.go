@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-type APIError struct {
+type Error struct {
 	Success bool         `json:"success"`
 	Error   ErrorDetails `json:"error"`
 }
@@ -25,7 +25,7 @@ func CreateAPIErrReader(err error) io.ReadCloser {
 	}
 
 	baseErr := getBaseError(err)
-	apiErr := APIError{
+	apiErr := Error{
 		Success: false,
 		Error: ErrorDetails{
 			Message: err.Error(),
@@ -50,6 +50,7 @@ func getBaseError(err error) error {
 		if unwrapped == nil {
 			return err
 		}
+
 		err = unwrapped
 	}
 }
