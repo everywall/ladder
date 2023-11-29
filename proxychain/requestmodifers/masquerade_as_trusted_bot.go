@@ -89,11 +89,13 @@ func masqueradeAsTrustedBot(botUA string, botIP string, ja3 string) proxychain.R
 			DeleteRequestHeader("origin"),
 		)
 
-		if ja3 != "" {
-			chain.AddOnceRequestModifications(
-				SpoofJA3fingerprint(ja3, botUA),
-			)
-		}
+		/*
+			if ja3 != "" {
+				chain.AddOnceRequestModifications(
+					SpoofJA3fingerprint(ja3, botUA),
+				)
+			}
+		*/
 
 		return nil
 	}

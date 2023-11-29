@@ -8,7 +8,7 @@ import (
 // from enforcing any CORS restrictions. This should run at the end of the chain.
 func BypassCORS() proxychain.ResponseModification {
 	return func(chain *proxychain.ProxyChain) error {
-		chain.AddResponseModifications(
+		chain.AddOnceResponseModifications(
 			SetResponseHeader("Access-Control-Allow-Origin", "*"),
 			SetResponseHeader("Access-Control-Expose-Headers", "*"),
 			SetResponseHeader("Access-Control-Allow-Credentials", "true"),
