@@ -22,6 +22,9 @@ var faviconData string
 //go:embed styles.css
 var cssData embed.FS
 
+//go:embed VERSION
+var version string
+
 func main() {
 	parser := argparse.NewParser("ladder", "Every Wall needs a Ladder")
 
@@ -100,9 +103,10 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			Prefork:        *prefork,
-			GETOnly:        false,
-			ReadBufferSize: 4096 * 4, // increase max header size
+			Prefork:               *prefork,
+			GETOnly:               false,
+			ReadBufferSize:        4096 * 4, // increase max header size
+			DisableStartupMessage: true,
 		},
 	)
 
@@ -158,5 +162,6 @@ func main() {
 	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
 	app.Post("/*", handlers.NewProxySiteHandler(proxyOpts))
 
+	fmt.Println(cli.StartupMessage("1.0.1", *port, *ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }

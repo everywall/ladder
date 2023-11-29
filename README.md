@@ -189,7 +189,8 @@ There is a basic ruleset available in a separate repository [ruleset.yaml](https
 To run a development server at http://localhost:8080:
 
 ```bash
-echo "dev" > handlers/VERSION
+echo "dev  " > handlers/VERSION
+echo "dev  " > cmd/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
 ```
 
