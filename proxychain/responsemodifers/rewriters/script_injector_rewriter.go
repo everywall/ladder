@@ -34,7 +34,7 @@ func (r *ScriptInjectorRewriter) ShouldModify(token *html.Token) bool {
 //go:embed after_dom_idle_script_injector.js
 var afterDomIdleScriptInjector string
 
-func (r *ScriptInjectorRewriter) ModifyToken(token *html.Token) (string, string) {
+func (r *ScriptInjectorRewriter) ModifyToken(_ *html.Token) (string, string) {
 	switch {
 	case r.execTime == BeforeDOMContentLoaded:
 		return "", fmt.Sprintf("\n<script>\n%s\n</script>\n", r.script)
@@ -58,6 +58,7 @@ func (r *ScriptInjectorRewriter) applyParams(params map[string]string) {
 	for key := range params {
 		keys = append(keys, key)
 	}
+
 	sort.Slice(keys, func(i, j int) bool {
 		return len(keys[i]) > len(keys[j])
 	})

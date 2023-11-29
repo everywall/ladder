@@ -2,6 +2,7 @@ package responsemodifers
 
 import (
 	"fmt"
+
 	http "github.com/bogdanfinn/fhttp"
 	//"net/http"
 	//http "github.com/Danny-Dasilva/fhttp"
@@ -11,7 +12,7 @@ import (
 
 // DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server
 // back down to the client.
-func DeleteIncomingCookies(whitelist ...string) proxychain.ResponseModification {
+func DeleteIncomingCookies(_ ...string) proxychain.ResponseModification {
 	return func(px *proxychain.ProxyChain) error {
 		px.Response.Header.Del("Set-Cookie")
 		return nil
@@ -37,6 +38,7 @@ func DeleteIncomingCookiesExcept(whitelist ...string) proxychain.ResponseModific
 		filteredCookies := []string{}
 		for _, cookieStr := range px.Response.Header["Set-Cookie"] {
 			cookie := parseCookie(cookieStr)
+
 			if _, found := whitelistMap[cookie.Name]; found {
 				filteredCookies = append(filteredCookies, cookieStr)
 			}

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
+	"strings"
+
 	//"time"
 
 	//"net/http"
@@ -12,10 +15,8 @@ import (
 	//http "github.com/Danny-Dasilva/fhttp"
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
-	//"github.com/bogdanfinn/tls-client/profiles"
 
-	"net/url"
-	"strings"
+	//"github.com/bogdanfinn/tls-client/profiles"
 
 	"ladder/pkg/ruleset"
 
@@ -122,7 +123,7 @@ type HTTPClient interface {
 	SetCookies(u *url.URL, cookies []*http.Cookie)
 	SetCookieJar(jar http.CookieJar)
 	GetCookieJar() http.CookieJar
-	SetProxy(proxyUrl string) error
+	SetProxy(proxyURL string) error
 	GetProxy() string
 	SetFollowRedirect(followRedirect bool)
 	GetFollowRedirect() bool
@@ -184,7 +185,7 @@ func (chain *ProxyChain) AddRuleset(rs *ruleset.RuleSet) *ProxyChain {
 	return chain
 }
 
-func (chain *ProxyChain) _initialize_request() (*http.Request, error) {
+func (chain *ProxyChain) _initializeRequest() (*http.Request, error) {
 	if chain.Context == nil {
 		chain.abortErr = chain.abort(errors.New("no context set"))
 		return nil, chain.abortErr
@@ -264,9 +265,11 @@ func preventRecursiveProxyRequest(urlQuery *url.URL, baseProxyURL string) *url.U
 // is a relative path, it reconstructs the full URL using the referer header.
 func (chain *ProxyChain) extractURL() (*url.URL, error) {
 	reqURL := chain.Context.Params("*")
+
 	fmt.Println("XXXXXXXXXXXXXXXX")
 	fmt.Println(reqURL)
 	fmt.Println(chain._apiPrefix)
+
 	reqURL = strings.TrimPrefix(reqURL, chain._apiPrefix)
 
 	// sometimes client requests doubleroot '//'
@@ -318,7 +321,7 @@ func (chain *ProxyChain) SetFiberCtx(ctx *fiber.Ctx) *ProxyChain {
 	chain.Context = ctx
 
 	// initialize the request and prepare it for modification
-	req, err := chain._initialize_request()
+	req, err := chain._initializeRequest()
 	if err != nil {
 		chain.abortErr = chain.abort(err)
 	}
