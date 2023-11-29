@@ -487,9 +487,11 @@ func (chain *ProxyChain) Execute() error {
 	}
 
 	// in case api user did not set or forward content-type, we do it for them
-	if chain.Context.Get("content-type") == "" {
-		chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
-	}
+	/*
+		if chain.Context.Get("content-type") == "" {
+			chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+		}
+	*/
 
 	// Return request back to client
 	return chain.Context.SendStream(body)
