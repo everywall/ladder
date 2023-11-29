@@ -147,12 +147,13 @@ func main() {
 
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
-	app.Get("api/*", handlers.Api)
 
 	proxyOpts := &handlers.ProxyOptions{
 		Verbose:     *verbose,
 		RulesetPath: *ruleset,
 	}
+
+	app.Get("api/outline/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
 
 	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
 	app.Post("/*", handlers.NewProxySiteHandler(proxyOpts))

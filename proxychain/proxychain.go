@@ -102,6 +102,7 @@ type ProxyChain struct {
 	Ruleset                   *ruleset.RuleSet
 	debugMode                 bool
 	abortErr                  error
+	_apiPrefix                string
 }
 
 // a ProxyStrategy is a pre-built proxychain with purpose-built defaults
@@ -164,6 +165,15 @@ func (chain *ProxyChain) AddOnceResponseModifications(mods ...ResponseModificati
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) *ProxyChain {
 	chain.responseModifications = mods
+	return chain
+}
+
+// WithAPIPath trims the path during URL extraction.
+// example: using path = "api/outline/", a path like "http://localhost:8080/api/outline/https://example.com" becomes "https://example.com"
+func (chain *ProxyChain) WithAPIPath(path string) *ProxyChain {
+	fmt.Println("===================")
+	fmt.Printf("set path %s\n", path)
+	chain._apiPrefix = path
 	return chain
 }
 
@@ -254,6 +264,10 @@ func preventRecursiveProxyRequest(urlQuery *url.URL, baseProxyURL string) *url.U
 // is a relative path, it reconstructs the full URL using the referer header.
 func (chain *ProxyChain) extractURL() (*url.URL, error) {
 	reqURL := chain.Context.Params("*")
+	fmt.Println("XXXXXXXXXXXXXXXX")
+	fmt.Println(reqURL)
+	fmt.Println(chain._apiPrefix)
+	reqURL = strings.TrimPrefix(reqURL, chain._apiPrefix)
 
 	// sometimes client requests doubleroot '//'
 	// there is a bug somewhere else, but this is a workaround until we find it
@@ -347,6 +361,9 @@ func (chain *ProxyChain) SetOnceHTTPClient(httpClient HTTPClient) *ProxyChain {
 // SetVerbose changes the logging behavior to print
 // the modification steps and applied rulesets for debugging
 func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
+	if isDebugMode {
+		log.Println("DEBUG MODE ENABLED")
+	}
 	chain.debugMode = isDebugMode
 	return chain
 }

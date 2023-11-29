@@ -8,12 +8,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type ProxyOptions struct {
-	RulesetPath string
-	Verbose     bool
-}
-
-func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
+func NewAPIOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
+	// TODO: implement ruleset logic
 	/*
 		var rs ruleset.RuleSet
 		if opts.RulesetPath != "" {
@@ -28,27 +24,19 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		proxychain := proxychain.
 			NewProxyChain().
-			SetFiberCtx(c).
+			WithAPIPath(path).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				//rx.SpoofJA3fingerprint(ja3, "Googlebot"),
-				//rx.MasqueradeAsFacebookBot(),
 				rx.MasqueradeAsGoogleBot(),
-				rx.DeleteOutgoingCookies(),
 				rx.ForwardRequestHeaders(),
 				rx.SpoofReferrerFromGoogleSearch(),
-				//rx.RequestWaybackMachine(),
-				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
-				tx.ForwardResponseHeaders(),
-				tx.BypassCORS(),
-				tx.BypassContentSecurityPolicy(),
-				//tx.DeleteIncomingCookies(),
+				tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
-				tx.PatchDynamicResourceURLs(),
-			//tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
+				tx.APIOutline(),
 			).
+			SetFiberCtx(c).
 			Execute()
 
 		return proxychain
