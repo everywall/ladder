@@ -66,6 +66,7 @@ func (r *HTMLRewriter) Close() error {
 	r.tokenBuffer.Reset()
 	r.currentToken = nil
 	r.currentTokenProcessed = false
+
 	return nil
 }
 
@@ -79,6 +80,7 @@ func (r *HTMLRewriter) Read(p []byte) (int, error) {
 			if r.tokenizer.Err() == io.EOF {
 				return 0, io.EOF
 			}
+
 			return 0, r.tokenizer.Err()
 		}
 
@@ -96,6 +98,7 @@ func (r *HTMLRewriter) Read(p []byte) (int, error) {
 			if !rewriter.ShouldModify(r.currentToken) {
 				continue
 			}
+
 			prepend, a := rewriter.ModifyToken(r.currentToken)
 			appends = append(appends, a)
 			// add <prepends> to buffer
@@ -125,5 +128,6 @@ func (r *HTMLRewriter) Read(p []byte) (int, error) {
 		r.currentTokenProcessed = true
 		err = nil // EOF in this context is expected and not an actual error
 	}
+
 	return n, err
 }

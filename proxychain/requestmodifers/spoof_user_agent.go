@@ -2,9 +2,10 @@ package requestmodifers
 
 import (
 	_ "embed"
+	"strings"
+
 	"ladder/proxychain"
 	tx "ladder/proxychain/responsemodifers"
-	"strings"
 )
 
 // https://github.com/faisalman/ua-parser-js/tree/master

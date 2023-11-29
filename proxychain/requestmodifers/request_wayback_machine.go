@@ -2,10 +2,10 @@ package requestmodifers
 
 import (
 	"net/url"
+	"regexp"
 
 	"ladder/proxychain"
 	tx "ladder/proxychain/responsemodifers"
-	"regexp"
 )
 
 const waybackUrl string = "https://web.archive.org/web/"

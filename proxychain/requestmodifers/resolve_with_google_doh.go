@@ -4,14 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	http "github.com/bogdanfinn/fhttp"
 	"net"
+	"time"
+
+	http "github.com/bogdanfinn/fhttp"
+
 	/*
 		tls_client "github.com/bogdanfinn/tls-client"
 		//"net/http"
 	*/
-
-	"time"
 
 	"ladder/proxychain"
 )
@@ -71,7 +72,6 @@ func (cd *CustomDialer) DialContext(ctx context.Context, network, addr string) (
 // ResolveWithGoogleDoH modifies a ProxyChain's client to make the request by resolving the URL
 // using Google's DNS over HTTPs service
 func ResolveWithGoogleDoH() proxychain.RequestModification {
-
 	///customDialer := NewCustomDialer(10*time.Second, 10*time.Second)
 	return func(chain *proxychain.ProxyChain) error {
 		/*

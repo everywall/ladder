@@ -1,9 +1,9 @@
 package requestmodifers
 
 import (
+	"strings"
 	//"fmt"
 	"ladder/proxychain"
-	"strings"
 )
 
 var forwardBlacklist map[string]bool
@@ -27,7 +27,6 @@ func init() {
 // ForwardRequestHeaders forwards the requests headers sent from the client to the upstream server
 func ForwardRequestHeaders() proxychain.RequestModification {
 	return func(chain *proxychain.ProxyChain) error {
-
 		forwardHeaders := func(key, value []byte) {
 			k := strings.ToLower(string(key))
 			v := string(value)
