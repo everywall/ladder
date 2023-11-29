@@ -6,13 +6,15 @@ import (
 	"io"
 	"net/url"
 	"testing"
+
+	"ladder/proxychain/responsemodifers/api"
 )
 
 func TestCreateAPIErrReader(t *testing.T) {
 	_, baseErr := url.Parse("://this is an invalid url")
 	wrappedErr := fmt.Errorf("wrapped error: %w", baseErr)
 
-	readCloser := CreateAPIErrReader(wrappedErr)
+	readCloser := api.CreateAPIErrReader(wrappedErr)
 	defer readCloser.Close()
 
 	// Read and unmarshal the JSON output
@@ -22,7 +24,7 @@ func TestCreateAPIErrReader(t *testing.T) {
 	}
 	fmt.Println(string(data))
 
-	var apiErr APIError
+	var apiErr api.Error
 	err = json.Unmarshal(data, &apiErr)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
@@ -41,7 +43,7 @@ func TestCreateAPIErrReader(t *testing.T) {
 func TestCreateAPIErrReader2(t *testing.T) {
 	_, baseErr := url.Parse("://this is an invalid url")
 
-	readCloser := CreateAPIErrReader(baseErr)
+	readCloser := api.CreateAPIErrReader(baseErr)
 	defer readCloser.Close()
 
 	// Read and unmarshal the JSON output
@@ -51,7 +53,7 @@ func TestCreateAPIErrReader2(t *testing.T) {
 	}
 	fmt.Println(string(data))
 
-	var apiErr APIError
+	var apiErr api.Error
 	err = json.Unmarshal(data, &apiErr)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal JSON: %v", err)
