@@ -9,6 +9,7 @@ import (
 
 	"ladder/handlers"
 	"ladder/internal/cli"
+	"ladder/internal/helpers"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +23,6 @@ var faviconData string
 //go:embed styles.css
 var cssData embed.FS
 
-//go:embed VERSION
 var version string
 
 func main() {
@@ -47,6 +47,11 @@ func main() {
 	verbose := parser.Flag("v", "verbose", &argparse.Options{
 		Required: false,
 		Help:     "Adds verbose logging",
+	})
+
+	randomGooglebot := parser.Flag("", "random-googlebot", &argparse.Options{
+		Required: false,
+		Help:     "Uses a random trusted Googlebot IP for each masqueraded request",
 	})
 
 	// TODO: add version flag that reads from handers/VERSION
@@ -74,6 +79,15 @@ func main() {
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
+	}
+
+	if *randomGooglebot {
+		err := helpers.UpdateGooglebotIPs()
+
+		if err != nil {
+			fmt.Println("error while retrieving list of Googlebot IPs: " + err.Error())
+			fmt.Println("defaulting to known trusted Googlebot identity")
+		}
 	}
 
 	// utility cli flag to compile ruleset directory into single ruleset.yaml
