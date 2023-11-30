@@ -183,12 +183,12 @@ func main() {
 		RulesetPath: *ruleset,
 	}
 
-	app.Get("api/outline/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
-	app.Get("outline/*", handlers.Outline("outline/*", proxyOpts))
+	app.Get("api/content/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
 
-	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
-	app.Post("/*", handlers.NewProxySiteHandler(proxyOpts))
+	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
 
-	fmt.Println(cli.StartupMessage("1.0.1", *port, *ruleset))
+	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
+
+	fmt.Println(cli.StartupMessage("1.0.0", *port, *ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }

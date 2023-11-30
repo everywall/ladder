@@ -4,27 +4,14 @@ import (
 	"ladder/proxychain"
 	rx "ladder/proxychain/requestmodifers"
 	tx "ladder/proxychain/responsemodifers"
-	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func Outline(path string, opts *ProxyOptions) fiber.Handler {
-
-	// TODO: implement ruleset logic
-	/*
-		var rs ruleset.RuleSet
-		if opts.RulesetPath != "" {
-			r, err := ruleset.NewRuleset(opts.RulesetPath)
-			if err != nil {
-				panic(err)
-			}
-			rs = r
-		}
-	*/
-
+func NewOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		result, err := proxychain.
+
+		return proxychain.
 			NewProxyChain().
 			WithAPIPath(path).
 			SetDebugLogging(opts.Verbose).
@@ -36,20 +23,10 @@ func Outline(path string, opts *ProxyOptions) fiber.Handler {
 			AddResponseModifications(
 				tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
-				tx.APIOutline(),
+				tx.GenerateReadableOutline(), // <-- this response modification does the outline rendering
 			).
 			SetFiberCtx(c).
-			ExecuteForOutline()
+			Execute()
 
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return c.Render("outline", fiber.Map{
-			"Success": true,
-			"Params":  c.Params("*"),
-			"Title":   "Outline",
-			"Body":    result,
-		})
 	}
 }

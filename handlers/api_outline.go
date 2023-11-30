@@ -34,7 +34,7 @@ func NewAPIOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
 			AddResponseModifications(
 				tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
-				tx.APIOutline(),
+				tx.APIContent(),
 			).
 			SetFiberCtx(c).
 			Execute()
