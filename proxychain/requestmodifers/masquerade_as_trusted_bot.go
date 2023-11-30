@@ -8,14 +8,9 @@ import (
 // MasqueradeAsGoogleBot modifies user agent and x-forwarded for
 // to appear to be a Google Bot
 func MasqueradeAsGoogleBot() proxychain.RequestModification {
-	const botUA string = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; http://www.google.com/bot.html) Chrome/79.0.3945.120 Safari/537.36"
-	var botIP string = helpers.RandomGooglebotIP()
+	ip := helpers.GlobalGoogleBot.GetRandomIP()
 
-	// https://github.com/trisulnsm/trisul-scripts/blob/master/lua/frontend_scripts/reassembly/ja3/prints/ja3fingerprint.json
-	const ja3 string = "769,49195-49199-49196-49200-52393-52392-52244-52243-49161-49171-49162-49172-156-157-47-53-10,65281-0-23-35-13-5-18-16-11-10-21,29-23-24,0"
-	//	"741,49195-49199-49200-49161-49171-49162-49172-156-157-47-10-53-51-57,65281-0-23-35-13-13172-11-10,29-23-24,0"
-
-	return masqueradeAsTrustedBot(botUA, botIP, ja3)
+	return masqueradeAsTrustedBot(helpers.GlobalGoogleBot.UserAgent, ip, helpers.GlobalGoogleBot.Fingerprint)
 }
 
 // MasqueradeAsBingBot modifies user agent and x-forwarded for

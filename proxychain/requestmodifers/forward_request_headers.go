@@ -33,7 +33,7 @@ func ForwardRequestHeaders() proxychain.RequestModification {
 			if forwardBlacklist[k] {
 				return
 			}
-			//fmt.Println(k, v)
+			// fmt.Println(k, v)
 			chain.Request.Header.Set(k, v)
 		}
 

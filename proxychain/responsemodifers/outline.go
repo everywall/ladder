@@ -25,7 +25,7 @@ func APIOutline() proxychain.ResponseModification {
 		opts := trafilatura.Options{
 			IncludeImages: true,
 			IncludeLinks:  true,
-			//FavorPrecision:     true,
+			// FavorPrecision:     true,
 			FallbackCandidates: nil, // TODO: https://github.com/markusmobius/go-trafilatura/blob/main/examples/chained/main.go
 			// implement fallbacks from	"github.com/markusmobius/go-domdistiller" and 	"github.com/go-shiori/go-readability"
 			OriginalURL: chain.Request.URL,

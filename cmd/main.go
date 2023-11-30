@@ -83,8 +83,7 @@ func main() {
 	}
 
 	if *randomGooglebot {
-		err := helpers.UpdateGooglebotIPs()
-
+		err := helpers.GlobalGoogleBot.UpdatePool()
 		if err != nil {
 			fmt.Println("error while retrieving list of Googlebot IPs: " + err.Error())
 			fmt.Println("defaulting to known trusted Googlebot identity")
