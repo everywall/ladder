@@ -519,7 +519,7 @@ func (chain *ProxyChain) Execute() error {
 	// return chain.Context.SendStream(body)
 }
 
-func (chain *ProxyChain) ExecuteForAPI() (string, error) {
+func (chain *ProxyChain) ExecuteForOutline() (string, error) {
 	defer chain._reset()
 	body, err := chain._execute()
 	if err != nil {

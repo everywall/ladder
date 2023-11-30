@@ -39,7 +39,7 @@ func Outline(path string, opts *ProxyOptions) fiber.Handler {
 				tx.APIOutline(),
 			).
 			SetFiberCtx(c).
-			ExecuteForAPI()
+			ExecuteForOutline()
 
 		if err != nil {
 			log.Fatal(err)
