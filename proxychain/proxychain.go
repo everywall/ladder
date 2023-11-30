@@ -518,3 +518,32 @@ func (chain *ProxyChain) Execute() error {
 
 	// return chain.Context.SendStream(body)
 }
+
+func (chain *ProxyChain) ExecuteForAPI() (string, error) {
+	defer chain._reset()
+	body, err := chain._execute()
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	if chain.Context == nil {
+		return "", errors.New("no context set")
+	}
+
+	// in case api user did not set or forward content-type, we do it for them
+	/*
+		if chain.Context.Get("content-type") == "" {
+			chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+		}
+	*/
+
+	// Capture the HTML content in a variable
+	htmlContent, err := io.ReadAll(body)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	// Return the HTML content to the client
+	return string(htmlContent), nil
+}

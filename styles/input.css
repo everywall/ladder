@@ -1,3 +1,78 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  a {
+    @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300;
+  }
+  h1 {
+    @apply text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-200;
+  }
+  h2 {
+    @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 text-slate-900 dark:text-slate-200;
+  }
+  h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-200;
+  }
+  h4,
+  h5,
+  h6 {
+    @apply scroll-m-20 text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-200;
+  }
+  p {
+    @apply leading-7 [&:not(:first-child)]:mt-6 text-slate-900 dark:text-slate-200;
+  }
+  kbd,
+  code {
+    @apply relative rounded bg-slate-200 dark:bg-slate-800 px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+  }
+  blockquote {
+    @apply mt-6 border-l-2 pl-6 italic;
+  }
+  ul {
+    @apply my-6 ml-6 list-disc [&>li]:mt-2 text-slate-900 dark:text-slate-200;
+  }
+  ol {
+    @apply my-6 ml-6 list-decimal [&>li]:mt-2 text-slate-900 dark:text-slate-200;
+  }
+  dl {
+    @apply my-6 text-slate-900 dark:text-slate-200 font-bold [&>dd]:font-normal [&>dd]:ml-6 [&>dt]:mt-3;
+  }
+  li {
+    @apply text-slate-900 dark:text-slate-200;
+  }
+  table {
+    @apply w-full caption-bottom text-sm;
+  }
+  thead {
+    @apply [&_tr]:border-b;
+  }
+  tbody {
+    @apply [&_tr:last-child]:border-0;
+  }
+  tfoot {
+    @apply border-t border-slate-400 dark:border-slate-700 bg-slate-700/50 dark:bg-slate-200/50 font-medium [&>tr]:last:border-b-0;
+  }
+  tr {
+    @apply border-b border-slate-400 dark:border-slate-700 transition-colors hover:bg-slate-200/50 dark:hover:bg-slate-700/50 data-[state=selected]:bg-slate-700 dark:data-[state=selected]:bg-slate-200;
+  }
+  th {
+    @apply h-12 px-4 text-left align-middle font-medium text-slate-600 dark:text-slate-200 [&:has([role=checkbox])]:pr-0;
+  }
+  td {
+    @apply p-4 align-middle [&:has([role=checkbox])]:pr-0;
+  }
+  caption {
+    @apply mt-4 text-sm text-slate-600 dark:text-slate-200;
+  }
+  img {
+    @apply h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700;
+  }
+  figcaption {
+    @apply mt-2 text-sm text-slate-600 dark:text-slate-400;
+  }
+  hr {
+    @apply shrink-0 bg-slate-200 dark:bg-slate-700 h-[1px] w-full;
+  }
+}

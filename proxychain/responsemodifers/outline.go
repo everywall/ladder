@@ -1,12 +1,13 @@
 package responsemodifers
 
 import (
-	"bytes"
-	"encoding/json"
 	"io"
+	"strings"
 
 	//"github.com/go-shiori/dom"
+	"github.com/go-shiori/dom"
 	"github.com/markusmobius/go-trafilatura"
+
 	//"golang.org/x/net/html"
 
 	"ladder/proxychain"
@@ -37,15 +38,9 @@ func APIOutline() proxychain.ResponseModification {
 			return nil
 		}
 
-		doc := api.ExtractResultToAPIResponse(result)
-		jsonData, err := json.MarshalIndent(doc, "", "\t")
-		if err != nil {
-			chain.Response.Body = api.CreateAPIErrReader(err)
-			return nil
-		}
-
-		buf := bytes.NewBuffer(jsonData)
-		chain.Response.Body = io.NopCloser(buf)
+		doc := trafilatura.CreateReadableDocument(result)
+		reader := io.NopCloser(strings.NewReader(dom.OuterHTML(doc)))
+		chain.Response.Body = reader
 		return nil
 	}
 }

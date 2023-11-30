@@ -20,6 +20,8 @@ require (
 	github.com/elliotchance/pie/v2 v2.8.0 // indirect
 	github.com/forPelevin/gomoji v1.1.8 // indirect
 	github.com/go-shiori/go-readability v0.0.0-20231029095239-6b97d5aba789 // indirect
+	github.com/gofiber/template v1.8.2 // indirect
+	github.com/gofiber/utils v1.1.0 // indirect
 	github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f // indirect
 	github.com/hablullah/go-hijri v1.0.2 // indirect
 	github.com/hablullah/go-juliandays v1.0.0 // indirect
@@ -40,8 +42,10 @@ require (
 )
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gofiber/template/html/v2 v2.0.5
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/klauspost/compress v1.17.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
