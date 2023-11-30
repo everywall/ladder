@@ -7,7 +7,7 @@ import (
 )
 
 //nolint:all
-
+//go:embed VERSION
 var version string
 
 func Api(c *fiber.Ctx) error {

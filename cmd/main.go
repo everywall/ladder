@@ -23,6 +23,7 @@ var faviconData string
 //go:embed styles.css
 var cssData embed.FS
 
+//go:embed VERSION
 var version string
 
 func main() {
