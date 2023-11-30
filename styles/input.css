@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
+@layer base {
   a {
-    @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300;
+    @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300;
   }
   h1 {
     @apply text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-200;
