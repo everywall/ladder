@@ -42,7 +42,6 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/andybalholm/brotli v1.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gofiber/template/html/v2 v2.0.5
