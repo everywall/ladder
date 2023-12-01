@@ -183,7 +183,7 @@ func main() {
 		RulesetPath: *ruleset,
 	}
 
-	app.Get("api/content/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
+	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 
 	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
 

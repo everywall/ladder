@@ -27,6 +27,15 @@ type TextContent struct {
 	Data string `json:"data"`
 }
 
+type ListContent struct {
+	Type      string            `json:"type"`
+	ListItems []ListItemContent `json:"listItems"`
+}
+
+type ListItemContent struct {
+	Data string `json:"data"`
+}
+
 type JSONDocument struct {
 	Success  bool         `json:"success"`
 	Error    ErrorDetails `json:"error"`
@@ -35,6 +44,7 @@ type JSONDocument struct {
 		Author      string   `json:"author"`
 		URL         string   `json:"url"`
 		Hostname    string   `json:"hostname"`
+		Image       string   `json:"image"`
 		Description string   `json:"description"`
 		Sitename    string   `json:"sitename"`
 		Date        string   `json:"date"`
@@ -58,11 +68,13 @@ func ExtractResultToAPIResponse(extract *trafilatura.ExtractResult) *JSONDocumen
 	jsonDoc.Metadata.URL = extract.Metadata.URL
 	jsonDoc.Metadata.Hostname = extract.Metadata.Hostname
 	jsonDoc.Metadata.Description = extract.Metadata.Description
+	jsonDoc.Metadata.Image = extract.Metadata.Image
 	jsonDoc.Metadata.Sitename = extract.Metadata.Sitename
 	jsonDoc.Metadata.Date = extract.Metadata.Date.Format("2006-01-02")
 	jsonDoc.Metadata.Categories = extract.Metadata.Categories
 	jsonDoc.Metadata.Tags = extract.Metadata.Tags
 	jsonDoc.Metadata.License = extract.Metadata.License
+	jsonDoc.Metadata.Hostname = extract.Metadata.Hostname
 
 	// Populate content
 	if extract.ContentNode != nil {
@@ -120,7 +132,34 @@ func parseContent(node *html.Node) []interface{} {
 			}
 			content = append(content, text)
 
-		// continue with other tags
+		case "h4":
+			text := TextContent{
+				Type: "h4",
+				Data: dom.InnerText(child),
+			}
+			content = append(content, text)
+
+		case "h5":
+			text := TextContent{
+				Type: "h5",
+				Data: dom.InnerText(child),
+			}
+			content = append(content, text)
+
+		case "ul", "ol":
+			list := ListContent{
+				Type:      child.Data,
+				ListItems: []ListItemContent{},
+			}
+			for listItem := child.FirstChild; listItem != nil; listItem = listItem.NextSibling {
+				if listItem.Data == "li" {
+					listItemContent := ListItemContent{
+						Data: dom.InnerText(listItem),
+					}
+					list.ListItems = append(list.ListItems, listItemContent)
+				}
+			}
+			content = append(content, list)
 
 		default:
 			text := TextContent{
