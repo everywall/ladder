@@ -189,6 +189,6 @@ func main() {
 
 	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
 
-	fmt.Println(cli.StartupMessage("1.0.0", *port, *ruleset))
+	fmt.Println(cli.StartupMessage(version, *port, *ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }
