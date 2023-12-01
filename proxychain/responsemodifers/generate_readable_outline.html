@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/styles.css" />
+    <script src="/script.js" defer></script>
     <script>
       const handleThemeChange = () => {
         const theme = localStorage.getItem("theme");
@@ -50,7 +51,7 @@
               />
             </svg>
             <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle"
-              >ladder</span
+                  >ladder | {{.Hostname}}</span
             >
           </a>
         </div>
@@ -327,19 +328,10 @@
         </code>
         {{else}}
         <div class="flex flex-col gap-1 mt-3">
-          <div>
-            <small class="text-sm font-medium leading-none">
-              <a
-                href="{{.Url}}"
-                class="text-slate-600 dark:text-slate-400 hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-                >{{.Url}}</a
-              >
-            </small>
-          </div>
           <h1
             class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200"
           >
-            {{.Title}}
+            <a href="{{.Url}}"> {{.Title}} </a>
           </h1>
           {{ if ne .Date "" }}
           <small
@@ -355,7 +347,13 @@
         </div>
 
         <div class="flex flex-col space-y-3">
-        <div>{{ .Params }}</div>
+          <div>
+            <div class="grid grid-cols-1 justify-items-center">
+            <div><img src="{{.Image}}"/></div>
+            <div class="text-xs text-gray-800">{{.Description}}</div>
+          </div>
+        </div>
+
         <div>{{ .Body }}</div>
         {{ end }}
         <!-- Trick Tailwind into compiling these styles into styles.css -->
@@ -382,6 +380,5 @@
       <div class="my-2"></div>
     </div>
 
-    <script src="/script.js"></script>
   </body>
 </html>
