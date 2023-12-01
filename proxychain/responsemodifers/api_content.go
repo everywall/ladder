@@ -3,18 +3,15 @@ package responsemodifers
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-
-	//"github.com/go-shiori/dom"
 	"github.com/markusmobius/go-trafilatura"
-	//"golang.org/x/net/html"
-
+	"io"
 	"ladder/proxychain"
 	"ladder/proxychain/responsemodifers/api"
 )
 
-// APIOutline creates an JSON representation of the article and returns it as an API response.
-func APIOutline() proxychain.ResponseModification {
+// APIContent creates an JSON representation of the article and returns it as an API response.
+func APIContent() proxychain.ResponseModification {
+
 	return func(chain *proxychain.ProxyChain) error {
 		// we set content-type twice here, in case another response modifier
 		// tries to forward over the original headers
@@ -37,15 +34,14 @@ func APIOutline() proxychain.ResponseModification {
 			return nil
 		}
 
-		doc := api.ExtractResultToAPIResponse(result)
-		jsonData, err := json.MarshalIndent(doc, "", "\t")
+		res := api.ExtractResultToAPIResponse(result)
+		jsonData, err := json.MarshalIndent(res, "", "  ")
 		if err != nil {
-			chain.Response.Body = api.CreateAPIErrReader(err)
-			return nil
+			return err
 		}
 
-		buf := bytes.NewBuffer(jsonData)
-		chain.Response.Body = io.NopCloser(buf)
+		chain.Response.Body = io.NopCloser(bytes.NewReader(jsonData))
 		return nil
 	}
+
 }

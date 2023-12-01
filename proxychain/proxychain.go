@@ -103,7 +103,7 @@ type ProxyChain struct {
 	Ruleset                   *ruleset.RuleSet
 	debugMode                 bool
 	abortErr                  error
-	_apiPrefix                string
+	APIPrefix                 string
 }
 
 // a ProxyStrategy is a pre-built proxychain with purpose-built defaults
@@ -172,9 +172,8 @@ func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) 
 // WithAPIPath trims the path during URL extraction.
 // example: using path = "api/outline/", a path like "http://localhost:8080/api/outline/https://example.com" becomes "https://example.com"
 func (chain *ProxyChain) WithAPIPath(path string) *ProxyChain {
-	fmt.Println("===================")
-	fmt.Printf("set path %s\n", path)
-	chain._apiPrefix = path
+	chain.APIPrefix = path
+	chain.APIPrefix = strings.TrimSuffix(chain.APIPrefix, "*")
 	return chain
 }
 
@@ -268,9 +267,9 @@ func (chain *ProxyChain) extractURL() (*url.URL, error) {
 
 	fmt.Println("XXXXXXXXXXXXXXXX")
 	fmt.Println(reqURL)
-	fmt.Println(chain._apiPrefix)
+	fmt.Println(chain.APIPrefix)
 
-	reqURL = strings.TrimPrefix(reqURL, chain._apiPrefix)
+	reqURL = strings.TrimPrefix(reqURL, chain.APIPrefix)
 
 	// sometimes client requests doubleroot '//'
 	// there is a bug somewhere else, but this is a workaround until we find it
@@ -507,11 +506,9 @@ func (chain *ProxyChain) Execute() error {
 	}
 
 	// in case api user did not set or forward content-type, we do it for them
-	/*
-		if chain.Context.Get("content-type") == "" {
-			chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
-		}
-	*/
+	if chain.Context.Get("content-type") == "" {
+		chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+	}
 
 	// Return request back to client
 	return chain.Context.SendStream(body)

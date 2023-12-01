@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	"html/template"
 	"log"
 	"os"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/basicauth"
 	"github.com/gofiber/fiber/v2/middleware/favicon"
+	"github.com/gofiber/template/html/v2"
 )
 
 //go:embed favicon.ico
@@ -22,6 +24,9 @@ var faviconData string
 
 //go:embed styles.css
 var cssData embed.FS
+
+//go:embed script.js
+var scriptData embed.FS
 
 //go:embed VERSION
 var version string
@@ -128,12 +133,21 @@ func main() {
 		*prefork = true
 	}
 
+	engine := html.New("./handlers", ".html")
+	engine.AddFunc(
+		// add unescape function
+		"unescape", func(s string) template.HTML {
+			return template.HTML(s)
+		},
+	)
+
 	app := fiber.New(
 		fiber.Config{
 			Prefork:               *prefork,
 			GETOnly:               false,
 			ReadBufferSize:        4096 * 4, // increase max header size
 			DisableStartupMessage: true,
+			Views:                 engine,
 		},
 	)
 
@@ -176,6 +190,18 @@ func main() {
 		return c.Send(cssData)
 	})
 
+	// TODO: move to handlers/script.go
+	app.Get("/script.js", func(c *fiber.Ctx) error {
+		scriptData, err := scriptData.ReadFile("script.js")
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
+		}
+
+		c.Set("Content-Type", "text/javascript")
+
+		return c.Send(scriptData)
+	})
+
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
 
@@ -184,11 +210,12 @@ func main() {
 		RulesetPath: *ruleset,
 	}
 
-	app.Get("api/outline/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
+	app.Get("api/content/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
 
-	app.Get("/*", handlers.NewProxySiteHandler(proxyOpts))
-	app.Post("/*", handlers.NewProxySiteHandler(proxyOpts))
+	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
 
-	fmt.Println(cli.StartupMessage("1.0.1", *port, *ruleset))
+	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
+
+	fmt.Println(cli.StartupMessage("1.0.0", *port, *ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }

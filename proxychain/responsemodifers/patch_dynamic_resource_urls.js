@@ -28,10 +28,21 @@
     ];
 
     function rewriteURL(url) {
-        const oldUrl = url;
         if (!url) return url;
-        let isStr = typeof url.startsWith === "function";
-        if (!isStr) return url;
+
+        // fetch url might be string, url, or request object
+        // handle all three by downcasting to string
+        const isStr = typeof url === "string";
+        if (!isStr) {
+            x = String(url);
+            if (x == "[object Request]") {
+                url = url.url;
+            } else {
+                url = String(url);
+            }
+        }
+
+        const oldUrl = url;
 
         // don't rewrite special URIs
         if (blacklistedSchemes.includes(url)) return url;
@@ -44,7 +55,8 @@
         }
 
         // don't double rewrite
-        if (url.startsWith(proxyOrigin)) return url;
+        if (url.startsWith(`${proxyOrigin}/http://`)) return url;
+        if (url.startsWith(`${proxyOrigin}/https://`)) return url;
         if (url.startsWith(`/${proxyOrigin}`)) return url;
         if (url.startsWith(`/${origin}`)) return url;
         if (url.startsWith(`/http://`)) return url;
@@ -59,6 +71,11 @@
             url = `/${origin}/${encodeURIComponent(url.substring(2))}`;
         } else if (url.startsWith("/")) {
             url = `/${origin}/${encodeURIComponent(url.substring(1))}`;
+        } else if (
+            url.startsWith(proxyOrigin) && !url.startsWith(`${proxyOrigin}/http`)
+        ) {
+            // edge case where client js uses current url host to write an absolute path
+            url = "".replace(proxyOrigin, `${proxyOrigin}/${origin}`);
         } else if (url.startsWith(origin)) {
             url = `/${encodeURIComponent(url)}`;
         } else if (url.startsWith("http://") || url.startsWith("https://")) {
@@ -68,36 +85,41 @@
         return url;
     }
 
-    // sometimes anti-bot protections like cloudflare or akamai bot manager check if JS is hooked
+    /*
+                // sometimes anti-bot protections like cloudflare or akamai bot manager check if JS is hooked
+                function hideMonkeyPatch(objectOrName, method, originalToString) {
+                    let obj;
+                    let isGlobalFunction = false;
+  
+                    if (typeof objectOrName === "string") {
+                        obj = globalThis[objectOrName];
+                        isGlobalFunction = (typeof obj === "function") &&
+                            (method === objectOrName);
+                    } else {
+                        obj = objectOrName;
+                    }
+  
+                    if (isGlobalFunction) {
+                        const originalFunction = obj;
+                        globalThis[objectOrName] = function(...args) {
+                            return originalFunction.apply(this, args);
+                        };
+                        globalThis[objectOrName].toString = () => originalToString;
+                    } else if (obj && typeof obj[method] === "function") {
+                        const originalMethod = obj[method];
+                        obj[method] = function(...args) {
+                            return originalMethod.apply(this, args);
+                        };
+                        obj[method].toString = () => originalToString;
+                    } else {
+                        console.warn(
+                            `proxychain: cannot hide monkey patch: ${method} is not a function on the provided object.`,
+                        );
+                    }
+                }
+                */
     function hideMonkeyPatch(objectOrName, method, originalToString) {
-        let obj;
-        let isGlobalFunction = false;
-
-        if (typeof objectOrName === "string") {
-            obj = globalThis[objectOrName];
-            isGlobalFunction = (typeof obj === "function") &&
-                (method === objectOrName);
-        } else {
-            obj = objectOrName;
-        }
-
-        if (isGlobalFunction) {
-            const originalFunction = obj;
-            globalThis[objectOrName] = function(...args) {
-                return originalFunction.apply(this, args);
-            };
-            globalThis[objectOrName].toString = () => originalToString;
-        } else if (obj && typeof obj[method] === "function") {
-            const originalMethod = obj[method];
-            obj[method] = function(...args) {
-                return originalMethod.apply(this, args);
-            };
-            obj[method].toString = () => originalToString;
-        } else {
-            console.warn(
-                `proxychain: cannot hide monkey patch: ${method} is not a function on the provided object.`,
-            );
-        }
+        return;
     }
 
     // monkey patch fetch
