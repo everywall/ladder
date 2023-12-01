@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
 	"html/template"
 	"io"
 	"ladder/proxychain"
 	"log"
+	"net/url"
+	"strings"
+
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 
 	//"github.com/go-shiori/dom"
 	"github.com/markusmobius/go-trafilatura"
@@ -35,7 +38,7 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 		// 1. extract dom contents using reading mode algo
 		// ===========================================================
 		opts := trafilatura.Options{
-			IncludeImages:      true,
+			IncludeImages:      false,
 			IncludeLinks:       true,
 			FavorRecall:        true,
 			Deduplicate:        true,
@@ -55,6 +58,8 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 
 		// render DOM to string without H1 title
 		removeFirstH1(extract.ContentNode)
+		// rewrite all links to stay on /outline/ path
+		rewriteHrefLinks(extract.ContentNode, chain.Context.BaseURL(), chain.APIPrefix)
 		var b bytes.Buffer
 		html.Render(&b, extract.ContentNode)
 		distilledHTML := b.String()
@@ -62,11 +67,10 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 		// populate template parameters
 		data := map[string]interface{}{
 			"Success":     true,
-			"Footer":      extract.Metadata.License,
 			"Image":       extract.Metadata.Image,
 			"Description": extract.Metadata.Description,
 			"Hostname":    extract.Metadata.Hostname,
-			"Url":         chain.Request.URL,
+			"Url":         "/" + chain.Request.URL.String(),
 			"Title":       extract.Metadata.Title, // todo: modify CreateReadableDocument so we don't have <h1> titles duplicated?
 			"Date":        extract.Metadata.Date.String(),
 			"Author":      extract.Metadata.Author,
@@ -96,6 +100,10 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 	}
 }
 
+// =============================================
+// DOM Rendering helpers
+// =============================================
+
 func removeFirstH1(n *html.Node) {
 	var recurse func(*html.Node) bool
 	recurse = func(n *html.Node) bool {
@@ -107,6 +115,43 @@ func removeFirstH1(n *html.Node) {
 				n.RemoveChild(c)
 				return false // Removed first H1, no need to continue
 			}
+		}
+		return false
+	}
+	recurse(n)
+}
+
+func rewriteHrefLinks(n *html.Node, baseURL string, apiPath string) {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		log.Printf("GenerateReadableOutline :: rewriteHrefLinks error - %s\n", err)
+	}
+	apiPath = strings.Trim(apiPath, "/")
+	proxyURL := fmt.Sprintf("%s://%s", u.Scheme, u.Host)
+	newProxyURL := fmt.Sprintf("%s/%s", proxyURL, apiPath)
+
+	var recurse func(*html.Node) bool
+	recurse = func(n *html.Node) bool {
+
+		if n.Type == html.ElementNode && n.DataAtom == atom.A {
+			for i := range n.Attr {
+				attr := n.Attr[i]
+				if attr.Key != "href" {
+					continue
+				}
+				// rewrite url on a.href: http://localhost:8080/https://example.com -> http://localhost:8080/outline/https://example.com
+				attr.Val = strings.Replace(attr.Val, proxyURL, newProxyURL, 1)
+				// rewrite relative URLs too
+				if strings.HasPrefix(attr.Val, "/") {
+					attr.Val = fmt.Sprintf("/%s%s", apiPath, attr.Val)
+				}
+				n.Attr[i].Val = attr.Val
+				log.Println(attr.Val)
+			}
+		}
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			recurse(c)
 		}
 		return false
 	}
