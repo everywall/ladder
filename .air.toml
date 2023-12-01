@@ -12,7 +12,7 @@ tmp_dir = "tmp"
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
   follow_symlink = false
-  full_bin = "RULESET=./ruleset.yaml ./tmp/main"
+  full_bin = "./tmp/main --ruleset ./ruleset.yaml"
   include_dir = []
   include_ext = ["go", "tpl", "tmpl", "yaml", "html", "js"]
   include_file = []
@@ -21,7 +21,7 @@ tmp_dir = "tmp"
   poll = false
   poll_interval = 0
   post_cmd = []
-  pre_cmd = ["echo 'dev' > handlers/VERSION"]
+  pre_cmd = ["echo 'dev' > handlers/VERSION echo 'dev' > cmd/VERSION"]
   rerun = false
   rerun_delay = 500
   send_interrupt = false
