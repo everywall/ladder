@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/styles.css" />
     <title>ladder</title>
+    <script src="/script.js" defer></script>
     <script>
       const handleThemeChange = () => {
-        const theme = localStorage.getItem("theme");
+        let theme = localStorage.getItem("theme");
+        if (theme === null) {
+          localStorage.setItem("theme", "system");
+          theme = "system";
+        }
         if (
           theme === "dark" ||
           (theme === "system" &&
@@ -338,6 +343,5 @@
         });
       }
     </script>
-    <script src="/script.js"></script>
   </body>
 </html>

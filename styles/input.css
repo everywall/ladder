@@ -7,7 +7,7 @@
     @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300;
   }
   h1 {
-    @apply text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-200;
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 dark:text-slate-200;
   }
   h2 {
     @apply scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0 text-slate-900 dark:text-slate-200;
@@ -24,8 +24,9 @@
     @apply leading-7 [&:not(:first-child)]:mt-6 text-slate-900 dark:text-slate-200;
   }
   kbd,
+  pre,
   code {
-    @apply relative rounded bg-slate-200 dark:bg-slate-800 px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+    @apply relative whitespace-break-spaces rounded bg-slate-200 dark:bg-slate-800 py-[0.2rem] font-mono text-sm font-semibold;
   }
   blockquote {
     @apply mt-6 border-l-2 pl-6 italic;

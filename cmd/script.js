@@ -159,13 +159,17 @@ const handleFontChange = () => {
   if (mainElement === null) {
     return;
   }
-  const font = localStorage.getItem("font");
-  if (font === "sans-serif") {
-    mainElement.classList.add("font-sans");
-    mainElement.classList.remove("font-serif");
-  } else {
+  let font = localStorage.getItem("font");
+  if (font === null) {
+    localStorage.setItem("font", "sans-serif");
+    font = "sans-serif";
+  }
+  if (font === "serif") {
     mainElement.classList.add("font-serif");
     mainElement.classList.remove("font-sans");
+  } else {
+    mainElement.classList.add("font-sans");
+    mainElement.classList.remove("font-serif");
   }
 };
 
@@ -179,9 +183,10 @@ const changeFontSize = (node, classes) => {
     "text-2xl",
     "text-3xl",
     "text-4xl",
-    "sm:text-3xl",
-    "sm:text-4xl",
-    "sm:text-5xl",
+    "text-5xl",
+    "lg:text-4xl",
+    "lg:text-5xl",
+    "lg:text-6xl",
   ];
   const currentClasses = sizes.filter((size) => node.classList.contains(size));
   node.classList.remove(...currentClasses);
@@ -192,9 +197,21 @@ const handleFontSizeChange = () => {
   if (mainElement === null) {
     return;
   }
-  const fontSize = localStorage.getItem("fontsize");
+  let fontSize = localStorage.getItem("fontsize");
+  if (fontSize === null) {
+    localStorage.setItem("fontsize", "text-base");
+    fontSize = "text-base";
+  }
+  if (fontSize === "text-sm") {
+    changeFontSize(document.querySelector("body"), ["text-sm"]);
+  } else if (fontSize === "text-lg") {
+    changeFontSize(document.querySelector("body"), ["text-lg"]);
+  } else {
+    changeFontSize(document.querySelector("body"), ["text-base"]);
+  }
+
   const nodes = document.querySelectorAll(
-    "h1, h2, h3, h4, code, pre, kbd, table"
+    "h1, h2, h3, h4, h5, h6, code, pre, kbd, table"
   );
   if (fontSize === "text-sm") {
     changeFontSize(mainElement, ["text-sm"]);
@@ -208,12 +225,13 @@ const handleFontSizeChange = () => {
     switch (node.tagName) {
       case "H1": {
         if (fontSize === "text-sm") {
-          classes = ["text-2xl", "sm:text-3xl"];
+          classes = ["text-3xl", "lg:text-4xl"];
         } else if (fontSize === "text-lg") {
-          classes = ["text-4xl", "sm:text-5xl"];
+          classes = ["text-5xl", "lg:text-6xl"];
         } else {
-          classes = ["text-3xl", "sm:text-4xl"];
+          classes = ["text-4xl", "lg:text-5xl"];
         }
+        break;
       }
       case "H2": {
         if (fontSize === "text-sm") {
@@ -235,7 +253,9 @@ const handleFontSizeChange = () => {
         }
         break;
       }
-      case "H4": {
+      case "H4":
+      case "H5":
+      case "H6": {
         if (fontSize === "text-sm") {
           classes = ["text-lg"];
         } else if (fontSize === "text-lg") {
@@ -259,6 +279,13 @@ const handleFontSizeChange = () => {
         break;
       }
       default: {
+        if (fontSize === "text-sm") {
+          classes = ["text-sm"];
+        } else if (fontSize === "text-lg") {
+          classes = ["text-lg"];
+        } else {
+          classes = ["text-base"];
+        }
         break;
       }
     }

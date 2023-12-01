@@ -7,7 +7,11 @@
     <script src="/script.js" defer></script>
     <script>
       const handleThemeChange = () => {
-        const theme = localStorage.getItem("theme");
+        let theme = localStorage.getItem("theme");
+        if (theme === null) {
+          localStorage.setItem("theme", "system");
+          theme = "system";
+        }
         if (
           theme === "dark" ||
           (theme === "system" &&
@@ -20,7 +24,7 @@
       };
       handleThemeChange();
     </script>
-    <title>ladder | {{ .Title }}</title>
+    <title>ladder | {{.Title}}</title>
   </head>
 
   <body
@@ -31,9 +35,11 @@
         <div
           class="hover:drop-shadow-[0_0px_4px_rgba(122,167,209,.3)] transition-colors duration-300 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
         >
+
+        <div class="flex">
           <a
             href="/"
-            class="flex -ml-2 gap-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+            class="flex -ml-2 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -50,10 +56,15 @@
                 d="M153.196 310.121L133.153 285.021C140.83 283.798 148.978 285.092 156.741 284.353L156.637 277.725L124.406 278.002C123.298 277.325 122.856 276.187 122.058 275.193L116.089 267.862C110.469 260.975 103.827 254.843 98.6026 247.669C103.918 246.839 105.248 246.537 111.14 246.523L129.093 246.327C130.152 238.785 128.62 240.843 122.138 240.758C111.929 240.623 110.659 242.014 105.004 234.661L97.9953 225.654C94.8172 221.729 91.2219 218.104 88.2631 214.005C84.1351 208.286 90.1658 209.504 94.601 209.489L236.752 209.545C257.761 209.569 268.184 211.009 285.766 221.678L285.835 206.051C285.837 197.542 286.201 189.141 284.549 180.748C280.22 158.757 260.541 143.877 240.897 135.739C238.055 134.561 232.259 133.654 235.575 129.851C244.784 119.288 263.680 111.990 277.085 111.105C288.697 109.828 301.096 113.537 311.75 117.703C360.649 136.827 393.225 183.042 398.561 234.866C402.204 270.253 391.733 308.356 367.999 335.1C332.832 374.727 269.877 384.883 223.294 360.397C206.156 351.388 183.673 333.299 175.08 316.6C173.511 313.551 174.005 313.555 170.443 313.52L160.641 313.449C158.957 313.435 156.263 314.031 155.122 312.487L153.196 310.121Z"
               />
             </svg>
-            <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle"
-                  >ladder | {{.Hostname}}</span
-            >
           </a>
+          <a
+            href="/https://{{.Hostname}}"
+            class="flex ml-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+            >
+            <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle">{{.Sitename}}</span>
+          </a>
+        </div>
+
         </div>
 
         <div class="flex justify-center z-10">
@@ -303,61 +314,46 @@
       </div>
 
       <main class="flex flex-col space-y-3">
-        {{ if not .Success}}
-        <h1
-          class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200"
-        >
+        {{if not .Success}}
+        <h1>
           Error
         </h1>
-        <p
-          class="leading-7 [&:not(:first-child)]:mt-6 text-slate-900 dark:text-slate-200"
-        >
+        <p>
           There was a problem querying
-          <a
-            href="{{ .Params }}"
-            class="hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-            >{{ .Params }}</a
-          >
+          <a href="{{.Params}}">{{.Params}}</a>
         </p>
-        <code
-          class="m-auto text-red-500 dark:text-red-400 relative rounded bg-slate-200 dark:bg-slate-800 px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
-        >
-          {{ .Type }}: {{ .Message }}
-          <div class="my-2">Cause:</div>
-          {{ .Cause }}
+        <code class="text-red-500 dark:text-red-400">
+          {{.Error}}
         </code>
         {{else}}
         <div class="flex flex-col gap-1 mt-3">
-          <h1
-            class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200"
-          >
-            <a href="{{.Url}}"> {{.Title}} </a>
+          <h1>
+            <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200"> {{.Title}} </a>
           </h1>
-          {{ if ne .Date "" }}
+          {{if ne .Date ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
-            >{{.date}}</small
+            >{{.Date}}</small
           >
-          {{ end }} {{ if ne .Author "" }}
+          {{end}} 
+          {{if ne .Author ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
             >{{.Author}}</small
           >
-          {{ end }}
+          {{end}}
         </div>
 
         <div class="flex flex-col space-y-3">
           <div>
             <div class="grid grid-cols-1 justify-items-center">
-            <div><img src="{{.Image}}"/></div>
-            <div class="text-xs text-gray-800">{{.Description}}</div>
+            <div><img src="{{.Image}}" alt="{{.Description}}" class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"/></div>
+            <div class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{.Description}}</div>
           </div>
         </div>
 
-        <div>{{ .Body }}</div>
-        {{ end }}
-        <!-- Trick Tailwind into compiling these styles into styles.css -->
-        <!-- <div class="hidden text-xs text-sm text-base text-xl text-2xl text-3xl text-4xl sm:text-3xl sm:text-4xl sm:text-5xl"></div> -->
+        <div>{{.Body}}</div>
+        {{end}}
       </main>
 
       <div class="my-2"></div>

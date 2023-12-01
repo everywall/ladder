@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func NewAPIOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
+func NewAPIContentHandler(path string, opts *ProxyOptions) fiber.Handler {
 	// TODO: implement ruleset logic
 	/*
 		var rs ruleset.RuleSet

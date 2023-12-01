@@ -210,12 +210,12 @@ func main() {
 		RulesetPath: *ruleset,
 	}
 
-	app.Get("api/content/*", handlers.NewAPIOutlineHandler("api/outline/*", proxyOpts))
+	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 
 	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
 
 	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
 
-	fmt.Println(cli.StartupMessage("1.0.0", *port, *ruleset))
+	fmt.Println(cli.StartupMessage(version, *port, *ruleset))
 	log.Fatal(app.Listen(":" + *port))
 }
