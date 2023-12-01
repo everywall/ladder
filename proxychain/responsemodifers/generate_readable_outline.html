@@ -24,7 +24,7 @@
       };
       handleThemeChange();
     </script>
-    <title>ladder | {{ .Title }}</title>
+    <title>ladder | {{.Title}}</title>
   </head>
 
   <body
@@ -314,46 +314,46 @@
       </div>
 
       <main class="flex flex-col space-y-3">
-        {{ if not .Success}}
+        {{if not .Success}}
         <h1>
           Error
         </h1>
         <p>
           There was a problem querying
-          <a href="{{ .Params }}">{{ .Params }}</a>
+          <a href="{{.Params}}">{{.Params}}</a>
         </p>
         <code class="text-red-500 dark:text-red-400">
-          {{ .Error }}
+          {{.Error}}
         </code>
         {{else}}
         <div class="flex flex-col gap-1 mt-3">
           <h1>
-            <a href="{{ .Url }}" class="text-slate-900 dark:text-slate-200"> {{ .Title }} </a>
+            <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200"> {{.Title}} </a>
           </h1>
-          {{ if ne .Date "" }}
+          {{if ne .Date ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
-            >{{ .Date }}</small
+            >{{.Date}}</small
           >
-          {{ end }} 
-          {{ if ne .Author "" }}
+          {{end}} 
+          {{if ne .Author ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
-            >{{ .Author }}</small
+            >{{.Author}}</small
           >
-          {{ end }}
+          {{end}}
         </div>
 
         <div class="flex flex-col space-y-3">
           <div>
             <div class="grid grid-cols-1 justify-items-center">
-            <div><img src="{{ .Image }}" alt="{{ .Description }}" class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"/></div>
-            <div class="text-xs text-gray-800">{{ .Description }}</div>
+            <div><img src="{{.Image}}" alt="{{.Description}}" class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"/></div>
+            <div class="text-xs text-gray-800">{{.Description}}</div>
           </div>
         </div>
 
-        <div>{{ .Body }}</div>
-        {{ end }}
+        <div>{{.Body}}</div>
+        {{end}}
       </main>
 
       <div class="my-2"></div>
