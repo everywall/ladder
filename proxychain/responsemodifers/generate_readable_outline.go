@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"ladder/proxychain"
 	"log"
 	"net/url"
 	"strings"
+
+	"ladder/proxychain"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
@@ -24,7 +25,6 @@ var templateFS embed.FS
 // GenerateReadableOutline creates an reader-friendly distilled representation of the article.
 // This is a reliable way of bypassing soft-paywalled articles, where the content is hidden, but still present in the DOM.
 func GenerateReadableOutline() proxychain.ResponseModification {
-
 	// get template only once, and resuse for subsequent calls
 	f := "generate_readable_outline.html"
 	tmpl, err := template.ParseFS(templateFS, f)
@@ -33,7 +33,6 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 	}
 
 	return func(chain *proxychain.ProxyChain) error {
-
 		// ===========================================================
 		// 1. extract dom contents using reading mode algo
 		// ===========================================================
@@ -90,14 +89,13 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 			defer pw.Close()
 
 			err := tmpl.Execute(pw, data) // <- render template
-
 			if err != nil {
 				log.Printf("WARN: GenerateReadableOutline template rendering error: %s\n", err)
 			}
 		}()
 
 		chain.Context.Set("content-type", "text/html")
-		chain.Response.Body = pr // <- replace reponse body reader with our new reader from pipe
+		chain.Response.Body = pr // <- replace response body reader with our new reader from pipe
 		return nil
 	}
 }
@@ -134,7 +132,6 @@ func rewriteHrefLinks(n *html.Node, baseURL string, apiPath string) {
 
 	var recurse func(*html.Node) bool
 	recurse = func(n *html.Node) bool {
-
 		if n.Type == html.ElementNode && n.DataAtom == atom.A {
 			for i := range n.Attr {
 				attr := n.Attr[i]

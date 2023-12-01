@@ -3,15 +3,16 @@ package responsemodifers
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/markusmobius/go-trafilatura"
 	"io"
+
+	"github.com/markusmobius/go-trafilatura"
+
 	"ladder/proxychain"
 	"ladder/proxychain/responsemodifers/api"
 )
 
 // APIContent creates an JSON representation of the article and returns it as an API response.
 func APIContent() proxychain.ResponseModification {
-
 	return func(chain *proxychain.ProxyChain) error {
 		// we set content-type twice here, in case another response modifier
 		// tries to forward over the original headers
@@ -43,5 +44,4 @@ func APIContent() proxychain.ResponseModification {
 		chain.Response.Body = io.NopCloser(bytes.NewReader(jsonData))
 		return nil
 	}
-
 }

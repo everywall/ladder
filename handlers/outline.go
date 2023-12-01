@@ -10,7 +10,6 @@ import (
 
 func NewOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-
 		return proxychain.
 			NewProxyChain().
 			WithAPIPath(path).
@@ -27,6 +26,5 @@ func NewOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
 			).
 			SetFiberCtx(c).
 			Execute()
-
 	}
 }

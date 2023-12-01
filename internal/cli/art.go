@@ -2,9 +2,10 @@ package cli
 
 import (
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 var art string = `
