@@ -87,8 +87,20 @@ func masqueradeAsTrustedBot(botUA string, botIP string, ja3 string) proxychain.R
 			SetRequestHeader("X-Real-IP", botIP),
 			// akamai
 			SetRequestHeader("True-Client-IP", botIP),
+
 			// cloudflare
+			// TODO: this seems to cause issues with CF... figure out workaround or remove
+			/*
+				Error 1000
+				Ray ID: xxxxxxxxxxxxxxxx •
+				2023-12-01 20:09:22 UTC
+				DNS points to prohibited IP
+				What happened?
+				You've requested a page on a website (xxxxxxxxxxxxxxxxxxx) that is on the Cloudflare network. Unfortunately, it is resolving to an IP address that is creating a conflict within Cloudflare's system
+			*/
+
 			SetRequestHeader("CF-Connecting-IP", botIP),
+
 			// weblogic
 			SetRequestHeader("WL-Proxy-Client-IP", botIP),
 			// azure
