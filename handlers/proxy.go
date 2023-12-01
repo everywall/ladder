@@ -33,10 +33,11 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetRequestModifications(
 				// rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				// rx.MasqueradeAsFacebookBot(),
-				rx.MasqueradeAsGoogleBot(),
+				//rx.MasqueradeAsGoogleBot(),
 				rx.DeleteOutgoingCookies(),
 				rx.ForwardRequestHeaders(),
-				rx.SpoofReferrerFromGoogleSearch(),
+				//rx.SpoofReferrerFromGoogleSearch(),
+				rx.SpoofReferrerFromLinkedInPost(),
 				// rx.RequestWaybackMachine(),
 				// rx.RequestArchiveIs(),
 			).
@@ -47,6 +48,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				// tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
 				tx.PatchDynamicResourceURLs(),
+				tx.PatchTrackerScripts(),
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			).
 			Execute()
