@@ -1,24 +1,24 @@
 package requestmodifers
 
 import (
-	"ladder/internal/helpers"
 	"ladder/proxychain"
+	"ladder/proxychain/requestmodifers/bot"
 )
 
 // MasqueradeAsGoogleBot modifies user agent and x-forwarded for
 // to appear to be a Google Bot
 func MasqueradeAsGoogleBot() proxychain.RequestModification {
-	ip := helpers.GlobalGoogleBot.GetRandomIP()
+	ip := bot.GoogleBot.GetRandomIP()
 
-	return masqueradeAsTrustedBot(helpers.GlobalGoogleBot.UserAgent, ip, helpers.GlobalGoogleBot.Fingerprint)
+	return masqueradeAsTrustedBot(bot.GoogleBot.UserAgent, ip, bot.GoogleBot.Fingerprint)
 }
 
 // MasqueradeAsBingBot modifies user agent and x-forwarded for
 // to appear to be a Bing Bot
 func MasqueradeAsBingBot() proxychain.RequestModification {
-	const botUA string = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/79.0.3945.120 Safari/537.36"
-	const botIP string = "13.66.144.9" // https://www.bing.com/toolbox/bingbot.json
-	return masqueradeAsTrustedBot(botUA, botIP, "")
+	ip := bot.BingBot.GetRandomIP()
+
+	return masqueradeAsTrustedBot(bot.BingBot.Fingerprint, ip, "")
 }
 
 // MasqueradeAsWaybackMachineBot modifies user agent and x-forwarded for
