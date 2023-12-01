@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "handlers/form.html"
+      - "proxychain/responsemodifiers/generate_readable_outline.html"
   workflow_dispatch:
 
 jobs:
