@@ -38,8 +38,8 @@
 
         <div class="flex">
           <a
-              href="/https://{{.Hostname}}"
-            class="flex -ml-2 gap-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+            href="/"
+            class="flex -ml-2 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,12 @@
                 d="M153.196 310.121L133.153 285.021C140.83 283.798 148.978 285.092 156.741 284.353L156.637 277.725L124.406 278.002C123.298 277.325 122.856 276.187 122.058 275.193L116.089 267.862C110.469 260.975 103.827 254.843 98.6026 247.669C103.918 246.839 105.248 246.537 111.14 246.523L129.093 246.327C130.152 238.785 128.62 240.843 122.138 240.758C111.929 240.623 110.659 242.014 105.004 234.661L97.9953 225.654C94.8172 221.729 91.2219 218.104 88.2631 214.005C84.1351 208.286 90.1658 209.504 94.601 209.489L236.752 209.545C257.761 209.569 268.184 211.009 285.766 221.678L285.835 206.051C285.837 197.542 286.201 189.141 284.549 180.748C280.22 158.757 260.541 143.877 240.897 135.739C238.055 134.561 232.259 133.654 235.575 129.851C244.784 119.288 263.680 111.990 277.085 111.105C288.697 109.828 301.096 113.537 311.75 117.703C360.649 136.827 393.225 183.042 398.561 234.866C402.204 270.253 391.733 308.356 367.999 335.1C332.832 374.727 269.877 384.883 223.294 360.397C206.156 351.388 183.673 333.299 175.08 316.6C173.511 313.551 174.005 313.555 170.443 313.52L160.641 313.449C158.957 313.435 156.263 314.031 155.122 312.487L153.196 310.121Z"
               />
             </svg>
-              <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle">{{.Sitename}}</span>
+          </a>
+          <a
+            href="/https://{{.Hostname}}"
+            class="flex ml-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+            >
+            <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle">{{.Sitename}}</span>
           </a>
         </div>
 
