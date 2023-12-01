@@ -7,7 +7,11 @@
     <script src="/script.js" defer></script>
     <script>
       const handleThemeChange = () => {
-        const theme = localStorage.getItem("theme");
+        let theme = localStorage.getItem("theme");
+        if (theme === null) {
+          localStorage.setItem("theme", "system");
+          theme = "system";
+        }
         if (
           theme === "dark" ||
           (theme === "system" &&
@@ -306,44 +310,31 @@
 
       <main class="flex flex-col space-y-3">
         {{ if not .Success}}
-        <h1
-          class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200"
-        >
+        <h1>
           Error
         </h1>
-        <p
-          class="leading-7 [&:not(:first-child)]:mt-6 text-slate-900 dark:text-slate-200"
-        >
+        <p>
           There was a problem querying
-          <a
-            href="{{ .Params }}"
-            class="hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-            >{{ .Params }}</a
-          >
+          <a href="{{ .Params }}">{{ .Params }}</a>
         </p>
-        <code
-          class="m-auto text-red-500 dark:text-red-400 relative rounded bg-slate-200 dark:bg-slate-800 px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
-        >
-          {{ .Type }}: {{ .Message }}
-          <div class="my-2">Cause:</div>
-          {{ .Cause }}
+        <code class="text-red-500 dark:text-red-400">
+          {{ .Error }}
         </code>
         {{else}}
         <div class="flex flex-col gap-1 mt-3">
-          <h1
-            class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight dark:text-slate-200"
-          >
-            <a href="{{.Url}}"> {{.Title}} </a>
+          <h1>
+            <a href="{{ .Url }}" class="text-slate-900 dark:text-slate-200"> {{ .Title }} </a>
           </h1>
           {{ if ne .Date "" }}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
-            >{{.date}}</small
+            >{{ .Date }}</small
           >
-          {{ end }} {{ if ne .Author "" }}
+          {{ end }} 
+          {{ if ne .Author "" }}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
-            >{{.Author}}</small
+            >{{ .Author }}</small
           >
           {{ end }}
         </div>
@@ -351,15 +342,13 @@
         <div class="flex flex-col space-y-3">
           <div>
             <div class="grid grid-cols-1 justify-items-center">
-            <div><img src="{{.Image}}"/></div>
-            <div class="text-xs text-gray-800">{{.Description}}</div>
+            <div><img src="{{ .Image }}" alt="{{ .Description }}" class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"/></div>
+            <div class="text-xs text-gray-800">{{ .Description }}</div>
           </div>
         </div>
 
         <div>{{ .Body }}</div>
         {{ end }}
-        <!-- Trick Tailwind into compiling these styles into styles.css -->
-        <!-- <div class="hidden text-xs text-sm text-base text-xl text-2xl text-3xl text-4xl sm:text-3xl sm:text-4xl sm:text-5xl"></div> -->
       </main>
 
       <div class="my-2"></div>
