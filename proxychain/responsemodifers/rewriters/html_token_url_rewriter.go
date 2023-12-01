@@ -92,7 +92,7 @@ func NewHTMLTokenURLRewriter(baseURL *url.URL, proxyURL string) *HTMLTokenURLRew
 }
 
 func (r *HTMLTokenURLRewriter) ShouldModify(token *html.Token) bool {
-	//fmt.Printf("touch token: %s\n", token.String())
+	// fmt.Printf("touch token: %s\n", token.String())
 	attrLen := len(token.Attr)
 	if attrLen == 0 {
 		return false
@@ -225,7 +225,7 @@ func handleAbsolutePath(attr *html.Attribute, _ *url.URL) {
 	}
 
 	attr.Val = fmt.Sprintf("/%s", escape(strings.TrimPrefix(attr.Val, "/")))
-	//attr.Val = fmt.Sprintf("/%s", escape(attr.Val))
+	// attr.Val = fmt.Sprintf("/%s", escape(attr.Val))
 
 	log.Printf("abs url rewritten-> '%s'='%s'", attr.Key, attr.Val)
 }
@@ -283,6 +283,6 @@ func handleSrcSet(attr *html.Attribute, baseURL *url.URL) {
 }
 
 func escape(str string) string {
-	//return str
+	// return str
 	return strings.ReplaceAll(url.PathEscape(str), "%2F", "/")
 }

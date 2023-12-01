@@ -391,7 +391,7 @@ func (chain *ProxyChain) _reset() {
 	chain.Context = nil
 	chain.onceResponseModifications = []ResponseModification{}
 	chain.onceRequestModifications = []RequestModification{}
-	//chain.onceClient = nil
+	// chain.onceClient = nil
 }
 
 // NewProxyChain initializes a new ProxyChain
@@ -401,9 +401,9 @@ func NewProxyChain() *ProxyChain {
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeoutSeconds(20),
 		tls_client.WithRandomTLSExtensionOrder(),
-		//tls_client.WithClientProfile(profiles.Chrome_117),
-		//tls_client.WithNotFollowRedirects(),
-		//tls_client.WithCookieJar(jar), // create cookieJar instance and pass it as argument
+		// tls_client.WithClientProfile(profiles.Chrome_117),
+		// tls_client.WithNotFollowRedirects(),
+		// tls_client.WithCookieJar(jar), // create cookieJar instance and pass it as argument
 	}
 	client, err := tls_client.NewHttpClient(tls_client.NewNoopLogger(), options...)
 	if err != nil {
@@ -459,7 +459,7 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 			return nil, chain.abort(err)
 		}
 		chain.Response = resp
-		//chain.onceClient = nil
+		// chain.onceClient = nil
 	} else {
 		resp, err := chain.Client.Do(chain.Request)
 		if err != nil {

@@ -24,7 +24,7 @@ func init() {
 // ForwardResponseHeaders forwards the response headers from the upstream server to the client
 func ForwardResponseHeaders() proxychain.ResponseModification {
 	return func(chain *proxychain.ProxyChain) error {
-		//fmt.Println(chain.Response.Header)
+		// fmt.Println(chain.Response.Header)
 		for uname, headers := range chain.Response.Header {
 			name := strings.ToLower(uname)
 			if forwardBlacklist[name] {

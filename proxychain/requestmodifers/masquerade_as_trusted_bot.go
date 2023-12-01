@@ -2,26 +2,23 @@ package requestmodifers
 
 import (
 	"ladder/proxychain"
+	"ladder/proxychain/requestmodifers/bot"
 )
 
 // MasqueradeAsGoogleBot modifies user agent and x-forwarded for
 // to appear to be a Google Bot
 func MasqueradeAsGoogleBot() proxychain.RequestModification {
-	const botUA string = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; http://www.google.com/bot.html) Chrome/79.0.3945.120 Safari/537.36"
-	const botIP string = "66.249.78.8" // TODO: create a random ip pool from https://developers.google.com/static/search/apis/ipranges/googlebot.json
-	// https://github.com/trisulnsm/trisul-scripts/blob/master/lua/frontend_scripts/reassembly/ja3/prints/ja3fingerprint.json
-	const ja3 string = "769,49195-49199-49196-49200-52393-52392-52244-52243-49161-49171-49162-49172-156-157-47-53-10,65281-0-23-35-13-5-18-16-11-10-21,29-23-24,0"
-	//	"741,49195-49199-49200-49161-49171-49162-49172-156-157-47-10-53-51-57,65281-0-23-35-13-13172-11-10,29-23-24,0"
+	ip := bot.GoogleBot.GetRandomIP()
 
-	return masqueradeAsTrustedBot(botUA, botIP, ja3)
+	return masqueradeAsTrustedBot(bot.GoogleBot.UserAgent, ip, bot.GoogleBot.Fingerprint)
 }
 
 // MasqueradeAsBingBot modifies user agent and x-forwarded for
 // to appear to be a Bing Bot
 func MasqueradeAsBingBot() proxychain.RequestModification {
-	const botUA string = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm) Chrome/79.0.3945.120 Safari/537.36"
-	const botIP string = "13.66.144.9" // https://www.bing.com/toolbox/bingbot.json
-	return masqueradeAsTrustedBot(botUA, botIP, "")
+	ip := bot.BingBot.GetRandomIP()
+
+	return masqueradeAsTrustedBot(bot.BingBot.Fingerprint, ip, "")
 }
 
 // MasqueradeAsWaybackMachineBot modifies user agent and x-forwarded for
@@ -84,7 +81,19 @@ func masqueradeAsTrustedBot(botUA string, botIP string, ja3 string) proxychain.R
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddOnceRequestModifications(
 			SpoofUserAgent(botUA),
-			SetRequestHeader("x-forwarded-for", botIP),
+
+			// general / nginx
+			SetRequestHeader("X-Forwarded-For", botIP),
+			SetRequestHeader("X-Real-IP", botIP),
+			// akamai
+			SetRequestHeader("True-Client-IP", botIP),
+			// cloudflare
+			SetRequestHeader("CF-Connecting-IP", botIP),
+			// weblogic
+			SetRequestHeader("WL-Proxy-Client-IP", botIP),
+			// azure
+			SetRequestHeader("X-Cluster-Client-IP", botIP),
+
 			DeleteRequestHeader("referrer"),
 			DeleteRequestHeader("origin"),
 		)
