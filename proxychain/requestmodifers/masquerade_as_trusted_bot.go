@@ -81,7 +81,19 @@ func masqueradeAsTrustedBot(botUA string, botIP string, ja3 string) proxychain.R
 	return func(chain *proxychain.ProxyChain) error {
 		chain.AddOnceRequestModifications(
 			SpoofUserAgent(botUA),
-			SetRequestHeader("x-forwarded-for", botIP),
+
+			// general / nginx
+			SetRequestHeader("X-Forwarded-For", botIP),
+			SetRequestHeader("X-Real-IP", botIP),
+			// akamai
+			SetRequestHeader("True-Client-IP", botIP),
+			// cloudflare
+			SetRequestHeader("CF-Connecting-IP", botIP),
+			// weblogic
+			SetRequestHeader("WL-Proxy-Client-IP", botIP),
+			// azure
+			SetRequestHeader("X-Cluster-Client-IP", botIP),
+
 			DeleteRequestHeader("referrer"),
 			DeleteRequestHeader("origin"),
 		)
