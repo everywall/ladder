@@ -308,3 +308,40 @@ func debugPrintRule(rule string, err error) {
 	fmt.Println(rule)
 	fmt.Println("------------------------------ END DEBUG RULESET -------------------------------")
 }
+
+// ======================= RuleSetMap implementation =================================================
+
+// RuleSetMap: A map with domain names as keys and pointers to the corresponding Rules as values.
+// This type is used to efficiently access rules based on domain names.
+type RuleSetMap map[string]*Rule
+
+// ToMap converts a RuleSet into a RuleSetMap. It transforms each Rule in the RuleSet
+// into a map entry where the key is the Rule's domain (lowercase)
+// and the value is a pointer to the Rule. This method is used to
+// efficiently access rules based on domain names.
+// The RuleSetMap may be accessed with or without a "www." prefix in the domain.
+func (rs *RuleSet) ToMap() RuleSetMap {
+	rsm := make(RuleSetMap)
+
+	addMapEntry := func(d string, rule *Rule) {
+		d = strings.ToLower(d)
+		rsm[d] = rule
+		if strings.HasPrefix(d, "www.") {
+			d = strings.TrimPrefix(d, "www.")
+			rsm[d] = rule
+		} else {
+			d = fmt.Sprintf("www.%s", d)
+			rsm[d] = rule
+		}
+	}
+
+	for i, rule := range *rs {
+		rulePtr := &(*rs)[i]
+		addMapEntry(rule.Domain, rulePtr)
+		for _, domain := range rule.Domains {
+			addMapEntry(domain, rulePtr)
+		}
+	}
+
+	return rsm
+}

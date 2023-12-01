@@ -171,3 +171,55 @@ func TestLoadRulesFromLocalDir(t *testing.T) {
 		assert.Equal(t, rule.RegexRules[0].Replace, "https:")
 	}
 }
+
+func TestToMap(t *testing.T) {
+	// Prepare a ruleset with multiple rules, including "www." prefixed domains
+	rules := RuleSet{
+		{
+			Domain:     "Example.com",
+			RegexRules: []Regex{{Match: "match1", Replace: "replace1"}},
+		},
+		{
+			Domain:     "www.AnotherExample.com",
+			RegexRules: []Regex{{Match: "match2", Replace: "replace2"}},
+		},
+		{
+			Domain:     "www.foo.bAr.baz.bOol.quX.com",
+			RegexRules: []Regex{{Match: "match3", Replace: "replace3"}},
+		},
+	}
+
+	// Convert to RuleSetMap
+	rsm := rules.ToMap()
+
+	// Test for correct number of entries
+	if len(rsm) != 6 {
+		t.Errorf("Expected 6 entries in RuleSetMap, got %d", len(rsm))
+	}
+
+	// Test for correct mapping
+	testDomains := []struct {
+		domain        string
+		expectedMatch string
+	}{
+		{"example.com", "match1"},
+		{"www.example.com", "match1"},
+		{"anotherexample.com", "match2"},
+		{"www.anotherexample.com", "match2"},
+		{"foo.bar.baz.bool.qux.com", "match3"},
+		{"no.ruleset.domain.com", ""},
+	}
+
+	for _, test := range testDomains {
+		if test.domain == "no.ruleset.domain.com" {
+			assert.Empty(t, test.expectedMatch)
+			continue
+		}
+		rule, exists := rsm[test.domain]
+		if !exists {
+			t.Errorf("Expected domain %s to exist in RuleSetMap", test.domain)
+		} else if rule.RegexRules[0].Match != test.expectedMatch {
+			t.Errorf("Expected match for %s to be %s, got %s", test.domain, test.expectedMatch, rule.RegexRules[0].Match)
+		}
+	}
+}
