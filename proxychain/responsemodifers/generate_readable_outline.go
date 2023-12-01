@@ -69,12 +69,14 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 			"Success":     true,
 			"Image":       extract.Metadata.Image,
 			"Description": extract.Metadata.Description,
+			"Sitename":    extract.Metadata.Sitename,
 			"Hostname":    extract.Metadata.Hostname,
 			"Url":         "/" + chain.Request.URL.String(),
 			"Title":       extract.Metadata.Title, // todo: modify CreateReadableDocument so we don't have <h1> titles duplicated?
 			"Date":        extract.Metadata.Date.String(),
-			"Author":      extract.Metadata.Author,
-			"Body":        distilledHTML,
+			"Author":      createWikipediaSearchLinks(extract.Metadata.Author),
+			//"Author": extract.Metadata.Author,
+			"Body": distilledHTML,
 		}
 
 		// ============================================================================
@@ -156,4 +158,35 @@ func rewriteHrefLinks(n *html.Node, baseURL string, apiPath string) {
 		return false
 	}
 	recurse(n)
+}
+
+// createWikipediaSearchLinks takes in comma or semicolon separated terms,
+// then turns them into <a> links searching for the term.
+func createWikipediaSearchLinks(searchTerms string) string {
+	semiColonSplit := strings.Split(searchTerms, ";")
+
+	var links []string
+	for i, termGroup := range semiColonSplit {
+		commaSplit := strings.Split(termGroup, ",")
+		for _, term := range commaSplit {
+			trimmedTerm := strings.TrimSpace(term)
+			if trimmedTerm == "" {
+				continue
+			}
+
+			encodedTerm := url.QueryEscape(trimmedTerm)
+
+			wikiURL := fmt.Sprintf("https://en.wikipedia.org/w/index.php?search=%s", encodedTerm)
+
+			link := fmt.Sprintf("<a href=\"%s\">%s</a>", wikiURL, trimmedTerm)
+			links = append(links, link)
+		}
+
+		// If it's not the last element in semiColonSplit, add a comma to the last link
+		if i < len(semiColonSplit)-1 {
+			links[len(links)-1] = links[len(links)-1] + ","
+		}
+	}
+
+	return strings.Join(links, " ")
 }
