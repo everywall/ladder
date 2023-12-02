@@ -6,9 +6,17 @@ import (
 )
 
 func TestRandomIPFromSubnet(t *testing.T) {
-	subnets := []string{"34.100.182.96/28", "207.46.13.0/24", "2001:4860:4801:10::/64", "2001:4860:4801:c::/64"}
+	err := GoogleBot.UpdatePool("https://developers.google.com/static/search/apis/ipranges/googlebot.json")
+	if err != nil {
+		t.Error(err)
+	}
 
-	for _, subnet := range subnets {
+	for _, prefix := range GoogleBot.IPPool.Prefixes {
+		subnet := prefix.IPv4
+		if prefix.IPv6 != "" {
+			subnet = prefix.IPv6
+		}
+
 		t.Run(subnet, func(t *testing.T) {
 			_, ipnet, err := net.ParseCIDR(subnet)
 			if err != nil {
