@@ -33,7 +33,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetRequestModifications(
 				// rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				// rx.MasqueradeAsFacebookBot(),
-				//rx.MasqueradeAsGoogleBot(),
+				rx.MasqueradeAsGoogleBot(),
 				rx.DeleteOutgoingCookies(),
 				rx.ForwardRequestHeaders(),
 				//rx.SpoofReferrerFromGoogleSearch(),
@@ -42,6 +42,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				// rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
+				tx.InjectScriptBeforeDOMContentLoaded(`(() => {let d = document.createElement("div"); d.id = "adb-check"; document.body.append(d) })()`),
 				tx.ForwardResponseHeaders(),
 				tx.BypassCORS(),
 				tx.BypassContentSecurityPolicy(),

@@ -66,6 +66,7 @@ func PatchTrackerScripts() proxychain.ResponseModification {
 		// preflight checks
 		reqURL := chain.Request.URL.String()
 		isTracker := false
+		//
 
 		var surrogateScript io.ReadCloser
 		for domain, domainRules := range rules {
