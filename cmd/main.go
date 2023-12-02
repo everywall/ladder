@@ -101,7 +101,7 @@ func main() {
 	}
 
 	if *randomBingBot {
-		err := bot.BingBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
+		err := bot.GoogleBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
 		if err != nil {
 			fmt.Println("error while retrieving list of Bingbot IPs: " + err.Error())
 			fmt.Println("defaulting to known trusted Bingbot identity")
@@ -213,6 +213,8 @@ func main() {
 	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 
 	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
+
+	app.All("playground/*", handlers.PlaygroundHandler("playground/*", proxyOpts))
 
 	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
 
