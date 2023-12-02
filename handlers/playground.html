@@ -28,8 +28,12 @@
             window.matchMedia("(prefers-color-scheme: dark)").matches)
         ) {
           document.documentElement.classList.add("dark");
+          const ninjaKeys = document.querySelector("ninja-keys");
+          if (ninjaKeys !== null) ninjaKeys.classList.add("dark");
         } else {
           document.documentElement.classList.remove("dark");
+          const ninjaKeys = document.querySelector("ninja-keys");
+          if (ninjaKeys !== null) ninjaKeys.classList.remove("dark");
         }
       };
       handleThemeChange();
@@ -264,7 +268,7 @@
               <button
                 id="btnNinja"
                 type="button"
-                class="inline-flex items-center justify-center h-8 px-8 my-auto whitespace-nowrap rounded-xl text-sm font-medium text-slate-900 dark:text-slate-200 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200/90 dark:hover:bg-slate-800/90 border hover:bg-slate-500"
+                class="inline-flex items-center justify-center h-8 px-8 my-auto whitespace-nowrap rounded-xl text-sm font-medium text-slate-900 dark:text-slate-200 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200/90 dark:hover:bg-slate-800/90 border hover:bg-slate-200 dark:hover:bg-slate-500"
               >
                 Press &nbsp;<span id="ninjaKey">⌘</span>&nbsp; + K to Apply
                 Modifiers
