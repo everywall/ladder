@@ -101,7 +101,7 @@ func main() {
 	}
 
 	if *randomBingBot {
-		err := bot.GoogleBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
+		err := bot.BingBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
 		if err != nil {
 			fmt.Println("error while retrieving list of Bingbot IPs: " + err.Error())
 			fmt.Println("defaulting to known trusted Bingbot identity")

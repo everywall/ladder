@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
+	"math/bits"
 	"math/rand"
+	"net"
 	"net/http"
 	"time"
-
-	"github.com/3th1nk/cidr"
 )
 
 type Bot interface {
@@ -100,30 +101,42 @@ func (b *bot) GetRandomIP() string {
 	if prefix.IPv4 != "" {
 		ip, err := randomIPFromSubnet(prefix.IPv4)
 		if err == nil {
-			return ip
+			return ip.String()
 		}
 	}
 
 	if prefix.IPv6 != "" {
 		ip, err := randomIPFromSubnet(prefix.IPv6)
 		if err == nil {
-			return ip
+			return ip.String()
 		}
 	}
 
 	// fallback to default IP which is known to work
 	ip, _ := randomIPFromSubnet(b.IPPool.Prefixes[0].IPv4)
 
-	return ip
+	return ip.String()
 }
 
-func randomIPFromSubnet(c string) (string, error) {
-	block, err := cidr.Parse(c)
+func randomIPFromSubnet(c string) (net.IP, error) {
+	ip, ipnet, err := net.ParseCIDR(c)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// TODO: the beginning of the network is technically a viable IP to use
-	// but maybe a different solution would be better here
-	return block.Network().String(), nil
+	// int representation of byte mask
+	mask := big.NewInt(0).SetBytes(ipnet.Mask).Uint64()
+
+	// how many unset bits there are at the end of the mask
+	offset := bits.TrailingZeros8(byte(0) ^ byte(mask))
+
+	// total number of ips available in the block
+	offset *= offset
+
+	toAdd := rand.Intn(offset)
+
+	last := len(ip) - 1
+	ip[last] = ip[last] + byte(toAdd)
+
+	return ip, nil
 }
