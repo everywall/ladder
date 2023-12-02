@@ -233,12 +233,15 @@
               <path d="m6 6 12 12" />
             </svg>
           </button>
+          <p
+            id="errorContainer"
+            class="absolute ml-2 left-0 -bottom-6 text-red-700 dark:text-red-400 text-sm"
+          />
         </div>
-        <p
-          id="errorContainer"
-          class="ml-2 [&:not(:first-child)]:mt-0 text-red-700 dark:text-red-400 text-sm"
-        />
-        <div class="flex flex-wrap-reverse gap-x-10 gap-y-4 justify-center">
+
+        <div
+          class="flex flex-wrap-reverse mt-5 gap-x-10 gap-y-4 justify-center"
+        >
           <button
             type="button"
             id="outlineButton"
@@ -300,6 +303,7 @@
       function clearInput() {
         inputField.value = "";
         clearButton.style.display = "none";
+        errorContainer.textContent = "";
         inputField.focus();
       }
 
