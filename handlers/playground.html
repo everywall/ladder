@@ -50,18 +50,18 @@
         <header class="flex flex-col gap-2">
           <div class="flex justify-between place-items-center">
             <div
-              class="hover:drop-shadow-[0_0px_4px_rgba(122,167,209,.3)] transition-colors duration-300 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+              class="hover:drop-shadow-[0_0px_4px_rgba(122,167,209,.3)] ring-offset-white dark:ring-offset-slate-900 transition-colors duration-300 focus:outline-none focus:ring ring-offset-2"
             >
               <div class="flex">
                 <a
                   href="/"
-                  class="flex -ml-2 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+                  class="flex -ml-2 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none ring-offset-white dark:ring-offset-slate-900 focus:ring ring-offset-2"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     xmlns:xlink="http://www.w3.org/1999/xlink"
                     viewBox="0 0 512 512"
-                    class="h-8 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+                    class="h-8 focus:outline-none focus:ring ring-offset-white dark:ring-offset-slate-900 ring-offset-2"
                   >
                     <path
                       fill="#7AA7D1"
@@ -75,7 +75,7 @@
                 </a>
                 <a
                   href="/playground"
-                  class="flex ml-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+                  class="flex ml-1 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring ring-offset-2 ring-offset-white dark:ring-offset"
                 >
                   <span
                     class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle"
@@ -91,7 +91,7 @@
                   aria-expanded="closed"
                   onclick="toggleDropdown()"
                   type="button"
-                  class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
+                  class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-white dark:ring-offset transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -405,27 +405,17 @@
         });
       }
 
-      let modifiers = {
-        forward_request_headers: false,
-        masquerade_as_facebook_bot: false,
-        masquerade_as_google_bot: false,
-        modify_domain_with_regex: false,
-        modify_outgoing_cookies: false,
-        modify_path_with_regex: false,
-        generate_readable_outline: false,
-      };
-
       function submitForm() {
         fetch("/playground/" + inputField.value, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(modifiers),
+          body: JSON.stringify(payload),
         })
           .then((response) => response.text())
           .then((result) => {
-            var resultIframe = parent.document.getElementById("resultIframe");
+            const resultIframe = parent.document.getElementById("resultIframe");
             resultIframe.contentDocument.open();
             resultIframe.contentDocument.write(result);
             resultIframe.contentDocument.close();
@@ -433,48 +423,64 @@
       }
 
       function clickHandler(pill) {
-        toggleModifier(pill.id);
+        toggleModifier("", pill.id);
         pill.removeEventListener("click", () => clickHandler(pill));
         pill.remove();
       }
 
-      function toggleModifier(modifier) {
-        modifiers[modifier] = !modifiers[modifier];
-        for (const [key, value] of Object.entries(modifiers)) {
-          const existingPill = document.getElementById(key);
-          if (value) {
-            if (!existingPill) {
-              const pill = document.createElement("span");
-              pill.classList.add(
-                "inline-flex",
-                "items-center",
-                "rounded-md",
-                "bg-slate-100",
-                "dark:bg-slate-800",
-                "px-2",
-                "py-1",
-                "h-4",
-                "text-xs",
-                "font-medium",
-                "border",
-                "border-slate-400",
-                "dark:border-slate-700",
-                "cursor-pointer"
-              );
-              pill.id = key;
-              pill.textContent = key;
-              modifierContainer.appendChild(pill);
-              pill.addEventListener("click", () => clickHandler(pill));
-            }
-          } else {
-            if (existingPill) {
-              existingPill.removeEventListener("click", () =>
-                clickHandler(existingPill)
-              );
-              existingPill.remove();
+      // TODO: Handle objects later -> will require modal popup with textinput
+
+      function toggleModifier(modifierType, modifierKey, values) {
+        if (modifierType === "") {
+          for (const key of Object.keys(payload)) {
+            if (key === modifierKey) {
+              modifierType = key;
             }
           }
         }
+        if (typeof modifierType[modifierKey] === "boolean") {
+          modifierType[modifierKey] = !modifierType[modifierKey];
+        }
+
+        if (typeof modifierType[modifierKey] === "object") {
+          if (modifierType[modifierKey].length > 0) {
+            modifierType[modifierKey][0] = "";
+          } else {
+            // TODO: handle multiple values
+            modifierType[modifierKey][0] = values;
+          }
+        }
+        // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
+        console.log(payload);
+
+        const existingPill = document.getElementById(modifierKey);
+        if (!existingPill) {
+          const pill = document.createElement("span");
+          pill.classList.add(
+            "inline-flex",
+            "items-center",
+            "rounded-md",
+            "bg-slate-100",
+            "dark:bg-slate-800",
+            "px-2",
+            "py-1",
+            "h-4",
+            "text-xs",
+            "font-medium",
+            "border",
+            "border-slate-400",
+            "dark:border-slate-700",
+            "cursor-pointer"
+          );
+          pill.id = modifierKey;
+          pill.textContent = modifierKey;
+          modifierContainer.appendChild(pill);
+          pill.addEventListener("click", () => clickHandler(pill));
+        } else {
+          existingPill.removeEventListener("click", () => clickHandler(pill));
+          existingPill.remove();
+        }
+
         validateAndSubmit();
       }
 
@@ -485,7 +491,7 @@
           title: "Forward request headers",
           section: "Request Modifiers",
           handler: () => {
-            toggleModifier("forward_request_headers");
+            toggleModifier(payload.responsemodifierquery.forwardrequestheaders);
           },
         },
         {
@@ -503,7 +509,9 @@
           title: "Facebook Bot",
           parent: "masqueradeAsTrustedBot",
           handler: () => {
-            toggleModifier("masquerade_as_facebook_bot");
+            toggleModifier(
+              payload.responsemodifierquery.masqueradeasfacebook_bot
+            );
           },
         },
         {
@@ -511,7 +519,7 @@
           title: "Google Bot",
           parent: "masqueradeAsTrustedBot",
           handler: () => {
-            toggleModifier("masquerade_as_google_bot");
+            toggleModifier(payload.responsemodifierquery.masqueradeasgooglebot);
           },
         },
         {
@@ -519,7 +527,7 @@
           title: "Modify domain with regex",
           section: "Request Modifiers",
           handler: () => {
-            toggleModifier("modify_domain_with_regex");
+            toggleModifier(payload.responsemodifierquery.modifydomainwithregex);
           },
         },
         {
@@ -527,7 +535,7 @@
           title: "Modify outgoing cookies",
           section: "Request Modifiers",
           handler: () => {
-            toggleModifier("modify_outgoing_cookies");
+            toggleModifier(payload.responsemodifierquery.modifyoutgoingcookies);
           },
         },
         {
@@ -535,7 +543,7 @@
           title: "Modify path with regex",
           section: "Request Modifiers",
           handler: () => {
-            toggleModifier("modify_path_with_regex");
+            toggleModifier(payload.responsemodifierquery.modifypathwithregex);
           },
         },
         {
@@ -543,13 +551,137 @@
           title: "Generate readable outline",
           section: "Response Modifiers",
           handler: () => {
-            toggleModifier("generate_readable_outline");
+            toggleModifier(
+              payload.responsemodifierquery,
+              "generatereadableoutline"
+            );
           },
         },
       ];
       document.getElementById("btnNinja").addEventListener("click", () => {
         ninja.open();
       });
+
+      let payload = {
+        requestmodifierquery: {
+          forwardrequestheaders: false,
+          masqueradeasgooglebot: false,
+          masqueradeasbingbot: false,
+          masqueradeaswaybackmachinebot: false,
+          masqueradeasfacebook_bot: false,
+          masqueradeasyandexbot: false,
+          masqueradeasbaidubot: false,
+          masqueradeasduckduckbot: false,
+          masqueradeasyahoobot: false,
+          modifydomainwithregex: {
+            match: "",
+            replacement: "",
+          },
+          setoutgoingcookie: {
+            name: "",
+            val: "",
+          },
+          setoutgoingcookies: {
+            cookies: "",
+          },
+          deleteoutgoingcookie: {
+            name: "",
+          },
+          deleteoutgoingcookies: false,
+          deleteoutgoingcookiesexcept: {
+            whitelist: "",
+          },
+          modifypathwithregex: {
+            match: "",
+            replacement: "",
+          },
+          modifyqueryparams: {
+            key: "",
+            value: "",
+          },
+          setrequestheader: {
+            name: "",
+            val: "",
+          },
+          deleterequestheader: {
+            name: "",
+          },
+          requestarchiveis: false,
+          requestgooglecache: false,
+          requestwaybackmachine: false,
+          resolvewithgoogledoh: false,
+          spooforigin: {
+            url: "",
+          },
+          hideorigin: false,
+          spoofreferrer: {
+            url: "",
+          },
+          hidereferrer: false,
+          spoofreferrerfrombaidusearch: false,
+          spoofreferrerfrombingsearch: false,
+          spoofreferrerfromgooglesearch: false,
+          spoofreferrerfromlinkedinpost: false,
+          spoofreferrerfromnaversearch: false,
+          spoofreferrerfrompinterestpost: false,
+          spoofreferrerfromqqpost: false,
+          spoofreferrerfromredditpost: false,
+          spoofreferrerfromtumblrpost: false,
+          spoofreferrerfromtwitterpost: false,
+          spoofreferrerfromvkontaktepost: false,
+          spoofreferrerfromweibopost: false,
+          spoofuseragent: {
+            ua: "",
+          },
+          spoofxforwardedfor: {
+            ip: "",
+          },
+        },
+        responsemodifierquery: {
+          apicontent: false,
+          blockelementremoval: {
+            cssSelector: "",
+          },
+          bypasscors: false,
+          bypasscontentsecuritypolicy: false,
+          setcontentsecuritypolicy: {
+            csp: "",
+          },
+          forwardresponseheaders: false,
+          generatereadableoutline: false,
+          injectscriptbeforedomcontentloaded: {
+            js: "",
+          },
+          injectscriptafterdomcontentloaded: {
+            js: "",
+          },
+          injectscriptafterdomidle: {
+            js: "",
+          },
+          deleteincomingcookies: false,
+          deleteincomingcookiesexcept: {
+            whitelist: "",
+          },
+          setincomingcookies: {
+            cookies: "",
+          },
+          setincomingcookie: {
+            name: "",
+            val: "",
+          },
+          setresponseheader: {
+            key: "",
+            value: "",
+          },
+          deleteresponseheader: {
+            key: "",
+          },
+          patchdynamicresourceurls: false,
+          patchgoogleanalytics: false,
+          patchtrackerscripts: false,
+          rewritehtmlresourceurls: false,
+        },
+      };
     </script>
   </body>
 </html>
