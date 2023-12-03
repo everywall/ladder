@@ -3,7 +3,6 @@ module ladder
 go 1.21.1
 
 require (
-	github.com/3th1nk/cidr v0.2.0
 	github.com/akamensky/argparse v1.4.0
 	github.com/bogdanfinn/fhttp v0.5.24
 	github.com/bogdanfinn/tls-client v1.6.1

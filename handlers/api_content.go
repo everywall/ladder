@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"ladder/proxychain"
-	rx "ladder/proxychain/requestmodifers"
-	tx "ladder/proxychain/responsemodifers"
+	rx "ladder/proxychain/requestmodifiers"
+	tx "ladder/proxychain/responsemodifiers"
 
 	"github.com/gofiber/fiber/v2"
 )

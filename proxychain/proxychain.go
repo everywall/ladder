@@ -42,9 +42,9 @@ applying request and response modifications along the way.
 
 import (
 
-	rx "ladder/pkg/proxychain/requestmodifers"
-	tx "ladder/pkg/proxychain/responsemodifers"
-	"ladder/pkg/proxychain/responsemodifers/rewriters"
+	rx "ladder/pkg/proxychain/requestmodifiers"
+	tx "ladder/pkg/proxychain/responsemodifiers"
+	"ladder/pkg/proxychain/responsemodifiers/rewriters"
 	"ladder/internal/proxychain"
 
 )
@@ -134,14 +134,14 @@ type HTTPClient interface {
 	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
 }
 
-// SetRequestModifications sets the ProxyChain's request modifers
+// SetRequestModifications sets the ProxyChain's request modifiers
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) SetRequestModifications(mods ...RequestModification) *ProxyChain {
 	chain.requestModifications = mods
 	return chain
 }
 
-// AddRequestModifications adds more request modifers to the ProxyChain
+// AddRequestModifications adds more request modifiers to the ProxyChain
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddRequestModifications(mods ...RequestModification) *ProxyChain {
 	chain.requestModifications = append(chain.requestModifications, mods...)
@@ -162,7 +162,7 @@ func (chain *ProxyChain) AddOnceResponseModifications(mods ...ResponseModificati
 	return chain
 }
 
-// AddResponseModifications sets the ProxyChain's response modifers
+// AddResponseModifications sets the ProxyChain's response modifiers
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) *ProxyChain {
 	chain.responseModifications = mods

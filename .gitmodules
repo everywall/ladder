@@ -1,6 +1,6 @@
-[submodule "proxychain/requestmodifers/vendor/ua-parser-js"]
-	path = proxychain/requestmodifers/vendor/ua-parser-js
-	url = https://github.com/faisalman/ua-parser-js.git
-[submodule "proxychain/responsemodifers/vendor/ddg-tracker-surrogates"]
-	path = proxychain/responsemodifers/vendor/ddg-tracker-surrogates
+[submodule "proxychain/responsemodifiers/vendor/ddg-tracker-surrogates"]
+	path = proxychain/responsemodifiers/vendor/ddg-tracker-surrogates
 	url = https://github.com/duckduckgo/tracker-surrogates
+[submodule "proxychain/requestmodifiers/vendor/ua-parser-js"]
+	path = proxychain/requestmodifiers/vendor/ua-parser-js
+	url = https://github.com/faisalman/ua-parser-js.git

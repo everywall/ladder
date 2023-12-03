@@ -10,7 +10,7 @@ import (
 
 	"ladder/handlers"
 	"ladder/internal/cli"
-	"ladder/proxychain/requestmodifers/bot"
+	"ladder/proxychain/requestmodifiers/bot"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
