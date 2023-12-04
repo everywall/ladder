@@ -336,6 +336,31 @@
       <ninja-keys> </ninja-keys>
     </div>
     <script>
+      // TODO: add all modifiers into Ninja Keys
+      // TODO: reusable modal for value input for modifiers, reuse focus trap code from script.js
+      // TODO: write logic in toggleModifier() to handle non-boolean values
+      // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
+      // TODO: refactor common logic with form.html to script.js
+      // TODO: export to yaml
+
+      function closeDropdownOnClickWithinIframe() {
+        const iframe = document.getElementById("resultIframe");
+        iframe.contentWindow.document.addEventListener(
+          "click",
+          () => {
+            if (
+              !document
+                .getElementById("dropdown_panel")
+                .classList.contains("hidden")
+            ) {
+              toggleDropdown();
+            }
+          },
+          true
+        );
+      }
+      closeDropdownOnClickWithinIframe();
+
       function validateAndSubmit() {
         let url = inputField.value;
         let error = "";
@@ -418,6 +443,7 @@
             const resultIframe = parent.document.getElementById("resultIframe");
             resultIframe.contentDocument.open();
             resultIframe.contentDocument.write(result);
+            closeDropdownOnClickWithinIframe();
             resultIframe.contentDocument.close();
           });
       }
@@ -427,8 +453,6 @@
         pill.removeEventListener("click", () => clickHandler(pill));
         pill.remove();
       }
-
-      // TODO: Handle objects later -> will require modal popup with textinput
 
       function toggleModifier(modifierType, modifierKey, values) {
         if (modifierType === "") {
@@ -450,7 +474,6 @@
             modifierType[modifierKey][0] = values;
           }
         }
-        // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
         console.log(payload);
 
         const existingPill = document.getElementById(modifierKey);
