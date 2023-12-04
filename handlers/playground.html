@@ -234,13 +234,14 @@
             <div class="flex gap-6">
               <div class="flex-1 relative">
                 <input
-                  type="text"
+                  type="url"
                   id="inputField"
                   placeholder="Enter URL"
                   name="inputField"
                   class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
                   autocomplete="off"
                   autofocus
+                  required
                 />
                 <button
                   id="clearButton"
@@ -274,10 +275,6 @@
                 Modifiers
               </button>
             </div>
-            <p
-              id="errorContainer"
-              class="absolute ml-2 [&:not(:first-child)]:mt-9 text-red-700 dark:text-red-400 text-sm"
-            />
           </form>
           <div class="mt-4 mx-4 flex justify-between">
             <div id="modifierContainer" class="flex w-full gap-1"></div>
@@ -361,30 +358,8 @@
       }
       closeDropdownOnClickWithinIframe();
 
-      function validateAndSubmit() {
-        let url = inputField.value;
-        let error = "";
-        if (!url || typeof url !== "string") {
-          error = "Please enter a valid URL.";
-        }
-        if (typeof url === "string" && url.indexOf("http") === -1) {
-          url = "https://" + url;
-        }
-        const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(\/\S*)?$/i;
-        if (!urlPattern.test(url)) {
-          error = "Please enter a valid URL.";
-        }
-        if (error) {
-          errorContainer.textContent = error;
-          return false;
-        }
-        errorContainer.textContent = "";
-        submitForm();
-      }
-
       function clearInput() {
         inputField.value = "";
-        errorContainer.textContent = "";
         clearButton.style.display = "none";
         inputField.focus();
       }
@@ -393,7 +368,7 @@
         .getElementById("inputForm")
         .addEventListener("submit", function (e) {
           e.preventDefault();
-          validateAndSubmit();
+          submitForm();
         });
 
       if (navigator.platform.includes("Mac")) {
@@ -404,7 +379,6 @@
 
       const inputField = document.getElementById("inputField");
       const clearButton = document.getElementById("clearButton");
-      const errorContainer = document.getElementById("errorContainer");
       const modifierContainer = document.getElementById("modifierContainer");
 
       if (inputField !== null && clearButton !== null) {
@@ -431,6 +405,9 @@
       }
 
       function submitForm() {
+        if (!document.getElementById("inputForm").checkValidity()) {
+          return;
+        }
         fetch("/playground/" + inputField.value, {
           method: "POST",
           headers: {
@@ -504,23 +481,36 @@
           existingPill.remove();
         }
 
-        validateAndSubmit();
+        submitForm();
       }
 
       const ninja = document.querySelector("ninja-keys");
       ninja.data = [
         {
+          // REQUEST MODIFIERS
           id: "forwardRequestHeaders",
           title: "Forward request headers",
           section: "Request Modifiers",
           handler: () => {
-            toggleModifier(payload.responsemodifierquery.forwardrequestheaders);
+            toggleModifier(
+              payload.requestmodifierquery,
+              "forwardrequestheaders"
+            );
           },
         },
         {
           id: "masqueradeAsTrustedBot",
           title: "Masquerade as ...",
-          children: ["Facebook Bot", "Google Bot"],
+          children: [
+            "Google Bot",
+            "Bing Bot",
+            "Wayback Machine Bot",
+            "Facebook Bot",
+            "Yandex Bot",
+            "Baidu Bot",
+            "DuckDuckGo Bot",
+            "Yahoo Bot",
+          ],
           section: "Request Modifiers",
           handler: () => {
             ninja.open({ parent: "masqueradeAsTrustedBot" });
@@ -528,47 +518,549 @@
           },
         },
         {
-          id: "masqueradeAsFacebookBot",
-          title: "Facebook Bot",
+          id: "masqueradeAsGoogleBot",
+          title: "Google Bot",
           parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
           handler: () => {
             toggleModifier(
-              payload.responsemodifierquery.masqueradeasfacebook_bot
+              payload.requestmodifierquery,
+              "masqueradeasgooglebot"
             );
           },
         },
         {
-          id: "masqueradeAsGoogleBot",
-          title: "Google Bot",
+          id: "masqueradeAsBingBot",
+          title: "Bing Bot",
           parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
           handler: () => {
-            toggleModifier(payload.responsemodifierquery.masqueradeasgooglebot);
+            toggleModifier(payload.requestmodifierquery, "masqueradeasbingbot");
+          },
+        },
+        {
+          id: "masqueradeAsWaybackMachineBot",
+          title: "Wayback Machine Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "masqueradeaswaybackmachinebot"
+            );
+          },
+        },
+        {
+          id: "masqueradeAsFacebookBot",
+          title: "Facebook Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "masqueradeasfacebookbot"
+            );
+          },
+        },
+        {
+          id: "masqueradeAsYandexBot",
+          title: "Yandex Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "masqueradeasyandexbot"
+            );
+          },
+        },
+        {
+          id: "masqueradeAsBaiduBot",
+          title: "Baidu Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(payload.requestmodifierquery, "masqueradeabaidubot");
+          },
+        },
+        {
+          id: "masqueradeAsDuckDuckBot",
+          title: "DuckDuckGo Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "masqueradeasduckduckbot"
+            );
+          },
+        },
+        {
+          id: "masqueradeAsYahooBot",
+          title: "Yahoo Bot",
+          parent: "masqueradeAsTrustedBot",
+          section: "Masquerade as ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "masqueradeasyahoobot"
+            );
+          },
+        },
+        {
+          id: "modifyOutgoingCookies",
+          title: "Modify outgoing cookies...",
+          children: [
+            "Set outgoing cookie",
+            "Set outgoing cookies",
+            "Delete outgoing cookie",
+            "Delete outgoing cookies",
+            "Delete outgoing cookies except",
+          ],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "modifyOutgoingCookies" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "setOutgoingCookie",
+          title: "Set outgoing cookie",
+          parent: "modifyOutgoingCookies",
+          section: "Modify outgoing cookies ...",
+          handler: () => {
+            const values = getValues("name", "val");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "setoutgoingcookie",
+              values
+            );
+          },
+        },
+        {
+          id: "setOutgoingCookies",
+          title: "Set outgoing cookies",
+          parent: "modifyOutgoingCookies",
+          section: "Modify outgoing cookies ...",
+          handler: () => {
+            const values = getValues("cookies");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "setoutgoingcookies",
+              values
+            );
+          },
+        },
+        {
+          id: "deleteOutgoingCookie",
+          title: "Delete outgoing cookie",
+          parent: "modifyOutgoingCookies",
+          section: "Modify outgoing cookies ...",
+          handler: () => {
+            const values = getValues("name");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "deleteoutgoingcookie",
+              values
+            );
+          },
+        },
+        {
+          id: "deleteOutgoingCookies",
+          title: "Delete outgoing cookies",
+          parent: "modifyOutgoingCookies",
+          section: "Modify outgoing cookies ...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "deleteoutgoingcookies"
+            );
+          },
+        },
+        {
+          id: "deleteOutgoingCookiesExcept",
+          title: "Delete outgoing cookies except",
+          parent: "modifyOutgoingCookies",
+          section: "Modify outgoing cookies ...",
+          handler: () => {
+            const values = getValues("whitelist");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "deleteoutgoingcookiesexcept",
+              values
+            );
+          },
+        },
+        {
+          id: "modifyUrl",
+          title: "Modify URL...",
+          children: [
+            "Modify domain with regex",
+            "Modify path with regex",
+            "Modify query params",
+          ],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "modifyUrl" });
+            return { keepOpen: true };
           },
         },
         {
           id: "modifyDomainWithRegex",
           title: "Modify domain with regex",
-          section: "Request Modifiers",
+          parent: "modifyUrl",
+          section: "Modify URL ...",
           handler: () => {
-            toggleModifier(payload.responsemodifierquery.modifydomainwithregex);
-          },
-        },
-        {
-          id: "modifyOutgoingCookies",
-          title: "Modify outgoing cookies",
-          section: "Request Modifiers",
-          handler: () => {
-            toggleModifier(payload.responsemodifierquery.modifyoutgoingcookies);
+            const values = getValues("match", "replacement"); // TODO write a function to get values
+            toggleModifier(
+              payload.requestmodifierquery,
+              "modifydomainwithregex",
+              values
+            );
           },
         },
         {
           id: "modifyPathWithRegex",
           title: "Modify path with regex",
-          section: "Request Modifiers",
+          parent: "modifyUrl",
+          section: "Modify URL ...",
           handler: () => {
-            toggleModifier(payload.responsemodifierquery.modifypathwithregex);
+            const values = getValues("match", "replacement");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "modifypathwithregex",
+              values
+            );
           },
         },
+        {
+          id: "modifyQueryParams",
+          title: "Modify query params",
+          parent: "modifyUrl",
+          section: "Modify URL ...",
+          handler: () => {
+            const values = getValues("key", "value");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "modifyqueryparams",
+              values
+            );
+          },
+        },
+        {
+          id: "modifyRequestHeaders",
+          title: "Modify request headers...",
+          children: ["Set request header", "Delete request header"],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "modifyRequestHeaders" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "setRequestHeader",
+          title: "Set request header",
+          parent: "modifyRequestHeaders",
+          section: "Modify request headers ...",
+          handler: () => {
+            const values = getValues("name", "val");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "setrequestheader",
+              values
+            );
+          },
+        },
+        {
+          id: "deleteRequestHeader",
+          title: "Delete request header",
+          parent: "modifyRequestHeaders",
+          section: "Modify request headers ...",
+          handler: () => {
+            const values = getValues("name");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "deleterequestheader",
+              values
+            );
+          },
+        },
+        {
+          id: "requestArchived",
+          title: "Request archived version from...",
+          children: ["Archive.is", "Google Cache", "Wayback Machine"],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "requestArchived" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "requestArchiveIs",
+          title: "Achive.is",
+          parent: "requestArchived",
+          section: "Reqest archived version from...",
+          handler: () => {
+            toggleModifier(payload.requestmodifierquery, "requestarchiveis");
+          },
+        },
+        {
+          id: "requestGoogleCache",
+          title: "Google Cache",
+          parent: "requestArchived",
+          section: "Reqest archived version from...",
+          handler: () => {
+            toggleModifier(payload.requestmodifierquery, "requestgooglecache");
+          },
+        },
+        {
+          id: "requestWaybackMachine",
+          title: "Wayback Machine",
+          parent: "requestArchived",
+          section: "Reqest archived version from...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "requestwaybackmachine"
+            );
+          },
+        },
+        {
+          id: "resolveWithGoogleDoH",
+          title: "Resolve with Google's DNS over HTTPs service",
+          section: "Request Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "resolvewithgoogledoh"
+            );
+          },
+        },
+        {
+          id: "spoofRequest",
+          title: "Spoof or hide...",
+          children: ["Archive.is", "Google Cache", "Wayback Machine"],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "spoofRequest" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "spoofOrigin",
+          title: "Spoof origin",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            const values = getValues("url");
+            toggleModifier(payload.requestmodifierquery, "spooforigin", values);
+          },
+        },
+        {
+          id: "hideOrigin",
+          title: "Hide origin",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(payload.requestmodifierquery, "hideorigin");
+          },
+        },
+        {
+          id: "spoofReferrer",
+          title: "Spoof referrer",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            const values = getValues("url");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrer",
+              values
+            );
+          },
+        },
+        {
+          id: "hideReferrer",
+          title: "Hide referrer",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(payload.requestmodifierquery, "hidereferrer");
+          },
+        },
+        {
+          id: "spoofReferrerFromBaiduSearch",
+          title: "Spoof referrer from Baidu search",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfrombaidusearch"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromBingSearch",
+          title: "Spoof referrer from Bing search",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfrombingsearch"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromGoogleSearch",
+          title: "Spoof referrer from Google search",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromgooglesearch"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromLinkedinPost",
+          title: "Spoof referrer from Linkedin post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromlinkedinpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromNaverSearch",
+          title: "Spoof referrer from Naver search",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromnaversearch"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromPinterestPost",
+          title: "Spoof referrer from Pinterest post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfrompinterestpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromQQPost",
+          title: "Spoof referrer from QQ post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromqqpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromRedditPost",
+          title: "Spoof referrer from Reddit post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromredditpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromTumblrPost",
+          title: "Spoof referrer from Tumblr post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromtumblrpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromTwitterPost",
+          title: "Spoof referrer from Twitter post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromtwitterpost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromKontaktePost",
+          title: "Spoof referrer from Kontakte post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromkontaktelepost"
+            );
+          },
+        },
+        {
+          id: "spoofReferrerFromWeiboPost",
+          title: "Spoof referrer from Weibo post",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofreferrerfromweibopost"
+            );
+          },
+        },
+        {
+          id: "spoofUserAgent",
+          title: "Spoof user agent",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            const values = getValues("ua");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofuseragent",
+              values
+            );
+          },
+        },
+        {
+          id: "spoofXForwardedFor",
+          title: "Spoof X-Forwarded-For",
+          parent: "spoofRequest",
+          section: "Spoof or hide...",
+          handler: () => {
+            const values = getValues("ip");
+            toggleModifier(
+              payload.requestmodifierquery,
+              "spoofxforwardedfor",
+              values
+            );
+          },
+        },
+        // RESPONSE MODIFIERS
         {
           id: "GenerateReadableOutline",
           title: "Generate readable outline",
@@ -591,7 +1083,7 @@
           masqueradeasgooglebot: false,
           masqueradeasbingbot: false,
           masqueradeaswaybackmachinebot: false,
-          masqueradeasfacebook_bot: false,
+          masqueradeasfacebookbot: false,
           masqueradeasyandexbot: false,
           masqueradeasbaidubot: false,
           masqueradeasduckduckbot: false,

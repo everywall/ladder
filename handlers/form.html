@@ -203,7 +203,7 @@
       <form id="inputForm" method="get" class="flex flex-col gap-2 mx-4">
         <div class="relative">
           <input
-            type="text"
+            type="url"
             id="inputField"
             placeholder="Enter URL"
             name="inputField"
@@ -233,10 +233,6 @@
               <path d="m6 6 12 12" />
             </svg>
           </button>
-          <p
-            id="errorContainer"
-            class="absolute ml-2 left-0 -bottom-6 text-red-700 dark:text-red-400 text-sm"
-          />
         </div>
 
         <div
@@ -279,21 +275,6 @@
     <script>
       function validateAndRedirect(destination) {
         let url = inputField.value;
-        let error = "";
-        if (!url || typeof url !== "string") {
-          error = "Please enter a valid URL.";
-        }
-        if (typeof url === "string" && url.indexOf("http") === -1) {
-          url = "https://" + url;
-        }
-        const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(\/\S*)?$/i;
-        if (!urlPattern.test(url)) {
-          error = "Please enter a valid URL.";
-        }
-        if (error) {
-          errorContainer.textContent = error;
-          return false;
-        }
         const redirectUrl =
           destination === "outline" ? "/outline/" + url : "/" + url;
         window.location.href = redirectUrl;
@@ -303,7 +284,6 @@
       function clearInput() {
         inputField.value = "";
         clearButton.style.display = "none";
-        errorContainer.textContent = "";
         inputField.focus();
       }
 
@@ -322,7 +302,6 @@
 
       const inputField = document.getElementById("inputField");
       const clearButton = document.getElementById("clearButton");
-      const errorContainer = document.getElementById("errorContainer");
 
       if (inputField !== null && clearButton !== null) {
         inputField.addEventListener("input", () => {
