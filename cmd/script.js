@@ -95,7 +95,7 @@ const toggleDropdown = () => {
   };
 
   const handleClickOutside = (e) => {
-    if (!dropdown.contains(e.target)) {
+    if (dropdown !== null && !dropdown.contains(e.target)) {
       closeDropdown();
     }
   };
