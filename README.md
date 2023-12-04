@@ -189,6 +189,8 @@ There is a basic ruleset available in a separate repository [ruleset.yaml](https
 To run a development server at http://localhost:8080:
 
 ```bash
+git clone git@github.com-ladddder:everywall/ladder.git
+git submodule update --init --recursive
 echo "dev  " > handlers/VERSION
 echo "dev  " > cmd/VERSION
 RULESET="./ruleset.yaml" go run cmd/main.go
