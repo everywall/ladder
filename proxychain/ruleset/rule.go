@@ -34,11 +34,24 @@ func (rule *Rule) UnmarshalJSON(data []byte) error {
 		if err != nil {
 			return fmt.Errorf("Rule::UnmarshalJSON invalid function call syntax => '%s'", err)
 		}
-		f, exists := resModMap[name]
+		f, exists := rsmModMap[name]
+		if !exists {
+			return fmt.Errorf("Rule::UnmarshalJSON => responseModifer '%s' does not exist, please check spelling", err)
+		}
+		rule.ResponseModifications = append(rule.ResponseModifications, f(params...))
+	}
+
+	// convert responseModification function call string into actual functional option
+	for _, rqmModStr := range aux.RequestModifications {
+		name, params, err := parseFuncCall(rqmModStr)
+		if err != nil {
+			return fmt.Errorf("Rule::UnmarshalJSON invalid function call syntax => '%s'", err)
+		}
+		f, exists := rqmModMap[name]
 		if !exists {
 			return fmt.Errorf("Rule::UnmarshalJSON => requestModifier '%s' does not exist, please check spelling", err)
 		}
-		rule.ResponseModifications = append(rule.ResponseModifications, f(params...))
+		rule.RequestModifications = append(rule.RequestModifications, f(params...))
 	}
 
 	return nil

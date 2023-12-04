@@ -47,7 +47,7 @@ type CustomDialer struct {
 	*net.Dialer
 }
 
-func NewCustomDialer(timeout, keepAlive time.Duration) *CustomDialer {
+func newCustomDialer(timeout, keepAlive time.Duration) *CustomDialer {
 	return &CustomDialer{
 		Dialer: &net.Dialer{
 			Timeout:   timeout,
