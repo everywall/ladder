@@ -16,6 +16,8 @@ import (
 //go:embed playground.html
 var playgroundHtml string
 
+// TODO Write tests
+
 type ModifierQuery struct {
 	RequestModifierQuery  RequestModifierQuery  `json:"requestmodifierquery"`
 	ResponseModifierQuery ResponseModifierQuery `json:"responsemodifierquery"`
@@ -32,48 +34,48 @@ type RequestModifierQuery struct {
 	MasqueradeAsDuckDuckBot       bool `json:"masqueradeasduckduckbot"`
 	MasqueradeAsYahooBot          bool `json:"masqueradeasyahoobot"`
 	ModifyDomainWithRegex         struct {
-		match       string `json:"match"`
-		replacement string `json:"replacement"`
+		Match       string `json:"match"`
+		Replacement string `json:"replacement"`
 	} `json:"modifydomainwithregex"`
 	SetOutgoingCookie struct {
-		name string `json:"name"`
-		val  string `json:"val"`
+		Name string `json:"name"`
+		Val  string `json:"val"`
 	} `json:"setoutgoingcookie"`
 	SetOutgoingCookies struct {
-		cookies string `json:"cookies"`
+		Cookies string `json:"cookies"`
 	} `json:"setoutgoingcookies"`
 	DeleteOutgoingCookie struct {
-		name string `json:"name"`
+		Name string `json:"name"`
 	} `json:"deleteoutgoingcookie"`
 	DeleteOutgoingCookies       bool `json:"deleteoutgoingcookies"`
 	DeleteOutgoingCookiesExcept struct {
-		whitelist string `json:"whitelist"`
+		Whitelist string `json:"whitelist"`
 	} `json:"deleteoutgoingcookiesexcept"`
 	ModifyPathWithRegex struct {
-		match       string `json:"match"`
-		replacement string `json:"replacement"`
+		Match       string `json:"match"`
+		Replacement string `json:"replacement"`
 	} `json:"modifypathwithregex"`
 	ModifyQueryParams struct {
-		key   string `json:"key"`
-		value string `json:"value"`
+		Key   string `json:"key"`
+		Value string `json:"value"`
 	} `json:"modifyqueryparams"`
 	SetRequestHeader struct {
-		name string `json:"name"`
-		val  string `json:"val"`
+		Name string `json:"name"`
+		Val  string `json:"val"`
 	} `json:"setrequestheader"`
 	DeleteRequestHeader struct {
-		name string `json:"name"`
+		Name string `json:"name"`
 	} `json:"deleterequestheader"`
 	RequestArchiveIs      bool `json:"requestarchiveis"`
 	RequestGoogleCache    bool `json:"requestgooglecache"`
 	RequestWaybackMachine bool `json:"requestwaybackmachine"`
 	ResolveWithGoogleDoH  bool `json:"resolvewithgoogledoh"`
 	SpoofOrigin           struct {
-		url string `json:"url"`
+		Url string `json:"url"`
 	} `json:"spooforigin"`
 	HideOrigin    bool `json:"hideorigin"`
 	SpoofReferrer struct {
-		url string `json:"url"`
+		Url string `json:"url"`
 	} `json:"spoofreferrer"`
 	HideReferrer                   bool `json:"hidereferrer"`
 	SpoofReferrerFromBaiduSearch   bool `json:"spoofreferrerfrombaidusearch"`
@@ -89,51 +91,51 @@ type RequestModifierQuery struct {
 	SpoofReferrerFromVkontaktePost bool `json:"spoofreferrerfromvkontaktepost"`
 	SpoofReferrerFromWeiboPost     bool `json:"spoofreferrerfromweibopost"`
 	SpoofUserAgent                 struct {
-		ua string `json:"ua"`
+		Ua string `json:"ua"`
 	} `json:"spoofuseragent"`
 	SpoofXForwardedFor struct {
-		ip string `json:"ip"`
+		Ip string `json:"ip"`
 	} `json:"spoofxforwardedfor"`
 }
 
 type ResponseModifierQuery struct {
 	APIContent          bool `json:"apicontent"`
 	BlockElementRemoval struct {
-		cssSelector string `json:"cssSelector"`
+		CssSelector string `json:"cssSelector"`
 	} `json:"blockelementremoval"`
 	BypassCORS                  bool `json:"bypasscors"`
 	BypassContentSecurityPolicy bool `json:"bypasscontentsecuritypolicy"`
 	SetContentSecurityPolicy    struct {
-		csp string `json:"csp"`
+		Csp string `json:"csp"`
 	} `json:"setcontentsecuritypolicy"`
 	ForwardResponseHeaders             bool `json:"forwardresponseheaders"`
 	GenerateReadableOutline            bool `json:"generatereadableoutline"`
 	InjectScriptBeforeDOMContentLoaded struct {
-		js string `json:"js"`
+		Js string `json:"js"`
 	} `json:"injectscriptbeforedomcontentloaded"`
 	InjectScriptAfterDOMContentLoaded struct {
-		js string `json:"js"`
+		Js string `json:"js"`
 	} `json:"injectscriptafterdomcontentloaded"`
 	InjectScriptAfterDOMIdle struct {
-		js string `json:"js"`
+		Js string `json:"js"`
 	} `json:"injectscriptafterdomidle"`
 	DeleteIncomingCookies       bool `json:"deleteincomingcookies"`
 	DeleteIncomingCookiesExcept struct {
-		whitelist string `json:"whitelist"`
+		Whitelist string `json:"whitelist"`
 	} `json:"deleteincomingcookiesexcept"`
 	SetIncomingCookies struct {
-		cookies string `json:"cookies"`
+		Cookies string `json:"cookies"`
 	} `json:"setincomingcookies"`
 	SetIncomingCookie struct {
-		name string `json:"name"`
-		val  string `json:"val"`
+		Name string `json:"name"`
+		Val  string `json:"val"`
 	} `json:"setincomingcookie"`
 	SetResponseHeader struct {
-		key   string `json:"key"`
-		value string `json:"value"`
+		Key   string `json:"key"`
+		Value string `json:"value"`
 	} `json:"setresponseheader"`
 	DeleteResponseHeader struct {
-		key string `json:"key"`
+		Key string `json:"key"`
 	} `json:"deleteresponseheader"`
 	PatchDynamicResourceURLs bool `json:"patchdynamicresourceurls"`
 	PatchGoogleAnalytics     bool `json:"patchgoogleanalytics"`
@@ -201,44 +203,44 @@ func BuildRequestModifications(requestModificationData RequestModifierQuery) []p
 	if requestModificationData.MasqueradeAsYahooBot {
 		modifications = append(modifications, rx.MasqueradeAsYahooBot())
 	}
-	if requestModificationData.ModifyDomainWithRegex.match != "" && requestModificationData.ModifyDomainWithRegex.replacement != "" {
-		regex, err := regexp.Compile(requestModificationData.ModifyDomainWithRegex.match)
+	if requestModificationData.ModifyDomainWithRegex.Match != "" && requestModificationData.ModifyDomainWithRegex.Replacement != "" {
+		regex, err := regexp.Compile(requestModificationData.ModifyDomainWithRegex.Match)
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifications = append(modifications, rx.ModifyDomainWithRegex(*regex, requestModificationData.ModifyDomainWithRegex.replacement))
+		modifications = append(modifications, rx.ModifyDomainWithRegex(*regex, requestModificationData.ModifyDomainWithRegex.Replacement))
 	}
-	if requestModificationData.SetOutgoingCookie.name != "" && requestModificationData.SetOutgoingCookie.val != "" {
-		modifications = append(modifications, rx.SetOutgoingCookie(requestModificationData.SetOutgoingCookie.name, requestModificationData.SetOutgoingCookie.val))
+	if requestModificationData.SetOutgoingCookie.Name != "" && requestModificationData.SetOutgoingCookie.Val != "" {
+		modifications = append(modifications, rx.SetOutgoingCookie(requestModificationData.SetOutgoingCookie.Name, requestModificationData.SetOutgoingCookie.Val))
 	}
-	if requestModificationData.SetOutgoingCookies.cookies != "" {
-		modifications = append(modifications, rx.SetOutgoingCookies(requestModificationData.SetOutgoingCookies.cookies))
+	if requestModificationData.SetOutgoingCookies.Cookies != "" {
+		modifications = append(modifications, rx.SetOutgoingCookies(requestModificationData.SetOutgoingCookies.Cookies))
 	}
-	if requestModificationData.DeleteOutgoingCookie.name != "" {
-		modifications = append(modifications, rx.DeleteOutgoingCookie(requestModificationData.DeleteOutgoingCookie.name))
+	if requestModificationData.DeleteOutgoingCookie.Name != "" {
+		modifications = append(modifications, rx.DeleteOutgoingCookie(requestModificationData.DeleteOutgoingCookie.Name))
 	}
 	if requestModificationData.DeleteOutgoingCookies {
 		modifications = append(modifications, rx.DeleteOutgoingCookies())
 	}
-	if requestModificationData.DeleteOutgoingCookiesExcept.whitelist != "" {
+	if requestModificationData.DeleteOutgoingCookiesExcept.Whitelist != "" {
 		// TODO: Split comma separated values in string?
-		modifications = append(modifications, rx.DeleteOutgoingCookiesExcept(requestModificationData.DeleteOutgoingCookiesExcept.whitelist))
+		modifications = append(modifications, rx.DeleteOutgoingCookiesExcept(requestModificationData.DeleteOutgoingCookiesExcept.Whitelist))
 	}
-	if requestModificationData.ModifyPathWithRegex.match != "" && requestModificationData.ModifyPathWithRegex.replacement != "" {
-		regex, err := regexp.Compile(requestModificationData.ModifyPathWithRegex.match)
+	if requestModificationData.ModifyPathWithRegex.Match != "" && requestModificationData.ModifyPathWithRegex.Replacement != "" {
+		regex, err := regexp.Compile(requestModificationData.ModifyPathWithRegex.Match)
 		if err != nil {
 			log.Fatal(err)
 		}
-		modifications = append(modifications, rx.ModifyPathWithRegex(*regex, requestModificationData.ModifyPathWithRegex.replacement))
+		modifications = append(modifications, rx.ModifyPathWithRegex(*regex, requestModificationData.ModifyPathWithRegex.Replacement))
 	}
-	if requestModificationData.ModifyQueryParams.key != "" && requestModificationData.ModifyQueryParams.value != "" {
-		modifications = append(modifications, rx.ModifyQueryParams(requestModificationData.ModifyQueryParams.key, requestModificationData.ModifyQueryParams.value))
+	if requestModificationData.ModifyQueryParams.Key != "" && requestModificationData.ModifyQueryParams.Value != "" {
+		modifications = append(modifications, rx.ModifyQueryParams(requestModificationData.ModifyQueryParams.Key, requestModificationData.ModifyQueryParams.Value))
 	}
-	if requestModificationData.SetRequestHeader.name != "" && requestModificationData.SetRequestHeader.val != "" {
-		modifications = append(modifications, rx.SetRequestHeader(requestModificationData.SetRequestHeader.name, requestModificationData.SetRequestHeader.val))
+	if requestModificationData.SetRequestHeader.Name != "" && requestModificationData.SetRequestHeader.Val != "" {
+		modifications = append(modifications, rx.SetRequestHeader(requestModificationData.SetRequestHeader.Name, requestModificationData.SetRequestHeader.Val))
 	}
-	if requestModificationData.DeleteRequestHeader.name != "" {
-		modifications = append(modifications, rx.DeleteRequestHeader(requestModificationData.DeleteRequestHeader.name))
+	if requestModificationData.DeleteRequestHeader.Name != "" {
+		modifications = append(modifications, rx.DeleteRequestHeader(requestModificationData.DeleteRequestHeader.Name))
 	}
 	if requestModificationData.RequestArchiveIs {
 		modifications = append(modifications, rx.RequestArchiveIs())
@@ -252,14 +254,14 @@ func BuildRequestModifications(requestModificationData RequestModifierQuery) []p
 	if requestModificationData.ResolveWithGoogleDoH {
 		modifications = append(modifications, rx.ResolveWithGoogleDoH())
 	}
-	if requestModificationData.SpoofOrigin.url != "" {
-		modifications = append(modifications, rx.SpoofOrigin(requestModificationData.SpoofOrigin.url))
+	if requestModificationData.SpoofOrigin.Url != "" {
+		modifications = append(modifications, rx.SpoofOrigin(requestModificationData.SpoofOrigin.Url))
 	}
 	if requestModificationData.HideOrigin {
 		modifications = append(modifications, rx.HideOrigin())
 	}
-	if requestModificationData.SpoofReferrer.url != "" {
-		modifications = append(modifications, rx.SpoofReferrer(requestModificationData.SpoofReferrer.url))
+	if requestModificationData.SpoofReferrer.Url != "" {
+		modifications = append(modifications, rx.SpoofReferrer(requestModificationData.SpoofReferrer.Url))
 	}
 	if requestModificationData.HideReferrer {
 		modifications = append(modifications, rx.HideReferrer())
@@ -301,11 +303,11 @@ func BuildRequestModifications(requestModificationData RequestModifierQuery) []p
 	if requestModificationData.SpoofReferrerFromWeiboPost {
 		modifications = append(modifications, rx.SpoofReferrerFromWeiboPost())
 	}
-	if requestModificationData.SpoofUserAgent.ua != "" {
-		modifications = append(modifications, rx.SpoofUserAgent(requestModificationData.SpoofUserAgent.ua))
+	if requestModificationData.SpoofUserAgent.Ua != "" {
+		modifications = append(modifications, rx.SpoofUserAgent(requestModificationData.SpoofUserAgent.Ua))
 	}
-	if requestModificationData.SpoofXForwardedFor.ip != "" {
-		modifications = append(modifications, rx.SpoofXForwardedFor(requestModificationData.SpoofXForwardedFor.ip))
+	if requestModificationData.SpoofXForwardedFor.Ip != "" {
+		modifications = append(modifications, rx.SpoofXForwardedFor(requestModificationData.SpoofXForwardedFor.Ip))
 	}
 
 	return modifications
@@ -317,8 +319,8 @@ func BuildResponseModifications(responseModificationData ResponseModifierQuery) 
 	if responseModificationData.APIContent {
 		modifications = append(modifications, tx.APIContent())
 	}
-	if responseModificationData.BlockElementRemoval.cssSelector != "" {
-		modifications = append(modifications, tx.BlockElementRemoval(responseModificationData.BlockElementRemoval.cssSelector))
+	if responseModificationData.BlockElementRemoval.CssSelector != "" {
+		modifications = append(modifications, tx.BlockElementRemoval(responseModificationData.BlockElementRemoval.CssSelector))
 	}
 	if responseModificationData.BypassCORS {
 		modifications = append(modifications, tx.BypassCORS())
@@ -326,8 +328,8 @@ func BuildResponseModifications(responseModificationData ResponseModifierQuery) 
 	if responseModificationData.BypassContentSecurityPolicy {
 		modifications = append(modifications, tx.BypassContentSecurityPolicy())
 	}
-	if responseModificationData.SetContentSecurityPolicy.csp != "" {
-		modifications = append(modifications, tx.SetContentSecurityPolicy(responseModificationData.SetContentSecurityPolicy.csp))
+	if responseModificationData.SetContentSecurityPolicy.Csp != "" {
+		modifications = append(modifications, tx.SetContentSecurityPolicy(responseModificationData.SetContentSecurityPolicy.Csp))
 	}
 	if responseModificationData.ForwardResponseHeaders {
 		modifications = append(modifications, tx.ForwardResponseHeaders())
@@ -335,33 +337,33 @@ func BuildResponseModifications(responseModificationData ResponseModifierQuery) 
 	if responseModificationData.GenerateReadableOutline {
 		modifications = append(modifications, tx.GenerateReadableOutline())
 	}
-	if responseModificationData.InjectScriptBeforeDOMContentLoaded.js != "" {
-		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptBeforeDOMContentLoaded.js))
+	if responseModificationData.InjectScriptBeforeDOMContentLoaded.Js != "" {
+		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptBeforeDOMContentLoaded.Js))
 	}
-	if responseModificationData.InjectScriptAfterDOMContentLoaded.js != "" {
-		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptAfterDOMContentLoaded.js))
+	if responseModificationData.InjectScriptAfterDOMContentLoaded.Js != "" {
+		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptAfterDOMContentLoaded.Js))
 	}
-	if responseModificationData.InjectScriptAfterDOMIdle.js != "" {
-		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptAfterDOMIdle.js))
+	if responseModificationData.InjectScriptAfterDOMIdle.Js != "" {
+		modifications = append(modifications, tx.InjectScriptBeforeDOMContentLoaded(responseModificationData.InjectScriptAfterDOMIdle.Js))
 	}
 	if responseModificationData.DeleteIncomingCookies {
 		modifications = append(modifications, tx.DeleteIncomingCookies())
 	}
-	if responseModificationData.DeleteIncomingCookiesExcept.whitelist != "" {
+	if responseModificationData.DeleteIncomingCookiesExcept.Whitelist != "" {
 		// TODO: Split comma separated values in string?
-		modifications = append(modifications, tx.DeleteIncomingCookiesExcept(responseModificationData.DeleteIncomingCookiesExcept.whitelist))
+		modifications = append(modifications, tx.DeleteIncomingCookiesExcept(responseModificationData.DeleteIncomingCookiesExcept.Whitelist))
 	}
-	if responseModificationData.SetIncomingCookies.cookies != "" {
-		modifications = append(modifications, tx.SetIncomingCookies(responseModificationData.SetIncomingCookies.cookies))
+	if responseModificationData.SetIncomingCookies.Cookies != "" {
+		modifications = append(modifications, tx.SetIncomingCookies(responseModificationData.SetIncomingCookies.Cookies))
 	}
-	if responseModificationData.SetIncomingCookie.name != "" && responseModificationData.SetIncomingCookie.val != "" {
-		modifications = append(modifications, tx.SetIncomingCookie(responseModificationData.SetIncomingCookie.name, responseModificationData.SetIncomingCookie.val))
+	if responseModificationData.SetIncomingCookie.Name != "" && responseModificationData.SetIncomingCookie.Val != "" {
+		modifications = append(modifications, tx.SetIncomingCookie(responseModificationData.SetIncomingCookie.Name, responseModificationData.SetIncomingCookie.Val))
 	}
-	if responseModificationData.SetResponseHeader.key != "" && responseModificationData.SetResponseHeader.value != "" {
-		modifications = append(modifications, tx.SetResponseHeader(responseModificationData.SetResponseHeader.key, responseModificationData.SetResponseHeader.value))
+	if responseModificationData.SetResponseHeader.Key != "" && responseModificationData.SetResponseHeader.Value != "" {
+		modifications = append(modifications, tx.SetResponseHeader(responseModificationData.SetResponseHeader.Key, responseModificationData.SetResponseHeader.Value))
 	}
-	if responseModificationData.DeleteResponseHeader.key != "" {
-		modifications = append(modifications, tx.DeleteResponseHeader(responseModificationData.DeleteResponseHeader.key))
+	if responseModificationData.DeleteResponseHeader.Key != "" {
+		modifications = append(modifications, tx.DeleteResponseHeader(responseModificationData.DeleteResponseHeader.Key))
 	}
 	if responseModificationData.PatchDynamicResourceURLs {
 		modifications = append(modifications, tx.PatchDynamicResourceURLs())
