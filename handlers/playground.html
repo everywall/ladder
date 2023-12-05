@@ -330,18 +330,87 @@
           >
         </p>
       </footer>
+      <div
+        id="modalContainer"
+        tabindex="-1"
+        class="hidden relative z-10"
+        aria-labelledby="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="true"
+      >
+        <div class="fixed inset-0 bg-slate-500/50 transition-opacity"></div>
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div
+            class="flex min-h-full items-center justify-center p-4 text-center sm:p-0"
+          >
+            <div
+              id="modal-body"
+              class="relative transform overflow-hidden rounded-lg bg-white dark:bg-slate-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
+            >
+              <form>
+                <div class="px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                  <div class="mt-3 text-left sm:ml-4 sm:mt-0">
+                    <div class="flex w-full justify-between items-center">
+                      <h3 id="modal-title">MODAL HEADER</h3>
+                      <button
+                        type="button"
+                        id="modal-close"
+                        class="ml-2 text-slate-600 dark:text-slate-400 hover:text-slate-400 hover:dark:text-slate-300 bg-transparent text-sm w-6 h-6 inline-flex justify-center items-center"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                      </button>
+                    </div>
+                    <div
+                      class="my-2 flex flex-col gap-2"
+                      id="modal-content"
+                    ></div>
+                  </div>
+                </div>
+                <div
+                  class="bg-slate-200 dark:bg-slate-800 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
+                >
+                  <button
+                    type="button"
+                    id="modal-submit"
+                    class="inline-flex items-center justify-center h-11 px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium text-slate-200 dark:text-slate-900 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-800 dark:bg-slate-200 hover:bg-slate-800/90 dark:hover:bg-slate-200/90"
+                  >
+                    Apply modification
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <ninja-keys> </ninja-keys>
     </div>
     <script>
       // TODO: add all modifiers into Ninja Keys
-      // TODO: reusable modal for value input for modifiers, reuse focus trap code from script.js
-      // TODO: write logic in toggleModifier() to handle non-boolean values
       // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
-      // TODO: refactor common logic with form.html to script.js
       // TODO: export to yaml
+      // TODO: write tests
       // TODO: remove tailwind play cdn script in head
 
       const modifierContainer = document.getElementById("modifierContainer");
+      const modalContainer = document.getElementById("modalContainer");
+      const modalBody = document.getElementById("modal-body");
+      const modalContent = document.getElementById("modal-content");
+      const modalSubmitButton = document.getElementById("modal-submit");
+      const modalClose = document.getElementById("modal-close");
 
       // Rerun handleThemeChange() so style is applied to Ninja Keys
       handleThemeChange();
@@ -400,6 +469,102 @@
           });
       }
 
+      function getValues(...fields) {
+        const focusTrap = trap(modalBody);
+        let values = {};
+        const inputs = [];
+        const inputEventListeners = [];
+
+        function closeModal() {
+          focusTrap.destroy();
+          modalBody.removeEventListener("keydown", handleEscapeKey);
+          modalBody.removeEventListener("keydown", handleEnterKey);
+          modalContainer.removeEventListener("click", handleClickOutside);
+          modalSubmitButton.removeEventListener("click", closeModal);
+          modalClose.removeEventListener("click", closeModal);
+          inputEventListeners.forEach((listener, index) => {
+            inputs[index].removeEventListener("input", listener);
+          });
+          inputEventListeners.length = 0;
+          inputs.length = 0;
+          values = {};
+          modalContainer.classList.add("hidden");
+          modalContent.innerHTML = "";
+        }
+
+        const handleClickOutside = (e) => {
+          if (modalBody !== null && !modalBody.contains(e.target)) {
+            closeModal();
+          }
+        };
+
+        const handleEscapeKey = (e) => {
+          if (e.key === "Escape") {
+            closeModal();
+          }
+        };
+
+        const handleEnterKey = (e) => {
+          if (e.key === "Enter") {
+            modalSubmitButton.click();
+          }
+        };
+
+        document.getElementById("modal-title").innerHTML = fields[0];
+
+        for (let i = 1; i < fields.length; i++) {
+          const label = document.createElement("label");
+          label.innerHTML = fields[i];
+          label.setAttribute("for", `input-${i}`);
+          const input = document.createElement("input");
+          input.type = "text";
+          input.id = `input-${i}`;
+          input.classList.add(
+            "w-full",
+            "text-sm",
+            "leading-6",
+            "text-slate-400",
+            "rounded-md",
+            "ring-1",
+            "ring-slate-900/10",
+            "shadow-sm",
+            "py-1.5",
+            "pl-2",
+            "pr-3",
+            "hover:ring-slate-300",
+            "dark:bg-slate-800",
+            "dark:highlight-white/5",
+            "dark:hover:bg-slate-700"
+          );
+          modalContent.appendChild(label);
+          modalContent.appendChild(input);
+
+          const inputEventListener = (event) => {
+            const fieldName = fields[i];
+            values[fieldName] = event.target.value;
+          };
+          input.addEventListener("input", inputEventListener);
+          inputEventListeners.push(inputEventListener);
+          inputs.push(input);
+        }
+
+        modalContainer.classList.remove("hidden");
+        document.getElementById("input-1").focus();
+
+        return new Promise((resolve) => {
+          modalBody.addEventListener("keydown", handleEscapeKey);
+          modalBody.addEventListener("keydown", handleEnterKey);
+          modalContainer.addEventListener("click", handleClickOutside);
+          modalClose.addEventListener("click", () => {
+            closeModal();
+          });
+          modalSubmitButton.addEventListener("click", () => {
+            closeModal();
+            resolve(values);
+          });
+        });
+      }
+
       function clickHandler(pill) {
         toggleModifier("", pill.id);
         pill.removeEventListener("click", () => clickHandler(pill));
@@ -408,9 +573,13 @@
 
       function toggleModifier(modifierType, modifierKey, values) {
         if (modifierType === "") {
-          for (const key of Object.keys(payload)) {
-            if (key === modifierKey) {
-              modifierType = key;
+          for (const parentKey in payload) {
+            if (payload.hasOwnProperty(parentKey)) {
+              const childKeys = Object.keys(payload[parentKey]);
+              if (childKeys.includes(modifierKey)) {
+                modifierType = payload[parentKey];
+                break;
+              }
             }
           }
         }
@@ -419,14 +588,14 @@
         }
 
         if (typeof modifierType[modifierKey] === "object") {
-          if (modifierType[modifierKey].length > 0) {
-            modifierType[modifierKey][0] = "";
+          if (Object.values(modifierType[modifierKey]).some((v) => v === "")) {
+            Object.assign(modifierType[modifierKey], values);
           } else {
-            // TODO: handle multiple values
-            modifierType[modifierKey][0] = values;
+            for (const key in modifierType[modifierKey]) {
+              modifierType[modifierKey][key] = "";
+            }
           }
         }
-        console.log(payload);
 
         const existingPill = document.getElementById(modifierKey);
         if (!existingPill) {
@@ -604,12 +773,14 @@
           parent: "modifyOutgoingCookies",
           section: "Modify outgoing cookies ...",
           handler: () => {
-            const values = getValues("name", "val");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "setoutgoingcookie",
-              values
-            );
+            getValues("Set outgoing cookie", "name", "val").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "setoutgoingcookie",
+                values
+              );
+            });
           },
         },
         {
@@ -686,7 +857,7 @@
           parent: "modifyUrl",
           section: "Modify URL ...",
           handler: () => {
-            const values = getValues("match", "replacement"); // TODO write a function to get values
+            const values = getValues("match", "replacement");
             toggleModifier(
               payload.requestmodifierquery,
               "modifydomainwithregex",
