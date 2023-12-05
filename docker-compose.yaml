@@ -3,7 +3,7 @@ services:
   ladder:
     image: ghcr.io/everywall/ladder:latest
     container_name: ladder
-    #build: .
+    build: .
     #restart: always
     #command: sh -c ./ladder
     environment:

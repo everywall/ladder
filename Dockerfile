@@ -7,7 +7,7 @@ COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o ladder cmd/main.go
+RUN make build
 
 FROM debian:12-slim as release
 
@@ -17,9 +17,5 @@ COPY --from=build /go/src/ladder/ladder .
 RUN chmod +x /app/ladder
 
 RUN apt update && apt install -y ca-certificates && rm -rf /var/lib/apt/lists/*
-
-#EXPOSE 8080
-
-#ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
 CMD ["sh", "-c", "/app/ladder"]
