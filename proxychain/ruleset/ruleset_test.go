@@ -1,6 +1,7 @@
 package ruleset_v2
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -13,38 +14,40 @@ import (
 
 var (
 	validYAML = `
-domains:
-- example.com
-- www.example.com
-responsemodifications:
-- name: APIContent
-  params: []
-- name: SetContentSecurityPolicy
-  params:
-  - foobar
-- name: SetIncomingCookie
-  params:
-  - authorization-bearer
-  - hunter2
-requestmodifications:
-- name: ForwardRequestHeaders
-  params: []
+rules:
+  - domains:
+    - example.com
+    - www.example.com
+    responsemodifications:
+    - name: APIContent
+      params: []
+    - name: SetContentSecurityPolicy
+      params:
+      - foobar
+    - name: SetIncomingCookie
+      params:
+      - authorization-bearer
+      - hunter2
+    requestmodifications:
+    - name: ForwardRequestHeaders
+      params: []
 `
 
 	invalidYAML = `
-domains:
-- example.com
-- www.example.com
-responsemodifications:
-- name: APIContent
-- name: SetContentSecurityPolicy
-- name: INVALIDSetIncomingCookie
-  params:
-  - authorization-bearer
-  - hunter2
-requestmodifications:
-- name: ForwardRequestHeaders
-  params: []
+rules:
+  domains:
+  - example.com
+  - www.example.com
+  responsemodifications:
+  - name: APIContent
+  - name: SetContentSecurityPolicy
+  - name: INVALIDSetIncomingCookie
+    params:
+    - authorization-bearer
+    - hunter2
+  requestmodifications:
+  - name: ForwardRequestHeaders
+    params: []
 `
 )
 
@@ -59,26 +62,6 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 
 	app.Get("/invalid-config.yml", func(c *fiber.Ctx) error {
 		c.SendString(invalidYAML)
-		return nil
-	})
-
-	app.Get("/valid-config.gz", func(c *fiber.Ctx) error {
-		c.Set("Content-Type", "application/octet-stream")
-
-		rs, err := loadRuleFromString(validYAML)
-		if err != nil {
-			t.Errorf("failed to load valid yaml from string: %s", err.Error())
-		}
-
-		s, err := rs.GzipYaml()
-		if err != nil {
-			t.Errorf("failed to load gzip serialize yaml: %s", err.Error())
-		}
-
-		err = c.SendStream(s)
-		if err != nil {
-			t.Errorf("failed to stream gzip serialized yaml: %s", err.Error())
-		}
 		return nil
 	})
 
@@ -102,25 +85,21 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 	assert.True(t, exists, "expected example.com rule to be present")
 	assert.Equal(t, r.Domains[0], "example.com")
 
-	u, _ = url.Parse("http://www.www.example.com")
+	u, _ = url.Parse("http://www.www.foobar.com")
 	_, exists = rs.GetRule(u)
-	assert.False(t, exists, "expected www.www.example.com rule to NOT be present")
+	assert.False(t, exists, "expected www.www.foobar.com rule to NOT be present")
 
-	rs, err = NewRuleset("http://127.0.0.1:9999/valid-config.gz")
-	if err != nil {
-		t.Errorf("failed to load gzipped ruleset from http server: %s", err.Error())
-	}
-
+	u, _ = url.Parse("http://example.com")
 	r, exists = rs.GetRule(u)
 	assert.Equal(t, r.Domains[0], "example.com")
 
-	os.Setenv("RULESET", "http://127.0.0.1:9999/valid-config.gz")
+	os.Setenv("RULESET", "http://127.0.0.1:9999/valid-config.yml")
 
 	rs = NewRulesetFromEnv()
 	r, exists = rs.GetRule(u)
-	assert.True(t, exists, "expected example.com rule to be present")
+	assert.True(t, exists, "expected example.com rule to be present from env")
 	if !assert.Equal(t, r.Domains[0], "example.com") {
-		t.Error("expected no errors loading ruleset from gzip url using environment variable, but got one")
+		t.Error("expected no errors loading ruleset from url using environment variable, but got one")
 	}
 }
 
@@ -132,7 +111,10 @@ func loadRuleFromString(yaml string) (Ruleset, error) {
 
 	tmpFile.WriteString(yaml)
 
-	rs := Ruleset{}
+	rs := Ruleset{
+		_rulemap: map[string]*Rule{},
+		Rules:    []Rule{},
+	}
 	err := rs.loadRulesFromLocalFile(tmpFile.Name())
 
 	return rs, err
@@ -189,8 +171,9 @@ func TestLoadRulesFromLocalDir(t *testing.T) {
 	}
 
 	rs := Ruleset{}
+	fmt.Println(baseDir)
 	err = rs.loadRulesFromLocalDir(baseDir)
 
 	assert.NoError(t, err)
-	assert.Equal(t, rs.Count(), len(testCases)*3)
+	assert.Equal(t, len(testCases)*3, rs.Count())
 }

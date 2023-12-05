@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v3"
+	//"encoding/json"
 )
 
 type IRuleset interface {
@@ -21,12 +22,68 @@ type IRuleset interface {
 }
 
 type Ruleset struct {
-	rulesetPath string
-	rules       map[string]Rule
+	Rules    []Rule           `json:"rules" yaml:"rules"`
+	_rulemap map[string]*Rule // internal map for fast lookups; points at a rule in the Rules slice
 }
 
-func (rs Ruleset) GetRule(url *url.URL) (rule Rule, exists bool) {
-	rule, exists = rs.rules[url.Hostname()]
+func (rs *Ruleset) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type AuxRuleset struct {
+		Rules []Rule `yaml:"rules"`
+	}
+	yr := &AuxRuleset{}
+
+	if err := unmarshal(&yr); err != nil {
+		return err
+	}
+
+	rs._rulemap = make(map[string]*Rule)
+	rs.Rules = yr.Rules
+
+	// create a map of pointers to rules loaded above based on domain string keys
+	// this way we don't have two copies of the rule in ruleset
+	for i, rule := range rs.Rules {
+		rulePtr := &rs.Rules[i]
+		for _, domain := range rule.Domains {
+			rs._rulemap[domain] = rulePtr
+			if !strings.HasPrefix(domain, "www.") {
+				rs._rulemap["www."+domain] = rulePtr
+			}
+		}
+	}
+
+	return nil
+}
+
+// MarshalYAML implements the yaml.Marshaler interface.
+// It customizes the marshaling of a Ruleset object into YAML
+func (rs *Ruleset) MarshalYAML() (interface{}, error) {
+
+	type AuxRule struct {
+		Domains               []string `yaml:"domains"`
+		RequestModifications  []_rqm   `yaml:"requestmodifications"`
+		ResponseModifications []_rsm   `yaml:"responsemodifications"`
+	}
+	type Aux struct {
+		Rules []AuxRule `yaml:"rules"`
+	}
+
+	aux := Aux{}
+
+	for _, rule := range rs.Rules {
+		auxRule := AuxRule{
+			Domains:               rule.Domains,
+			RequestModifications:  rule._rqms,
+			ResponseModifications: rule._rsms,
+		}
+		aux.Rules = append(aux.Rules, auxRule)
+	}
+
+	out, err := yaml.Marshal(&aux)
+	return out, err
+}
+
+func (rs Ruleset) GetRule(url *url.URL) (rule *Rule, exists bool) {
+	rule, exists = rs._rulemap[url.Hostname()]
 	return rule, exists
 }
 
@@ -38,8 +95,8 @@ func (rs Ruleset) HasRule(url *url.URL) bool {
 // NewRuleset loads a new RuleSet from a path
 func NewRuleset(path string) (Ruleset, error) {
 	rs := Ruleset{
-		rulesetPath: path,
-		rules:       map[string]Rule{},
+		_rulemap: map[string]*Rule{},
+		Rules:    []Rule{},
 	}
 
 	switch {
@@ -88,18 +145,20 @@ func (rs *Ruleset) loadRulesFromLocalDir(path string) error {
 			return nil
 		}
 
-		isYAML := filepath.Ext(path) == "yaml" || filepath.Ext(path) == "yml"
+		isYAML := filepath.Ext(path) == ".yaml" || filepath.Ext(path) == ".yml"
 		if !isYAML {
 			return nil
 		}
 
-		err = rs.loadRulesFromLocalFile(path)
+		tmpRs := Ruleset{_rulemap: make(map[string]*Rule)}
+		err = tmpRs.loadRulesFromLocalFile(path)
 		if err != nil {
 			log.Printf("WARN: failed to load directory ruleset '%s': %s, skipping", path, err)
 			return nil
 		}
+		rs.Rules = append(rs.Rules, tmpRs.Rules...)
 
-		log.Printf("INFO: loaded ruleset %s\n", path)
+		//log.Printf("INFO: loaded ruleset %s\n", path)
 
 		return nil
 	})
@@ -120,21 +179,12 @@ func (rs *Ruleset) loadRulesFromLocalFile(path string) error {
 		return errors.Join(e, err)
 	}
 
-	rule := Rule{}
-	err = yaml.Unmarshal(yamlFile, &rule)
+	err = yaml.Unmarshal(yamlFile, rs)
 
 	if err != nil {
 		e := fmt.Errorf("failed to load rules from local file, possible syntax error in '%s' - %s", path, err)
-		ee := errors.Join(e, err)
-		debugPrintRule(string(yamlFile), ee)
-		return ee
-	}
-
-	for _, domain := range rule.Domains {
-		rs.rules[domain] = rule
-		if !strings.HasSuffix(domain, "www.") {
-			rs.rules["www."+domain] = rule
-		}
+		debugPrintRule(string(yamlFile), e)
+		return e
 	}
 
 	return nil
@@ -144,7 +194,6 @@ func (rs *Ruleset) loadRulesFromLocalFile(path string) error {
 // It supports plain and gzip compressed content.
 // Returns an error if there's an issue accessing the URL or if there's a syntax error in the YAML.
 func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
-	rule := Rule{}
 
 	resp, err := http.Get(rulesURL)
 	if err != nil {
@@ -160,7 +209,7 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 	var reader io.Reader
 
 	// in case remote server did not set content-encoding gzip header
-	isGzip := strings.HasSuffix(rulesURL, ".gz") || strings.HasSuffix(rulesURL, ".gzip")
+	isGzip := strings.HasSuffix(rulesURL, ".gz") || strings.HasSuffix(rulesURL, ".gzip") || resp.Header.Get("content-encoding") == "gzip"
 	if isGzip {
 		reader, err = gzip.NewReader(resp.Body)
 
@@ -171,22 +220,10 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 		reader = resp.Body
 	}
 
-	err = yaml.NewDecoder(reader).Decode(&rule)
+	err = yaml.NewDecoder(reader).Decode(&rs)
 
 	if err != nil {
 		return fmt.Errorf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error - %s", rulesURL, resp.Status, err)
-	}
-
-	if rs.rules == nil {
-		fmt.Println("nilmap")
-		rs.rules = make(map[string]Rule)
-	}
-
-	for _, domain := range rule.Domains {
-		rs.rules[domain] = rule
-		if !strings.HasSuffix(domain, "www.") {
-			rs.rules["www."+domain] = rule
-		}
 	}
 
 	return nil
@@ -204,31 +241,11 @@ func (rs *Ruleset) Yaml() (string, error) {
 	return string(y), nil
 }
 
-// GzipYaml returns an io.Reader that streams the Gzip-compressed YAML representation of the RuleSet.
-func (rs *Ruleset) GzipYaml() (io.Reader, error) {
-	pr, pw := io.Pipe()
-
-	go func() {
-		defer pw.Close()
-
-		gw := gzip.NewWriter(pw)
-		defer gw.Close()
-
-		if err := yaml.NewEncoder(gw).Encode(rs); err != nil {
-			gw.Close() // Ensure to close the gzip writer
-			pw.CloseWithError(err)
-			return
-		}
-	}()
-
-	return pr, nil
-}
-
 // Domains extracts and returns a slice of all domains present in the RuleSet.
 func (rs *Ruleset) Domains() []string {
 	var domains []string
-	for domain := range rs.rules {
-		domains = append(domains, domain)
+	for _, rule := range rs.Rules {
+		domains = append(domains, rule.Domains...)
 	}
 	return domains
 }
@@ -240,7 +257,7 @@ func (rs *Ruleset) DomainCount() int {
 
 // Count returns the total number of rules in the RuleSet.
 func (rs *Ruleset) Count() int {
-	return len(rs.rules)
+	return len(rs.Rules)
 }
 
 // PrintStats logs the number of rules and domains loaded in the RuleSet.
