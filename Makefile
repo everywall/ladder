@@ -1,3 +1,10 @@
+build:
+	cd proxychain/codegen && go run codegen.go
+	git submodule update --init --recursive
+	git rev-parse --short HEAD > handlers/VERSION
+	git rev-parse --short HEAD > cmd/VERSION
+	go build -o ladder -ldflags="-s -w" cmd/main.go
+
 lint:
 	gofumpt -l -w .
 	golangci-lint run -c .golangci-lint.yaml --fix
