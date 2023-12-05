@@ -133,6 +133,7 @@ func main() {
 		*prefork = true
 	}
 
+	//? Is this still required?
 	engine := html.New("./handlers", ".html")
 	engine.AddFunc(
 		// add unescape function
@@ -147,7 +148,7 @@ func main() {
 			GETOnly:               false,
 			ReadBufferSize:        4096 * 4, // increase max header size
 			DisableStartupMessage: true,
-			Views:                 engine,
+			Views:                 engine, //? Is this still required?
 		},
 	)
 
