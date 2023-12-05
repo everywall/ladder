@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"os"
-	"strings"
 
 	"ladder/handlers"
 	"ladder/internal/cli"
@@ -14,13 +13,8 @@ import (
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
-	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/template/html/v2"
 )
-
-//go:embed favicon.ico
-var faviconData string
 
 //go:embed styles.css
 var cssData embed.FS
@@ -151,23 +145,8 @@ func main() {
 		},
 	)
 
-	// TODO: move to cmd/auth.go
-	userpass := os.Getenv("USERPASS")
-	if userpass != "" {
-		userpass := strings.Split(userpass, ":")
-
-		app.Use(basicauth.New(basicauth.Config{
-			Users: map[string]string{
-				userpass[0]: userpass[1],
-			},
-		}))
-	}
-
-	// TODO: move to handlers/favicon.go
-	app.Use(favicon.New(favicon.Config{
-		Data: []byte(faviconData),
-		URL:  "/favicon.ico",
-	}))
+	app.Use(handlers.Auth())
+	app.Use(handlers.Favicon())
 
 	if os.Getenv("NOLOGS") != "true" {
 		app.Use(func(c *fiber.Ctx) error {

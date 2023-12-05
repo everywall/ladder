@@ -83,7 +83,7 @@ func init() {
 
 	%s
 }`, strings.Join(factoryMaps, "\n"))
-	//fmt.Println(code)
+	// fmt.Println(code)
 	return code, nil
 }
 
@@ -155,7 +155,7 @@ func init() {
 
 	%s
 }`, strings.Join(factoryMaps, "\n"))
-	//fmt.Println(code)
+	// fmt.Println(code)
 	return code, nil
 }
 
@@ -177,7 +177,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println(rqmCode)
+	// fmt.Println(rqmCode)
 
 	fq, err := os.Create("../ruleset/rule_reqmod_types.gen.go")
 	if err != nil {
@@ -192,7 +192,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Println(rsmCode)
+	// fmt.Println(rsmCode)
 
 	fs, err := os.Create("../ruleset/rule_resmod_types.gen.go")
 	if err != nil {

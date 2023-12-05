@@ -2,8 +2,9 @@ package requestmodifiers
 
 import (
 	"fmt"
-	"ladder/proxychain"
 	"regexp"
+
+	"ladder/proxychain"
 )
 
 func ModifyPathWithRegex(matchRegex string, replacement string) proxychain.RequestModification {

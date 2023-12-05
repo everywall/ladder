@@ -4,9 +4,10 @@ import (
 	"embed"
 	"encoding/json"
 	"io"
-	"ladder/proxychain"
 	"log"
 	"regexp"
+
+	"ladder/proxychain"
 )
 
 //go:embed vendor/ddg-tracker-surrogates/mapping.json

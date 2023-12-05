@@ -3,8 +3,9 @@ package responsemodifiers
 import (
 	_ "embed"
 	"io"
-	"ladder/proxychain"
 	"strings"
+
+	"ladder/proxychain"
 )
 
 //go:embed patch_google_analytics.js

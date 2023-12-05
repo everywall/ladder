@@ -3,6 +3,7 @@ package ruleset_v2
 import (
 	"encoding/json"
 	"fmt"
+
 	"gopkg.in/yaml.v3"
 	"ladder/proxychain"
 )
@@ -84,7 +85,6 @@ func (rule *Rule) MarshalJSON() ([]byte, error) {
 
 // implement type yaml marshaller
 func (rule *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
-
 	type Aux struct {
 		Domains               []string `yaml:"domains"`
 		RequestModifications  []_rqm   `yaml:"requestmodifications"`
@@ -122,7 +122,6 @@ func (rule *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (rule *Rule) MarshalYAML() (interface{}, error) {
-
 	type Aux struct {
 		Domains               []string `yaml:"domains"`
 		RequestModifications  []_rqm   `yaml:"requestmodifications"`
