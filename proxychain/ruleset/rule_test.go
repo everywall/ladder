@@ -3,53 +3,34 @@ package ruleset_v2
 import (
 	"encoding/json"
 	"fmt"
-	//yaml "gopkg.in/yaml.v3"
+	"gopkg.in/yaml.v3"
 	"testing"
 )
 
-func TestRuleUnmarshalJSON(t *testing.T) {
-	ruleJSON := `{
-    "domains": [
-        "example.com",
-        "www.example.com"
-    ],
-    "response_modifications": [
-      {
-      	"name": "APIContent",
-      	"params": []
-      },
-      {
-      	"name": "SetContentSecurityPolicy",
-      	"params": ["foobar"]
-      },
-      {
-      	"name": "SetIncomingCookie",
-      	"params": ["authorization-bearer", "hunter2"]
-      }
-    ],
-    "request_modifications": [
-      {
-      	"name": "ForwardRequestHeaders",
-      	"params": []
-      }
-    ]
-}`
-
-	//fmt.Println(ruleJSON)
+// unmarshalRule is a helper function to unmarshal a Rule from a JSON string.
+func unmarshalRule(t *testing.T, ruleJSON string) *Rule {
 	rule := &Rule{}
 	err := json.Unmarshal([]byte(ruleJSON), rule)
 	if err != nil {
-		t.Errorf("expected no error in Unmarshal, got '%s'", err)
-		return
+		t.Fatalf("expected no error in Unmarshal, got '%s'", err)
 	}
+	return rule
+}
+
+func TestRuleUnmarshalJSON(t *testing.T) {
+	ruleJSON := `{
+		"domains": ["example.com", "www.example.com"],
+		"responsemodifications": [{"name": "APIContent", "params": []}, {"name": "SetContentSecurityPolicy", "params": ["foobar"]}, {"name": "SetIncomingCookie", "params": ["authorization-bearer", "hunter2"]}],
+		"requestmodifications": [{"name": "ForwardRequestHeaders", "params": []}]
+	}`
+
+	rule := unmarshalRule(t, ruleJSON)
 
 	if len(rule.Domains) != 2 {
 		t.Errorf("expected number of domains to be 2")
-		return
 	}
 	if !(rule.Domains[0] == "example.com" || rule.Domains[1] == "example.com") {
 		t.Errorf("expected domain to be example.com")
-		return
 	}
 	if len(rule.ResponseModifications) != 3 {
 		t.Errorf("expected number of ResponseModifications to be 3, got %d", len(rule.ResponseModifications))
@@ -57,8 +38,17 @@ func TestRuleUnmarshalJSON(t *testing.T) {
 	if len(rule.RequestModifications) != 1 {
 		t.Errorf("expected number of RequestModifications to be 1, got %d", len(rule.RequestModifications))
 	}
+}
 
-	// test marshal
+func TestRuleMarshalJSON(t *testing.T) {
+	ruleJSON := `{
+		"domains": ["example.com", "www.example.com"],
+		"responsemodifications": [{"name": "APIContent", "params": []}, {"name": "SetContentSecurityPolicy", "params": ["foobar"]}, {"name": "SetIncomingCookie", "params": ["authorization-bearer", "hunter2"]}],
+		"requestmodifications": [{"name": "ForwardRequestHeaders", "params": []}]
+	}`
+
+	rule := unmarshalRule(t, ruleJSON)
+
 	jsonRule, err := json.Marshal(rule)
 	if err != nil {
 		t.Errorf("expected no error marshalling rule to json, got '%s'", err.Error())
@@ -66,34 +56,45 @@ func TestRuleUnmarshalJSON(t *testing.T) {
 	fmt.Println(string(jsonRule))
 }
 
-/*
-func TestRuleUnmarshalYAML(t *testing.T) {
-	ruleYAML := `
-domains:
-  - example.com
-  - www.example.com
-request_modifications:
-  - SpoofUserAgent("googlebot")
-response_modifications:
-  - APIContent()
-  - SetContentSecurityPolicy("foobar")
-  - SetIncomingCookie("authorization-bearer", "hunter2")
-`
+// ===============================================
 
+// unmarshalYAMLRule is a helper function to unmarshal a Rule from a YAML string.
+func unmarshalYAMLRule(t *testing.T, ruleYAML string) *Rule {
 	rule := &Rule{}
 	err := yaml.Unmarshal([]byte(ruleYAML), rule)
 	if err != nil {
-		t.Errorf("expected no error in Unmarshal, got '%s'", err)
-		return
+		t.Fatalf("expected no error in Unmarshal, got '%s'", err)
 	}
+	return rule
+}
+
+func TestRuleUnmarshalYAML(t *testing.T) {
+	ruleYAML := `
+domains:
+- example.com
+- www.example.com
+responsemodifications:
+- name: APIContent
+  params: []
+- name: SetContentSecurityPolicy
+  params:
+  - foobar
+- name: SetIncomingCookie
+  params:
+  - authorization-bearer
+  - hunter2
+requestmodifications:
+- name: ForwardRequestHeaders
+  params: []
+`
+
+	rule := unmarshalYAMLRule(t, ruleYAML)
 
 	if len(rule.Domains) != 2 {
-		t.Errorf("expected number of domains to be 2, got %d", len(rule.Domains))
-		return
+		t.Errorf("expected number of domains to be 2")
 	}
 	if !(rule.Domains[0] == "example.com" || rule.Domains[1] == "example.com") {
 		t.Errorf("expected domain to be example.com")
-		return
 	}
 	if len(rule.ResponseModifications) != 3 {
 		t.Errorf("expected number of ResponseModifications to be 3, got %d", len(rule.ResponseModifications))
@@ -101,11 +102,36 @@ response_modifications:
 	if len(rule.RequestModifications) != 1 {
 		t.Errorf("expected number of RequestModifications to be 1, got %d", len(rule.RequestModifications))
 	}
+	fmt.Println(rule.RequestModifications[0].Name)
+}
+
+func TestRuleMarshalYAML(t *testing.T) {
+	ruleYAML := `
+domains:
+- example.com
+- www.example.com
+responsemodifications:
+- name: APIContent
+  params: []
+- name: SetContentSecurityPolicy
+  params:
+  - foobar
+- name: SetIncomingCookie
+  params:
+  - authorization-bearer
+  - hunter2
+requestmodifications:
+- name: ForwardRequestHeaders
+  params: []
+`
+
+	rule := unmarshalYAMLRule(t, ruleYAML)
 
 	yamlRule, err := yaml.Marshal(rule)
 	if err != nil {
 		t.Errorf("expected no error marshalling rule to yaml, got '%s'", err.Error())
 	}
-	fmt.Println(string(yamlRule))
+	if yamlRule == nil {
+		t.Errorf("expected marshalling rule to yaml to not be nil")
+	}
 }
-*/
