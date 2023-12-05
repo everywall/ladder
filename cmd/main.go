@@ -1,7 +1,7 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"html/template"
 	"log"
@@ -15,9 +15,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 )
-
-//go:embed styles.css
-var cssData embed.FS
 
 //go:embed VERSION
 var version string
@@ -155,19 +152,8 @@ func main() {
 
 	app.Get("/", handlers.Form)
 
-	app.Get("/styles.css", func(c *fiber.Ctx) error {
-		cssData, err := cssData.ReadFile("styles.css")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
-		}
-
-		c.Set("Content-Type", "text/css")
-
-		return c.Send(cssData)
-	})
-
-	app.Get("/script.js", handlers.Script)
-
+	app.Get("styles.css", handlers.Styles)
+	app.Get("script.js", handlers.Script)
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
 
