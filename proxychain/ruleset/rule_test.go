@@ -3,7 +3,7 @@ package ruleset_v2
 import (
 	"encoding/json"
 	"fmt"
-	yaml "gopkg.in/yaml.v3"
+	//yaml "gopkg.in/yaml.v3"
 	"testing"
 )
 
@@ -13,13 +13,25 @@ func TestRuleUnmarshalJSON(t *testing.T) {
         "example.com",
         "www.example.com"
     ],
-    "request_modifications": [
-    	"SpoofUserAgent(\"googlebot\")"
-    ],
     "response_modifications": [
-      "APIContent()",
-      "SetContentSecurityPolicy(\"foobar\")",
-      "SetIncomingCookie(\"authorization-bearer\", \"hunter2\")"
+      {
+      	"name": "APIContent",
+      	"params": []
+      },
+      {
+      	"name": "SetContentSecurityPolicy",
+      	"params": ["foobar"]
+      },
+      {
+      	"name": "SetIncomingCookie",
+      	"params": ["authorization-bearer", "hunter2"]
+      }
+    ],
+    "request_modifications": [
+      {
+      	"name": "ForwardRequestHeaders",
+      	"params": []
+      }
     ]
 }`
 
@@ -54,6 +66,7 @@ func TestRuleUnmarshalJSON(t *testing.T) {
 	fmt.Println(string(jsonRule))
 }
 
+/*
 func TestRuleUnmarshalYAML(t *testing.T) {
 	ruleYAML := `
 domains:
@@ -95,3 +108,4 @@ response_modifications:
 	}
 	fmt.Println(string(yamlRule))
 }
+*/

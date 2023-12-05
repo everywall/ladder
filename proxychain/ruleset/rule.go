@@ -4,25 +4,35 @@ import (
 	"encoding/json"
 	"fmt"
 	"ladder/proxychain"
-	"reflect"
-	"runtime"
-	"strings"
-
-	_ "gopkg.in/yaml.v3"
+	// _ "gopkg.in/yaml.v3"
 )
 
 type Rule struct {
 	Domains               []string
 	RequestModifications  []proxychain.RequestModification
+	_rqms                 []_rqm // internal represenation of RequestModifications
 	ResponseModifications []proxychain.ResponseModification
+	_rsms                 []_rsm // internal represenation of ResponseModifications
+}
+
+// internal represenation of ResponseModifications
+type _rsm struct {
+	Name   string   `json:"name"`
+	Params []string `json:"params"`
+}
+
+// internal represenation of RequestModifications
+type _rqm struct {
+	Name   string   `json:"name"`
+	Params []string `json:"params"`
 }
 
 // implement type encoding/json/Marshaler
 func (rule *Rule) UnmarshalJSON(data []byte) error {
 	type Aux struct {
 		Domains               []string `json:"domains"`
-		RequestModifications  []string `json:"request_modifications"`
-		ResponseModifications []string `json:"response_modifications"`
+		RequestModifications  []_rqm   `json:"request_modifications"`
+		ResponseModifications []_rsm   `json:"response_modifications"`
 	}
 
 	aux := &Aux{}
@@ -30,163 +40,41 @@ func (rule *Rule) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	//fmt.Println(aux.Domains)
 	rule.Domains = aux.Domains
+	rule._rqms = aux.RequestModifications
+	rule._rsms = aux.ResponseModifications
 
 	// convert requestModification function call string into actual functional option
-	for _, rqmModStr := range aux.RequestModifications {
-		name, params, err := parseFuncCall(rqmModStr)
-		if err != nil {
-			return fmt.Errorf("Rule::UnmarshalJSON invalid function call syntax => '%s'", err)
-		}
-		f, exists := rqmModMap[name]
+	for _, rqm := range aux.RequestModifications {
+		f, exists := rqmModMap[rqm.Name]
 		if !exists {
-			return fmt.Errorf("Rule::UnmarshalJSON => requestModifier '%s' does not exist, please check spelling", name)
+			return fmt.Errorf("Rule::UnmarshalJSON => requestModifier '%s' does not exist, please check spelling", rqm.Name)
 		}
-		rule.RequestModifications = append(rule.RequestModifications, f(params...))
+		rule.RequestModifications = append(rule.RequestModifications, f(rqm.Params...))
 	}
 
 	// convert responseModification function call string into actual functional option
-	for _, rsmModStr := range aux.ResponseModifications {
-		name, params, err := parseFuncCall(rsmModStr)
-		if err != nil {
-			return fmt.Errorf("Rule::UnmarshalJSON invalid function call syntax => '%s'", err)
-		}
-		f, exists := rsmModMap[name]
+	for _, rsm := range aux.ResponseModifications {
+		f, exists := rsmModMap[rsm.Name]
 		if !exists {
-			return fmt.Errorf("Rule::UnmarshalJSON => responseModifier '%s' does not exist, please check spelling", name)
+			return fmt.Errorf("Rule::UnmarshalJSON => responseModifier '%s' does not exist, please check spelling", rsm.Name)
 		}
-		rule.ResponseModifications = append(rule.ResponseModifications, f(params...))
+		rule.ResponseModifications = append(rule.ResponseModifications, f(rsm.Params...))
 	}
 
 	return nil
 }
 
-// not fully possible to go from rule to JSON rule because
-// reflection cannot get the parameters of the functional options
-// of requestmodifiers and responsemodifiers
 func (r *Rule) MarshalJSON() ([]byte, error) {
-	type Aux struct {
+	aux := struct {
 		Domains               []string `json:"domains"`
-		RequestModifications  []string `json:"request_modifications"`
-		ResponseModifications []string `json:"response_modifications"`
-	}
-	aux := &Aux{}
-	aux.Domains = r.Domains
-
-	for _, rqmMod := range r.RequestModifications {
-		fnName := getFunctionName(rqmMod)
-		aux.RequestModifications = append(aux.RequestModifications, fnName)
-	}
-
-	for _, rsmMod := range r.ResponseModifications {
-		fnName := getFunctionName(rsmMod)
-		aux.ResponseModifications = append(aux.ResponseModifications, fnName)
+		RequestModifications  []_rqm   `json:"request_modifications"`
+		ResponseModifications []_rsm   `json:"response_modifications"`
+	}{
+		Domains:               r.Domains,
+		RequestModifications:  r._rqms,
+		ResponseModifications: r._rsms,
 	}
 
 	return json.Marshal(aux)
-}
-
-// getFunctionName returns the name of the function
-func getFunctionName(i interface{}) string {
-	// Get the value of the interface
-	val := reflect.ValueOf(i)
-
-	// Ensure it's a function
-	if val.Kind() != reflect.Func {
-		return "Not a function"
-	}
-
-	// Get the pointer to the function
-	ptr := val.Pointer()
-
-	// Get the function details from runtime
-	funcForPc := runtime.FuncForPC(ptr)
-
-	if funcForPc == nil {
-		return "Unknown"
-	}
-
-	// Return the name of the function
-	return extractShortName(funcForPc.Name())
-}
-
-// extractShortName extracts the short function name from the full name
-func extractShortName(fullName string) string {
-	parts := strings.Split(fullName, ".")
-	if len(parts) > 0 {
-		// Assuming the function name is always the second last part
-		return parts[len(parts)-2]
-	}
-	return ""
-}
-
-// == YAML
-// UnmarshalYAML implements the yaml.Unmarshaler interface for Rule
-func (rule *Rule) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type Aux struct {
-		Domains               []string `yaml:"domains"`
-		RequestModifications  []string `yaml:"request_modifications"`
-		ResponseModifications []string `yaml:"response_modifications"`
-	}
-
-	aux := &Aux{}
-	if err := unmarshal(aux); err != nil {
-		return err
-	}
-
-	rule.Domains = aux.Domains
-
-	// Process requestModifications
-	for _, rqmModStr := range aux.RequestModifications {
-		name, params, err := parseFuncCall(rqmModStr)
-		if err != nil {
-			return fmt.Errorf("Rule::UnmarshalYAML invalid function call syntax => '%s'", err)
-		}
-		f, exists := rqmModMap[name]
-		if !exists {
-			return fmt.Errorf("Rule::UnmarshalYAML => requestModifier '%s' does not exist, please check spelling", name)
-		}
-		rule.RequestModifications = append(rule.RequestModifications, f(params...))
-	}
-
-	// Process responseModifications
-	for _, rsmModStr := range aux.ResponseModifications {
-		name, params, err := parseFuncCall(rsmModStr)
-		if err != nil {
-			return fmt.Errorf("Rule::UnmarshalYAML invalid function call syntax => '%s'", err)
-		}
-		f, exists := rsmModMap[name]
-		if !exists {
-			return fmt.Errorf("Rule::UnmarshalYAML => responseModifier '%s' does not exist, please check spelling", name)
-		}
-		rule.ResponseModifications = append(rule.ResponseModifications, f(params...))
-	}
-
-	return nil
-}
-
-func (r *Rule) MarshalYAML() (interface{}, error) {
-	type Aux struct {
-		Domains               []string `yaml:"domains"`
-		RequestModifications  []string `yaml:"request_modifications"`
-		ResponseModifications []string `yaml:"response_modifications"`
-	}
-
-	aux := &Aux{
-		Domains: r.Domains,
-	}
-
-	for _, rqmMod := range r.RequestModifications {
-		// Assuming getFunctionName returns a string representation of the function
-		fnName := getFunctionName(rqmMod)
-		aux.RequestModifications = append(aux.RequestModifications, fnName)
-	}
-
-	for _, rsmMod := range r.ResponseModifications {
-		fnName := getFunctionName(rsmMod)
-		aux.ResponseModifications = append(aux.ResponseModifications, fnName)
-	}
-
-	return aux, nil
 }
