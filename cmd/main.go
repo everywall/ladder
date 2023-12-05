@@ -19,9 +19,6 @@ import (
 //go:embed styles.css
 var cssData embed.FS
 
-//go:embed script.js
-var scriptData embed.FS
-
 //go:embed VERSION
 var version string
 
@@ -169,17 +166,7 @@ func main() {
 		return c.Send(cssData)
 	})
 
-	// TODO: move to handlers/script.go
-	app.Get("/script.js", func(c *fiber.Ctx) error {
-		scriptData, err := scriptData.ReadFile("script.js")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
-		}
-
-		c.Set("Content-Type", "text/javascript")
-
-		return c.Send(scriptData)
-	})
+	app.Get("/script.js", handlers.Script)
 
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
