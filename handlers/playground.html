@@ -3,9 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ladder | playground</title>
     <link rel="stylesheet" href="/styles.css" />
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
-    <title>ladder | playground</title>
+    <style>
+      /* Chrome, Edge, and Safari */
+      #modifierContainer::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #modifierContainer::-webkit-scrollbar-thumb {
+        background: rgb(100 116 139);
+        border-radius: 14px;
+      }
+    </style>
     <script src="/script.js" defer></script>
     <script type="importmap">
       {
@@ -276,8 +287,11 @@
               </button>
             </div>
           </form>
-          <div class="mt-4 mx-4 flex justify-between">
-            <div id="modifierContainer" class="flex w-full gap-1"></div>
+          <div class="mt-2 mx-4 flex justify-between gap-2">
+            <div
+              id="modifierContainer"
+              class="flex flex-wrap grow overflow-y-auto max-h-14 w-full gap-1"
+            ></div>
             <button
               type="button"
               class="inline-flex items-center justify-center h-11 px-4 py-2 whitespace-nowrap rounded-md text-sm font-medium text-slate-200 dark:text-slate-900 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-800 dark:bg-slate-200 hover:bg-slate-800/90 dark:hover:bg-slate-200/90"
