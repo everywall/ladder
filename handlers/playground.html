@@ -339,6 +339,15 @@
       // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
       // TODO: refactor common logic with form.html to script.js
       // TODO: export to yaml
+      // TODO: remove tailwind play cdn script in head
+
+      const modifierContainer = document.getElementById("modifierContainer");
+
+      // Rerun handleThemeChange() so style is applied to Ninja Keys
+      handleThemeChange();
+
+      // Add event listener to the iframe so it closes  dropdown when clicked
+      closeDropdownOnClickWithinIframe();
 
       function closeDropdownOnClickWithinIframe() {
         const iframe = document.getElementById("resultIframe");
@@ -356,13 +365,6 @@
           true
         );
       }
-      closeDropdownOnClickWithinIframe();
-
-      function clearInput() {
-        inputField.value = "";
-        clearButton.style.display = "none";
-        inputField.focus();
-      }
 
       document
         .getElementById("inputForm")
@@ -375,33 +377,6 @@
         document.getElementById("ninjaKey").innerHTML = "⌘";
       } else {
         document.getElementById("ninjaKey").innerHTML = "Ctrl";
-      }
-
-      const inputField = document.getElementById("inputField");
-      const clearButton = document.getElementById("clearButton");
-      const modifierContainer = document.getElementById("modifierContainer");
-
-      if (inputField !== null && clearButton !== null) {
-        inputField.addEventListener("input", () => {
-          const clearButton = document.getElementById("clearButton");
-          if (clearButton !== null) {
-            if (inputField.value.trim().length > 0) {
-              clearButton.style.display = "block";
-            } else {
-              clearButton.style.display = "none";
-            }
-          }
-        });
-
-        inputField.addEventListener("keydown", (event) => {
-          if (event.code === "Escape") {
-            clearInput();
-          }
-        });
-
-        clearButton.addEventListener("click", () => {
-          clearInput();
-        });
       }
 
       function submitForm() {

@@ -210,6 +210,7 @@
             class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
             autocomplete="off"
             autofocus
+            required
           />
           <button
             id="clearButton"
@@ -281,12 +282,6 @@
         return true;
       }
 
-      function clearInput() {
-        inputField.value = "";
-        clearButton.style.display = "none";
-        inputField.focus();
-      }
-
       document
         .getElementById("inputForm")
         .addEventListener("submit", function (e) {
@@ -299,32 +294,6 @@
         .addEventListener("click", function () {
           validateAndRedirect("outline");
         });
-
-      const inputField = document.getElementById("inputField");
-      const clearButton = document.getElementById("clearButton");
-
-      if (inputField !== null && clearButton !== null) {
-        inputField.addEventListener("input", () => {
-          const clearButton = document.getElementById("clearButton");
-          if (clearButton !== null) {
-            if (inputField.value.trim().length > 0) {
-              clearButton.style.display = "block";
-            } else {
-              clearButton.style.display = "none";
-            }
-          }
-        });
-
-        inputField.addEventListener("keydown", (event) => {
-          if (event.code === "Escape") {
-            clearInput();
-          }
-        });
-
-        clearButton.addEventListener("click", () => {
-          clearInput();
-        });
-      }
     </script>
   </body>
 </html>
