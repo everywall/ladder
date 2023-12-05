@@ -1,12 +1,11 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
 	"html/template"
 	"log"
 	"os"
-	"strings"
 
 	"ladder/handlers"
 	"ladder/internal/cli"
@@ -14,19 +13,8 @@ import (
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/basicauth"
-	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/template/html/v2"
 )
-
-//go:embed favicon.ico
-var faviconData string
-
-//go:embed styles.css
-var cssData embed.FS
-
-//go:embed script.js
-var scriptData embed.FS
 
 //go:embed VERSION
 var version string
@@ -151,23 +139,8 @@ func main() {
 		},
 	)
 
-	// TODO: move to cmd/auth.go
-	userpass := os.Getenv("USERPASS")
-	if userpass != "" {
-		userpass := strings.Split(userpass, ":")
-
-		app.Use(basicauth.New(basicauth.Config{
-			Users: map[string]string{
-				userpass[0]: userpass[1],
-			},
-		}))
-	}
-
-	// TODO: move to handlers/favicon.go
-	app.Use(favicon.New(favicon.Config{
-		Data: []byte(faviconData),
-		URL:  "/favicon.ico",
-	}))
+	app.Use(handlers.Auth())
+	app.Use(handlers.Favicon())
 
 	if os.Getenv("NOLOGS") != "true" {
 		app.Use(func(c *fiber.Ctx) error {
@@ -179,29 +152,8 @@ func main() {
 
 	app.Get("/", handlers.Form)
 
-	app.Get("/styles.css", func(c *fiber.Ctx) error {
-		cssData, err := cssData.ReadFile("styles.css")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
-		}
-
-		c.Set("Content-Type", "text/css")
-
-		return c.Send(cssData)
-	})
-
-	// TODO: move to handlers/script.go
-	app.Get("/script.js", func(c *fiber.Ctx) error {
-		scriptData, err := scriptData.ReadFile("script.js")
-		if err != nil {
-			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
-		}
-
-		c.Set("Content-Type", "text/javascript")
-
-		return c.Send(scriptData)
-	})
-
+	app.Get("styles.css", handlers.Styles)
+	app.Get("script.js", handlers.Script)
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
 

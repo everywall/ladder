@@ -1,6 +1,6 @@
 {
 	"scripts": {
-		"build": "pnpx tailwindcss -i ./styles/input.css -o ./styles/output.css --build && pnpx minify ./styles/output.css > ./cmd/styles.css"
+		"build": "pnpx tailwindcss -i ./styles/input.css -o ./styles/output.css --build && pnpx minify ./styles/output.css > ./handlers/styles.css"
 	},
 	"devDependencies": {
 		"minify": "^10.5.2",

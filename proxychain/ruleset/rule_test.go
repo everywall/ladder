@@ -3,8 +3,9 @@ package ruleset_v2
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v3"
 	"testing"
+
+	"gopkg.in/yaml.v3"
 )
 
 // unmarshalRule is a helper function to unmarshal a Rule from a JSON string.

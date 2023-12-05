@@ -33,13 +33,13 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetRequestModifications(
 				// rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				// rx.MasqueradeAsFacebookBot(),
-				//rx.MasqueradeAsGoogleBot(),
+				// rx.MasqueradeAsGoogleBot(),
 				rx.DeleteOutgoingCookies(),
 				rx.ForwardRequestHeaders(),
-				//rx.SpoofReferrerFromGoogleSearch(),
+				// rx.SpoofReferrerFromGoogleSearch(),
 				rx.SpoofReferrerFromLinkedInPost(),
-				//rx.RequestWaybackMachine(),
-				//rx.RequestArchiveIs(),
+				// rx.RequestWaybackMachine(),
+				// rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
 				tx.ForwardResponseHeaders(),
