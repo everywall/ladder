@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="/styles.css" />
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <style>
+      /* Style modiferContainer scrollbar */
       /* Chrome, Edge, and Safari */
       #modifierContainer::-webkit-scrollbar {
         width: 8px;
       }
-
       #modifierContainer::-webkit-scrollbar-thumb {
         background: rgb(100 116 139);
         border-radius: 14px;
+      }
+      ninja-keys {
+        --ninja-accent-color: #7aa7d1;
       }
     </style>
     <script src="/script.js" defer></script>
@@ -413,13 +416,11 @@
       <ninja-keys> </ninja-keys>
     </div>
     <script>
-      // TODO: add all modifiers into Ninja Keys
+      // TODO: Add textarea instead of input for certain modifiers
       // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
-      // TODO: add textarea instead of input for certain modifiers
-      // TODO: see what adding a whole bunch of tags does to the styling of modifierContainer
+      // TODO: remove tailwind play cdn script in head
       // TODO: export to yaml
       // TODO: write tests
-      // TODO: remove tailwind play cdn script in head
 
       const modifierContainer = document.getElementById("modifierContainer");
       const modalContainer = document.getElementById("modalContainer");
@@ -805,12 +806,14 @@
           parent: "modifyOutgoingCookies",
           section: "Modify outgoing cookies ...",
           handler: () => {
-            const values = getValues("cookies");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "setoutgoingcookies",
-              values
-            );
+            getValues("Set outgoing cookies", "cookies").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "setoutgoingcookies",
+                values
+              );
+            });
           },
         },
         {
@@ -819,12 +822,14 @@
           parent: "modifyOutgoingCookies",
           section: "Modify outgoing cookies ...",
           handler: () => {
-            const values = getValues("name");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "deleteoutgoingcookie",
-              values
-            );
+            getValues("Delete outgoing cookie", "name").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "deleteoutgoingcookie",
+                values
+              );
+            });
           },
         },
         {
@@ -845,11 +850,15 @@
           parent: "modifyOutgoingCookies",
           section: "Modify outgoing cookies ...",
           handler: () => {
-            const values = getValues("whitelist");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "deleteoutgoingcookiesexcept",
-              values
+            getValues("Set outgoing cookies except", "whitelist").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "deleteoutgoingcookiesexcept",
+                  values
+                );
+              }
             );
           },
         },
@@ -873,11 +882,15 @@
           parent: "modifyUrl",
           section: "Modify URL ...",
           handler: () => {
-            const values = getValues("match", "replacement");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "modifydomainwithregex",
-              values
+            getValues("Modify domain with regex", "match", "replacement").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "modifydomainwithregex",
+                  values
+                );
+              }
             );
           },
         },
@@ -887,11 +900,15 @@
           parent: "modifyUrl",
           section: "Modify URL ...",
           handler: () => {
-            const values = getValues("match", "replacement");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "modifypathwithregex",
-              values
+            getValues("Modify path with regex", "match", "replacement").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "modifypathwithregex",
+                  values
+                );
+              }
             );
           },
         },
@@ -901,12 +918,14 @@
           parent: "modifyUrl",
           section: "Modify URL ...",
           handler: () => {
-            const values = getValues("key", "value");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "modifyqueryparams",
-              values
-            );
+            getValues("Modify query params", "key", "value").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "modifyqueryparams",
+                values
+              );
+            });
           },
         },
         {
@@ -925,12 +944,14 @@
           parent: "modifyRequestHeaders",
           section: "Modify request headers ...",
           handler: () => {
-            const values = getValues("name", "val");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "setrequestheader",
-              values
-            );
+            getValues("Set request header", "name", "val").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "setrequestheader",
+                values
+              );
+            });
           },
         },
         {
@@ -939,12 +960,14 @@
           parent: "modifyRequestHeaders",
           section: "Modify request headers ...",
           handler: () => {
-            const values = getValues("name");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "deleterequestheader",
-              values
-            );
+            getValues("Delete request header", "name").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "deleterequestheader",
+                values
+              );
+            });
           },
         },
         {
@@ -1014,8 +1037,14 @@
           parent: "spoofRequest",
           section: "Spoof or hide...",
           handler: () => {
-            const values = getValues("url");
-            toggleModifier(payload.requestmodifierquery, "spooforigin", values);
+            getValues("Spoof origin", "url").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "spooforigin",
+                values
+              );
+            });
           },
         },
         {
@@ -1033,12 +1062,14 @@
           parent: "spoofRequest",
           section: "Spoof or hide...",
           handler: () => {
-            const values = getValues("url");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "spoofreferrer",
-              values
-            );
+            getValues("Spoof referrer", "url").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "spoofreferrer",
+                values
+              );
+            });
           },
         },
         {
@@ -1200,12 +1231,14 @@
           parent: "spoofRequest",
           section: "Spoof or hide...",
           handler: () => {
-            const values = getValues("ua");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "spoofuseragent",
-              values
-            );
+            getValues("Spoof user agent", "ua").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "spoofuseragent",
+                values
+              );
+            });
           },
         },
         {
@@ -1214,23 +1247,296 @@
           parent: "spoofRequest",
           section: "Spoof or hide...",
           handler: () => {
-            const values = getValues("ip");
-            toggleModifier(
-              payload.requestmodifierquery,
-              "spoofxforwardedfor",
-              values
-            );
+            getValues("Spoof X-Forwarded-For", "ip").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "spoofxforwardedfor",
+                values
+              );
+            });
           },
         },
         // RESPONSE MODIFIERS
         {
-          id: "GenerateReadableOutline",
+          id: "APIContent",
+          title: "Fetch JSON API return of content",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(payload.responsemodifierquery, "apicontent");
+          },
+        },
+        {
+          id: "blockElementRemoval",
+          title: "Block CSS element removal",
+          section: "Response Modifiers",
+          handler: () => {
+            getValues("Block CSS element removal", "cssSelector").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "blockelementremoval",
+                  values
+                );
+              }
+            );
+          },
+        },
+        {
+          id: "bypassCors",
+          title: "Bypass CORS",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(payload.responsemodifierquery, "bypasscors");
+          },
+        },
+        {
+          id: "bypassContentSecurityPolicy",
+          title: "Bypass Content Security Policy",
+          section: "Response Modifiers",
+          handler: () => {
+            getValues("Block CSS element removal", "csp").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "bypasscontentsecuritypolicy",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "forwardResponseHeaders",
+          title: "Forward response headers",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "forwardresponseheaders"
+            );
+          },
+        },
+        {
+          id: "generateReadableOutline",
           title: "Generate readable outline",
           section: "Response Modifiers",
           handler: () => {
             toggleModifier(
               payload.responsemodifierquery,
               "generatereadableoutline"
+            );
+          },
+        },
+        {
+          id: "injectScriptBeforeDOMContentLoaded",
+          title: "Inject script before DOM content loaded",
+          section: "Response Modifiers",
+          handler: () => {
+            getValues("Block CSS element removal", "js").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "injectscriptbeforedomcontentloaded",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "injectScriptAfterDOMContentLoaded",
+          title: "Inject script after DOM content loaded",
+          section: "Response Modifiers",
+          handler: () => {
+            getValues("Block CSS element removal", "js").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "injectscriptafterdomcontentloaded",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "injectScriptAfterDOMIdle",
+          title: "Inject script after DOM idle",
+          section: "Response Modifiers",
+          handler: () => {
+            getValues("Block CSS element removal", "js").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "injectscriptafterdomidle",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "modifyIncomingCookies",
+          title: "Modify incoming cookies...",
+          children: [
+            "Delete incoming cookies",
+            "deleteIncomingCookiesExcept",
+            "setIncomingCookies",
+            "setIncomingCookie",
+          ],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "modifyIncomingCookies" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "deleteIncomingCookies",
+          title: "Delete incoming cookies",
+          parent: "modifyIncomingCookies",
+          section: "Modify incoming cookies...",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "deleteincomingcookies"
+            );
+          },
+        },
+        {
+          id: "deleteIncomingCookiesExcept",
+          title: "Delete incoming cookies except",
+          parent: "modifyIncomingCookies",
+          section: "Modify incoming cookies...",
+          handler: () => {
+            getValues("Block CSS element removal", "whitelist").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "deleteincomingcookiesexcept",
+                  values
+                );
+              }
+            );
+          },
+        },
+        {
+          id: "setIncomingCookies",
+          title: "Set incoming cookies",
+          parent: "modifyIncomingCookies",
+          section: "Modify incoming cookies...",
+          handler: () => {
+            getValues("Block CSS element removal", "cookies").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "setincomingcookies",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "setIncomingCookie",
+          title: "Set incoming cookies",
+          parent: "modifyIncomingCookies",
+          section: "Modify incoming cookies...",
+          handler: () => {
+            getValues("Block CSS element removal", "name", "val").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "setincomingcookie",
+                  values
+                );
+              }
+            );
+          },
+        },
+        {
+          id: "modifyResponseHeaders",
+          title: "Modify response headers...",
+          children: ["Set response header", "Delete response header"],
+          section: "Request Modifiers",
+          handler: () => {
+            ninja.open({ parent: "modifyResponseHeaders" });
+            return { keepOpen: true };
+          },
+        },
+        {
+          id: "setResponseHeader",
+          title: "Set response header",
+          parent: "modifyResponseHeaders",
+          section: "Modify response headers...",
+          handler: () => {
+            getValues("Block CSS element removal", "key", "value").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.requestmodifierquery,
+                  "setresponseheader",
+                  values
+                );
+              }
+            );
+          },
+        },
+        {
+          id: "deleteResponseHeader",
+          title: "Delete response header",
+          parent: "modifyResponseHeaders",
+          section: "Modify response headers...",
+          handler: () => {
+            getValues("Block CSS element removal", "key").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.requestmodifierquery,
+                "deleteresponseheader",
+                values
+              );
+            });
+          },
+        },
+        {
+          id: "patchDynamicResourceUrls",
+          title: "Patch dynamic resource urls",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "patchdynamicresourceurls"
+            );
+          },
+        },
+        {
+          id: "patchGoogleAnalytics",
+          title: "Patch Google Analytics",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "patchgoogleanalytics"
+            );
+          },
+        },
+        {
+          id: "patchTrackerscripts",
+          title: "Patch tracker scripts",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "patchtrackerscripts"
+            );
+          },
+        },
+        {
+          id: "rewriteHtmlResourceUrls",
+          title: "Rewrite HTML resource urls",
+          section: "Response Modifiers",
+          handler: () => {
+            toggleModifier(
+              payload.responsemodifierquery,
+              "rewritehtmlresourceurls"
             );
           },
         },
