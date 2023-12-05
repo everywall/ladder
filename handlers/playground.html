@@ -12,6 +12,10 @@
       #modifierContainer::-webkit-scrollbar {
         width: 8px;
       }
+      #modifierContainer::-webkit-scrollbar-track {
+        background: rgb(226 232 240);
+        border-radius: 5px;
+      }
       #modifierContainer::-webkit-scrollbar-thumb {
         background: rgb(100 116 139);
         border-radius: 14px;
@@ -416,11 +420,10 @@
       <ninja-keys> </ninja-keys>
     </div>
     <script>
-      // TODO: Add textarea instead of input for certain modifiers
       // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
+      // TODO: move script to separate file
       // TODO: remove tailwind play cdn script in head
-      // TODO: export to yaml
-      // TODO: write tests
+      // TODO: test functionality and POST requests
 
       const modifierContainer = document.getElementById("modifierContainer");
       const modalContainer = document.getElementById("modalContainer");
@@ -432,7 +435,7 @@
       // Rerun handleThemeChange() so style is applied to Ninja Keys
       handleThemeChange();
 
-      // Add event listener to the iframe so it closes  dropdown when clicked
+      // Add event listener to the iframe so it closes dropdown when clicked
       closeDropdownOnClickWithinIframe();
 
       function closeDropdownOnClickWithinIframe() {
@@ -463,6 +466,23 @@
         document.getElementById("ninjaKey").innerHTML = "⌘";
       } else {
         document.getElementById("ninjaKey").innerHTML = "Ctrl";
+      }
+
+      function downloadYaml() {
+        function parseYaml() {
+          // TODO parse payload into yaml format
+          return payload;
+        }
+
+        const yamlData = parseYaml();
+        const blob = new Blob([yamlData], { type: "text/yaml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        // TODO construct filename from hostname into naming scheme
+        link.download = `name_of_report.yaml`;
+        link.click();
+        URL.revokeObjectURL(url);
       }
 
       function submitForm() {
@@ -533,8 +553,15 @@
           const label = document.createElement("label");
           label.innerHTML = fields[i];
           label.setAttribute("for", `input-${i}`);
-          const input = document.createElement("input");
-          input.type = "text";
+          let input;
+          if (fields[i] === "js") {
+            input = document.createElement("textarea");
+            input.type = "textarea";
+            input.classList.add("min-h-[80px]");
+          } else {
+            input = document.createElement("input");
+            input.type = "text";
+          }
           input.id = `input-${i}`;
           input.classList.add(
             "w-full",
@@ -1329,9 +1356,24 @@
           },
         },
         {
+          id: "injectScript",
+          title: "Inject script...",
+          children: [
+            "Inject script before DOM content loaded",
+            "Inject script after DOM content loaded",
+            "Inject script after DOM idle",
+          ],
+          section: "Response Modifiers",
+          handler: () => {
+            ninja.open({ parent: "injectScript" });
+            return { keepOpen: true };
+          },
+        },
+        {
           id: "injectScriptBeforeDOMContentLoaded",
           title: "Inject script before DOM content loaded",
-          section: "Response Modifiers",
+          parent: "injectScript",
+          section: "Inject script...",
           handler: () => {
             getValues("Block CSS element removal", "js").then((values) => {
               if (Object.keys(values).length === 0) return;
@@ -1346,7 +1388,8 @@
         {
           id: "injectScriptAfterDOMContentLoaded",
           title: "Inject script after DOM content loaded",
-          section: "Response Modifiers",
+          parent: "injectScript",
+          section: "Inject script...",
           handler: () => {
             getValues("Block CSS element removal", "js").then((values) => {
               if (Object.keys(values).length === 0) return;
@@ -1361,7 +1404,8 @@
         {
           id: "injectScriptAfterDOMIdle",
           title: "Inject script after DOM idle",
-          section: "Response Modifiers",
+          parent: "injectScript",
+          section: "Inject script...",
           handler: () => {
             getValues("Block CSS element removal", "js").then((values) => {
               if (Object.keys(values).length === 0) return;
@@ -1378,11 +1422,11 @@
           title: "Modify incoming cookies...",
           children: [
             "Delete incoming cookies",
-            "deleteIncomingCookiesExcept",
-            "setIncomingCookies",
-            "setIncomingCookie",
+            "Delete incoming cookies except",
+            "Set incoming cookies",
+            "Set incoming cookie",
           ],
-          section: "Request Modifiers",
+          section: "Response Modifiers",
           handler: () => {
             ninja.open({ parent: "modifyIncomingCookies" });
             return { keepOpen: true };
@@ -1436,7 +1480,7 @@
         },
         {
           id: "setIncomingCookie",
-          title: "Set incoming cookies",
+          title: "Set incoming cookie",
           parent: "modifyIncomingCookies",
           section: "Modify incoming cookies...",
           handler: () => {
@@ -1456,7 +1500,7 @@
           id: "modifyResponseHeaders",
           title: "Modify response headers...",
           children: ["Set response header", "Delete response header"],
-          section: "Request Modifiers",
+          section: "Response Modifiers",
           handler: () => {
             ninja.open({ parent: "modifyResponseHeaders" });
             return { keepOpen: true };
