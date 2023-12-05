@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"fmt"
 	"ladder/proxychain"
 	rx "ladder/proxychain/requestmodifiers"
 	tx "ladder/proxychain/responsemodifiers"
+	"ladder/proxychain/ruleset"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,6 +26,10 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			rs = r
 		}
 	*/
+	rs, err := ruleset_v2.NewRuleset("ruleset_v2.yaml")
+	if err != nil {
+		panic(err)
+	}
 
 	return func(c *fiber.Ctx) error {
 		proxychain := proxychain.
@@ -51,9 +57,20 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				tx.PatchDynamicResourceURLs(),
 				tx.BlockElementRemoval(".article-content"),
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
-			).
-			Execute()
+			)
 
-		return proxychain
+		// load ruleset
+		rule, exists := rs.GetRule(proxychain.Request.URL)
+		fmt.Println("============")
+		fmt.Println(proxychain.Request.URL)
+		fmt.Println(rs)
+		fmt.Println("============")
+		if exists {
+			fmt.Println("===========EXISTS=")
+			proxychain.AddOnceRequestModifications(rule.RequestModifications...)
+			proxychain.AddOnceResponseModifications(rule.ResponseModifications...)
+		}
+
+		return proxychain.Execute()
 	}
 }

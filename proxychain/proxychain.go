@@ -3,22 +3,12 @@ package proxychain
 import (
 	"errors"
 	"fmt"
+	http "github.com/bogdanfinn/fhttp"
+	tls_client "github.com/bogdanfinn/tls-client"
 	"io"
 	"log"
 	"net/url"
 	"strings"
-
-	//"time"
-
-	//"net/http"
-	//"github.com/Danny-Dasilva/CycleTLS/cycletls"
-	//http "github.com/Danny-Dasilva/fhttp"
-	http "github.com/bogdanfinn/fhttp"
-	tls_client "github.com/bogdanfinn/tls-client"
-
-	//"github.com/bogdanfinn/tls-client/profiles"
-
-	"ladder/pkg/ruleset"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -100,7 +90,6 @@ type ProxyChain struct {
 	onceRequestModifications  []RequestModification
 	onceResponseModifications []ResponseModification
 	responseModifications     []ResponseModification
-	Ruleset                   *ruleset.RuleSet
 	debugMode                 bool
 	abortErr                  error
 	APIPrefix                 string
@@ -174,13 +163,6 @@ func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) 
 func (chain *ProxyChain) WithAPIPath(path string) *ProxyChain {
 	chain.APIPrefix = path
 	chain.APIPrefix = strings.TrimSuffix(chain.APIPrefix, "*")
-	return chain
-}
-
-// Adds a ruleset to ProxyChain
-func (chain *ProxyChain) AddRuleset(rs *ruleset.RuleSet) *ProxyChain {
-	chain.Ruleset = rs
-	// TODO: add _applyRuleset method
 	return chain
 }
 

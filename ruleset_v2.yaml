@@ -1,0 +1,17 @@
+rules:
+  - domains:
+    - example.com
+    - www.example.com
+    responsemodifications:
+    - name: APIContent
+      params: []
+    - name: SetContentSecurityPolicy
+      params:
+      - foobar
+    - name: SetIncomingCookie
+      params:
+      - authorization-bearer
+      - hunter2
+    requestmodifications:
+    - name: ForwardRequestHeaders
+      params: []

@@ -163,6 +163,18 @@ func (rs *Ruleset) loadRulesFromLocalDir(path string) error {
 		return nil
 	})
 
+	// create a map of pointers to rules loaded above based on domain string keys
+	// this way we don't have two copies of the rule in ruleset
+	for i, rule := range rs.Rules {
+		rulePtr := &rs.Rules[i]
+		for _, domain := range rule.Domains {
+			rs._rulemap[domain] = rulePtr
+			if !strings.HasPrefix(domain, "www.") {
+				rs._rulemap["www."+domain] = rulePtr
+			}
+		}
+	}
+
 	if err != nil {
 		return err
 	}
