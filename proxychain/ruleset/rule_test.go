@@ -102,7 +102,6 @@ requestmodifications:
 	if len(rule.RequestModifications) != 1 {
 		t.Errorf("expected number of RequestModifications to be 1, got %d", len(rule.RequestModifications))
 	}
-	fmt.Println(rule.RequestModifications[0].Name)
 }
 
 func TestRuleMarshalYAML(t *testing.T) {
