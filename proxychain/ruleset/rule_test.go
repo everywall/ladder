@@ -3,7 +3,7 @@ package ruleset_v2
 import (
 	"encoding/json"
 	"fmt"
-	//"io"
+	yaml "gopkg.in/yaml.v3"
 	"testing"
 )
 
@@ -13,12 +13,14 @@ func TestRuleUnmarshalJSON(t *testing.T) {
         "example.com",
         "www.example.com"
     ],
-    "response_modifiers": [
-        "APIContent()",
-        "SetContentSecurityPolicy(\"foobar\")",
-        "SetIncomingCookie(\"authorization-bearer\", \"hunter2\")"
+    "request_modifications": [
+    	"SpoofUserAgent(\"googlebot\")"
     ],
-    "response_modifiers": []
+    "response_modifications": [
+      "APIContent()",
+      "SetContentSecurityPolicy(\"foobar\")",
+      "SetIncomingCookie(\"authorization-bearer\", \"hunter2\")"
+    ]
 }`
 
 	//fmt.Println(ruleJSON)
@@ -37,9 +39,59 @@ func TestRuleUnmarshalJSON(t *testing.T) {
 		t.Errorf("expected domain to be example.com")
 		return
 	}
-	if len(rule.ResponseModifications) == 3 {
-		t.Errorf("expected number of ResponseModifications to be 3")
+	if len(rule.ResponseModifications) != 3 {
+		t.Errorf("expected number of ResponseModifications to be 3, got %d", len(rule.ResponseModifications))
 	}
-	fmt.Println(rule.ResponseModifications)
+	if len(rule.RequestModifications) != 1 {
+		t.Errorf("expected number of RequestModifications to be 1, got %d", len(rule.RequestModifications))
+	}
 
+	// test marshal
+	jsonRule, err := json.Marshal(rule)
+	if err != nil {
+		t.Errorf("expected no error marshalling rule to json, got '%s'", err.Error())
+	}
+	fmt.Println(string(jsonRule))
+}
+
+func TestRuleUnmarshalYAML(t *testing.T) {
+	ruleYAML := `
+domains:
+  - example.com
+  - www.example.com
+request_modifications:
+  - SpoofUserAgent("googlebot")
+response_modifications:
+  - APIContent()
+  - SetContentSecurityPolicy("foobar")
+  - SetIncomingCookie("authorization-bearer", "hunter2")
+`
+
+	rule := &Rule{}
+	err := yaml.Unmarshal([]byte(ruleYAML), rule)
+	if err != nil {
+		t.Errorf("expected no error in Unmarshal, got '%s'", err)
+		return
+	}
+
+	if len(rule.Domains) != 2 {
+		t.Errorf("expected number of domains to be 2, got %d", len(rule.Domains))
+		return
+	}
+	if !(rule.Domains[0] == "example.com" || rule.Domains[1] == "example.com") {
+		t.Errorf("expected domain to be example.com")
+		return
+	}
+	if len(rule.ResponseModifications) != 3 {
+		t.Errorf("expected number of ResponseModifications to be 3, got %d", len(rule.ResponseModifications))
+	}
+	if len(rule.RequestModifications) != 1 {
+		t.Errorf("expected number of RequestModifications to be 1, got %d", len(rule.RequestModifications))
+	}
+
+	yamlRule, err := yaml.Marshal(rule)
+	if err != nil {
+		t.Errorf("expected no error marshalling rule to yaml, got '%s'", err.Error())
+	}
+	fmt.Println(string(yamlRule))
 }

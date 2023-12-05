@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"io"
+	"io/fs"
 
 	//"io/fs"
 	"os"
@@ -42,7 +43,7 @@ func responseModCodeGen(dir string) (code string, err error) {
 
 	factoryMaps := []string{}
 	for _, file := range files {
-		if filepath.Ext(file.Name()) != ".go" {
+		if !shouldGenCodeFor(file) {
 			continue
 		}
 
@@ -114,7 +115,7 @@ func requestModCodeGen(dir string) (code string, err error) {
 
 	factoryMaps := []string{}
 	for _, file := range files {
-		if filepath.Ext(file.Name()) != ".go" {
+		if !shouldGenCodeFor(file) {
 			continue
 		}
 
@@ -156,6 +157,19 @@ func init() {
 }`, strings.Join(factoryMaps, "\n"))
 	//fmt.Println(code)
 	return code, nil
+}
+
+func shouldGenCodeFor(file fs.DirEntry) bool {
+	if file.IsDir() {
+		return false
+	}
+	if filepath.Ext(file.Name()) != ".go" {
+		return false
+	}
+	if strings.HasSuffix(file.Name(), "_test.go") {
+		return false
+	}
+	return true
 }
 
 func main() {

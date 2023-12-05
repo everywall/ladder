@@ -20,14 +20,6 @@ func init() {
     return tx.APIContent()
   }
 
-  rsmModMap["TestCreateAPIErrReader"] = func(params ...string) proxychain.ResponseModification {
-    return tx.TestCreateAPIErrReader(params[0])
-  }
-
-  rsmModMap["TestCreateAPIErrReader2"] = func(params ...string) proxychain.ResponseModification {
-    return tx.TestCreateAPIErrReader2(params[0])
-  }
-
   rsmModMap["BlockElementRemoval"] = func(params ...string) proxychain.ResponseModification {
     return tx.BlockElementRemoval(params[0])
   }
