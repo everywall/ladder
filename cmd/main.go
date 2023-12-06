@@ -9,6 +9,7 @@ import (
 
 	"ladder/handlers"
 	"ladder/internal/cli"
+	"ladder/proxychain/requestmodifiers/bot"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -42,17 +43,15 @@ func main() {
 		Help:     "Adds verbose logging",
 	})
 
-	/*
-		randomGoogleBot := parser.Flag("", "random-googlebot", &argparse.Options{
-			Required: false,
-			Help:     "Update the list of trusted Googlebot IPs, and use a random one for each masqueraded request",
-		})
+	randomGoogleBot := parser.Flag("", "random-googlebot", &argparse.Options{
+		Required: false,
+		Help:     "Update the list of trusted Googlebot IPs, and use a random one for each masqueraded request",
+	})
 
-		randomBingBot := parser.Flag("", "random-bingbot", &argparse.Options{
-			Required: false,
-			Help:     "Update the list of trusted Bingbot IPs, and use a random one for each masqueraded request",
-		})
-	*/
+	randomBingBot := parser.Flag("", "random-bingbot", &argparse.Options{
+		Required: false,
+		Help:     "Update the list of trusted Bingbot IPs, and use a random one for each masqueraded request",
+	})
 
 	// TODO: add version flag that reads from handers/VERSION
 
@@ -76,23 +75,21 @@ func main() {
 		fmt.Print(parser.Usage(err))
 	}
 
-	/*
-		if *randomGoogleBot {
-			err := bot.GoogleBot.UpdatePool("https://developers.google.com/static/search/apis/ipranges/googlebot.json")
-			if err != nil {
-				fmt.Println("error while retrieving list of Googlebot IPs: " + err.Error())
-				fmt.Println("defaulting to known trusted Googlebot identity")
-			}
+	if *randomGoogleBot {
+		err := bot.GoogleBot.UpdatePool("https://developers.google.com/static/search/apis/ipranges/googlebot.json")
+		if err != nil {
+			fmt.Println("error while retrieving list of Googlebot IPs: " + err.Error())
+			fmt.Println("defaulting to known trusted Googlebot identity")
 		}
+	}
 
-		if *randomBingBot {
-			err := bot.BingBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
-			if err != nil {
-				fmt.Println("error while retrieving list of Bingbot IPs: " + err.Error())
-				fmt.Println("defaulting to known trusted Bingbot identity")
-			}
+	if *randomBingBot {
+		err := bot.BingBot.UpdatePool("https://www.bing.com/toolbox/bingbot.json")
+		if err != nil {
+			fmt.Println("error while retrieving list of Bingbot IPs: " + err.Error())
+			fmt.Println("defaulting to known trusted Bingbot identity")
 		}
-	*/
+	}
 
 	// utility cli flag to compile ruleset directory into single ruleset.yaml
 	if *mergeRulesets {
