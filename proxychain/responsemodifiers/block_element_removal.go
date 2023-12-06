@@ -8,7 +8,7 @@ import (
 	"ladder/proxychain/responsemodifiers/rewriters"
 )
 
-//go:embed block_element_removal.js
+//go:embed vendor/block_element_removal.js
 var blockElementRemoval string
 
 // BlockElementRemoval prevents paywall javascript from removing a

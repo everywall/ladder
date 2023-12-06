@@ -8,7 +8,7 @@ import (
 	"ladder/proxychain"
 )
 
-//go:embed patch_google_analytics.js
+//go:embed vendor/patch_google_analytics.js
 var gaPatch string
 
 // PatchGoogleAnalytics replaces any request to google analytics with a no-op stub function.
