@@ -26,7 +26,7 @@ var templateFS embed.FS
 // This is a reliable way of bypassing soft-paywalled articles, where the content is hidden, but still present in the DOM.
 func GenerateReadableOutline() proxychain.ResponseModification {
 	// get template only once, and resuse for subsequent calls
-	f := "generate_readable_outline.html"
+	f := "vendor/generate_readable_outline.html"
 	tmpl, err := template.ParseFS(templateFS, f)
 	if err != nil {
 		panic(fmt.Errorf("tx.GenerateReadableOutline Error: %s not found", f))
