@@ -1,5 +1,6 @@
 // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
 // TODO: remove tailwind play cdn script in head
+// TODO: Javascript syntax highlighting within textarea layout, styling and event listeners
 // TODO: test functionality and POST requests
 
 const modifierContainer = document.getElementById("modifierContainer");
@@ -35,7 +36,7 @@ document.getElementById("inputForm").addEventListener("submit", function (e) {
   submitForm();
 });
 
-if (navigator.platform.includes("Mac")) {
+if (navigator.userAgent.includes("Mac")) {
   document.getElementById("ninjaKey").innerHTML = "⌘";
 } else {
   document.getElementById("ninjaKey").innerHTML = "Ctrl";
@@ -116,7 +117,11 @@ function getValues(...fields) {
 
   const handleEnterKey = (e) => {
     if (e.key === "Enter") {
-      modalSubmitButton.click();
+      if (e.target.tagName.toLowerCase() === "textarea") {
+        return;
+      } else {
+        modalSubmitButton.click();
+      }
     }
   };
 
@@ -130,7 +135,12 @@ function getValues(...fields) {
     if (fields[i] === "js") {
       input = document.createElement("textarea");
       input.type = "textarea";
-      input.classList.add("min-h-[200px]");
+      input.classList.add(
+        "min-h-[200px]",
+        "font-mono",
+        "whitespace-break-spaces",
+        "font-semibold"
+      );
     } else {
       input = document.createElement("input");
       input.type = "text";
@@ -150,18 +160,41 @@ function getValues(...fields) {
       "pr-3",
       "hover:ring-slate-300",
       "dark:bg-slate-800",
-      "dark:highlight-white/5",
-      "dark:hover:bg-slate-700"
+      "dark:highlight-white/5"
     );
     modalContent.appendChild(label);
     modalContent.appendChild(input);
+
+    const textareaEventListener = (event) => {
+      codeElement = document.querySelector("code");
+      codeElement.innerText = input.value;
+      Prism.highlightElement(codeElement);
+      const fieldName = fields[i];
+      values[fieldName] = event.target.value;
+    };
+
+    if (input.type === "textarea") {
+      preElement = document.createElement("pre");
+      codeElement = document.createElement("code");
+      preElement.setAttribute("aria-hidden", "true");
+      preElement.setAttribute("tabindex", "-1");
+      codeElement.classList.add("language-javascript");
+      preElement.appendChild(codeElement);
+      modalContent.appendChild(preElement);
+      input.addEventListener("input", textareaEventListener);
+    }
 
     const inputEventListener = (event) => {
       const fieldName = fields[i];
       values[fieldName] = event.target.value;
     };
-    input.addEventListener("input", inputEventListener);
-    inputEventListeners.push(inputEventListener);
+
+    if (textareaEventListener) {
+      inputEventListeners.push(textareaEventListener);
+    } else {
+      input.addEventListener("input", inputEventListener);
+      inputEventListeners.push(inputEventListener);
+    }
     inputs.push(input);
   }
 
