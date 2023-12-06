@@ -9,6 +9,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"ladder/pkg/ruleset"
 
@@ -181,7 +182,9 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	// Fetch the site
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * 15,
+	}
 	req, _ := http.NewRequest("GET", url, nil)
 
 	if rule.Headers.UserAgent != "" {
