@@ -34,7 +34,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetRequestModifications(
 				//rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				rx.AddCacheBusterQuery(),
-				rx.MasqueradeAsGoogleBot(),
+				//rx.MasqueradeAsGoogleBot(),
 				rx.ForwardRequestHeaders(),
 				rx.DeleteOutgoingCookies(),
 				rx.SpoofReferrerFromRedditPost(),
@@ -44,15 +44,17 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			).
 			AddResponseModifications(
 				//tx.ForwardResponseHeaders(),
+				//tx.BlockThirdPartyScripts(),
 				tx.DeleteIncomingCookies(),
 				tx.DeleteLocalStorageData(),
 				tx.DeleteSessionStorageData(),
 				tx.BypassCORS(),
 				tx.BypassContentSecurityPolicy(),
 				tx.RewriteHTMLResourceURLs(),
-				tx.PatchTrackerScripts(),
 				tx.PatchDynamicResourceURLs(),
-				//tx.BlockElementRemoval(".article-content"),
+				tx.PatchTrackerScripts(),
+				//tx.BlockElementRemoval(".article-content"), // techcrunch
+				tx.BlockElementRemoval(".available-content"), // substack
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			)
 

@@ -24,6 +24,10 @@ func init() {
     return tx.BlockElementRemoval(params[0])
   }
 
+  rsmModMap["BlockThirdPartyScripts"] = func(_ ...string) proxychain.ResponseModification {
+    return tx.BlockThirdPartyScripts()
+  }
+
   rsmModMap["BypassCORS"] = func(_ ...string) proxychain.ResponseModification {
     return tx.BypassCORS()
   }
@@ -90,10 +94,6 @@ func init() {
 
   rsmModMap["PatchDynamicResourceURLs"] = func(_ ...string) proxychain.ResponseModification {
     return tx.PatchDynamicResourceURLs()
-  }
-
-  rsmModMap["PatchGoogleAnalytics"] = func(_ ...string) proxychain.ResponseModification {
-    return tx.PatchGoogleAnalytics()
   }
 
   rsmModMap["PatchTrackerScripts"] = func(_ ...string) proxychain.ResponseModification {

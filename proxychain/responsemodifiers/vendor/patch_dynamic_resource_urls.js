@@ -134,7 +134,7 @@
 
   // monkey patch xmlhttprequest
   const oldOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function (
+  XMLHttpRequest.prototype.open = function(
     method,
     url,
     async = true,
@@ -150,7 +150,7 @@
   );
 
   const oldSend = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.send = function (method, url) {
+  XMLHttpRequest.prototype.send = function(method, url) {
     return oldSend.call(this, method, rewriteURL(url));
   };
   hideMonkeyPatch(
@@ -160,6 +160,7 @@
   );
 
   // monkey patch service worker registration
+  /*
   const oldRegister = ServiceWorkerContainer.prototype.register;
   ServiceWorkerContainer.prototype.register = function (scriptURL, options) {
     return oldRegister.call(this, rewriteURL(scriptURL), options);
@@ -169,10 +170,11 @@
     "register",
     "function register() { [native code] }",
   );
+  */
 
   // monkey patch URL.toString() method
   const oldToString = URL.prototype.toString;
-  URL.prototype.toString = function () {
+  URL.prototype.toString = function() {
     let originalURL = oldToString.call(this);
     return rewriteURL(originalURL);
   };
@@ -184,7 +186,7 @@
 
   // monkey patch URL.toJSON() method
   const oldToJson = URL.prototype.toString;
-  URL.prototype.toString = function () {
+  URL.prototype.toString = function() {
     let originalURL = oldToJson.call(this);
     return rewriteURL(originalURL);
   };
@@ -200,11 +202,11 @@
     "href",
   );
   Object.defineProperty(URL.prototype, "href", {
-    get: function () {
+    get: function() {
       let originalHref = originalHrefDescriptor.get.call(this);
       return rewriteURL(originalHref);
     },
-    set: function (newValue) {
+    set: function(newValue) {
       originalHrefDescriptor.set.call(this, rewriteURL(newValue));
     },
   });
@@ -283,7 +285,7 @@
 
   // monkey-patching Element.setAttribute
   const originalSetAttribute = Element.prototype.setAttribute;
-  Element.prototype.setAttribute = function (name, value) {
+  Element.prototype.setAttribute = function(name, value) {
     const isMatchingElement = elements.some((element) => {
       return this.tagName.toLowerCase() === element.tag &&
         name.toLowerCase() === element.attribute;

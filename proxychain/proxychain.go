@@ -234,9 +234,53 @@ func preventRecursiveProxyRequest(urlQuery *url.URL, baseProxyURL string) *url.U
 	return preventRecursiveProxyRequest(fixedURL, baseProxyURL)
 }
 
-// extractURL extracts a URL from the request ctx. If the URL in the request
-// is a relative path, it reconstructs the full URL using the referer header.
+// extractURL extracts a URL from the request ctx
 func (chain *ProxyChain) extractURL() (*url.URL, error) {
+	isLocal := strings.HasPrefix(chain.Context.BaseURL(), "http://localhost") || strings.HasPrefix(chain.Context.BaseURL(), "http://127.0.0.1")
+	isReqPath := strings.HasPrefix(chain.Context.Path(), "/http")
+	isAPI := strings.HasPrefix(chain.Context.Path(), "/api")
+	isOutline := strings.HasPrefix(chain.Context.Path(), "/outline")
+
+	if isLocal || isReqPath || isAPI || isOutline {
+		return chain.extractURLFromPath()
+	}
+
+	u, err := url.Parse(chain.Context.BaseURL())
+	if err != nil {
+		return &url.URL{}, err
+	}
+	parts := strings.Split(u.Hostname(), ".")
+	if len(parts) < 2 {
+		fmt.Println("path")
+		return chain.extractURLFromPath()
+	}
+
+	return chain.extractURLFromSubdomain()
+}
+
+// extractURLFromPath extracts a URL from the request ctx if subdomains are used.
+func (chain *ProxyChain) extractURLFromSubdomain() (*url.URL, error) {
+	u, err := url.Parse(chain.Context.BaseURL())
+	if err != nil {
+		return &url.URL{}, err
+	}
+	parts := strings.Split(u.Hostname(), ".")
+	if len(parts) < 2 {
+		// no subdomain set, fallback to path extraction
+		//panic("asdf")
+		return chain.extractURLFromPath()
+	}
+	subdomain := strings.Join(parts[:len(parts)-2], ".")
+	subURL := subdomain
+	subURL = strings.ReplaceAll(subURL, "--", "|")
+	subURL = strings.ReplaceAll(subURL, "-", ".")
+	subURL = strings.ReplaceAll(subURL, "|", "-")
+	return url.Parse(fmt.Sprintf("https://%s/%s", subURL, u.Path))
+}
+
+// extractURLFromPath extracts a URL from the request ctx. If the URL in the request
+// is a relative path, it reconstructs the full URL using the referer header.
+func (chain *ProxyChain) extractURLFromPath() (*url.URL, error) {
 	reqURL := chain.Context.Params("*")
 
 	fmt.Println("XXXXXXXXXXXXXXXX")
@@ -316,7 +360,7 @@ func (chain *ProxyChain) validateCtxIsSet() error {
 	if chain.Context != nil {
 		return nil
 	}
-	err := errors.New("proxyChain was called without setting a fiber Ctx. Use ProxyChain.SetCtx()")
+	err := errors.New("proxyChain was called without setting a fiber Ctx. Use ProxyChain.SetFiberCtx()")
 	chain.abortErr = chain.abort(err)
 	return chain.abortErr
 }
