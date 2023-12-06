@@ -52,7 +52,7 @@ func HandleRulesetMerge(rulesetPath string, mergeRulesets bool, output *os.File)
 // Returns:
 // - An error if YAML conversion or file writing fails, otherwise nil.
 func yamlMerge(rs ruleset_v2.Ruleset, output io.Writer) error {
-	yaml, err := rs.Yaml()
+	yaml, err := rs.YAML()
 	if err != nil {
 		return err
 	}

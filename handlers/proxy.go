@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ladder/proxychain"
 	rx "ladder/proxychain/requestmodifiers"
 	tx "ladder/proxychain/responsemodifiers"
@@ -61,12 +60,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 
 		// load ruleset
 		rule, exists := rs.GetRule(proxychain.Request.URL)
-		fmt.Println("============")
-		fmt.Println(proxychain.Request.URL)
-		fmt.Println(rs)
-		fmt.Println("============")
 		if exists {
-			fmt.Println("===========EXISTS=")
 			proxychain.AddOnceRequestModifications(rule.RequestModifications...)
 			proxychain.AddOnceResponseModifications(rule.ResponseModifications...)
 		}

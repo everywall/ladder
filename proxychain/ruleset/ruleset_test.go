@@ -1,20 +1,24 @@
 package ruleset_v2
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
+
+	//"strings"
 	"testing"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/stretchr/testify/assert"
+	//"gopkg.in/yaml.v3"
 )
 
 var (
-	validYAML = `
-rules:
+	validYAML = `rules:
   - domains:
     - example.com
     - www.example.com
@@ -50,6 +54,32 @@ rules:
     params: []
 `
 )
+
+func TestYAMLUnmarshal(t *testing.T) {
+	rs, err := loadRuleFromString(validYAML)
+	fmt.Println(validYAML)
+	assert.NoError(t, err, "expected no error loading valid yml")
+	yml, err := rs.YAML()
+	assert.NoError(t, err, "expected no error marshalling ruleset")
+
+	rs2, err := loadRuleFromString(yml)
+	assert.NoError(t, err, "expected no error loading yaml marshalled -> unmarshalled -> marshalled ruleset")
+	assert.Equal(t, 1, rs2.Count(), "expected one rule to be returned after marshalled -> unmarshalled -> marshalled ruleset")
+}
+
+func TestJSONUnmarshal(t *testing.T) {
+	rs, err := loadRuleFromString(validYAML)
+	assert.NoError(t, err, "expected no error loading valid yml")
+	j, err := json.Marshal(&rs)
+	assert.NoError(t, err, "expected no error marshalling ruleset to json")
+
+	fmt.Println(string(j))
+
+	rs2, err := loadRuleFromString(string(j))
+	assert.NoError(t, err, "expected no error loading JSON marshalled -> unmarshalled -> marshalled ruleset")
+
+	assert.Equal(t, 1, rs2.Count(), "expected one rule to be returned after JSON marshalled -> unmarshalled -> marshalled ruleset")
+}
 
 func TestLoadRulesFromRemoteFile(t *testing.T) {
 	app := fiber.New()
@@ -103,13 +133,18 @@ func TestLoadRulesFromRemoteFile(t *testing.T) {
 	}
 }
 
-func loadRuleFromString(yaml string) (Ruleset, error) {
+func loadRuleFromString(yamlOrJSON string) (Ruleset, error) {
 	// Create a temporary file and load it
-	tmpFile, _ := os.CreateTemp("", "ruleset*.yaml")
+	var tmpFile *os.File
+	if strings.HasPrefix(yamlOrJSON, "{") {
+		tmpFile, _ = os.CreateTemp("", "ruleset*.json")
+	} else {
+		tmpFile, _ = os.CreateTemp("", "ruleset*.yaml")
+	}
 
 	defer os.Remove(tmpFile.Name())
 
-	tmpFile.WriteString(yaml)
+	tmpFile.WriteString(yamlOrJSON)
 
 	rs := Ruleset{
 		_rulemap: map[string]*Rule{},

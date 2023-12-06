@@ -1,6 +1,7 @@
 package ruleset_v2
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 
@@ -134,5 +135,9 @@ func (rule *Rule) MarshalYAML() (interface{}, error) {
 		ResponseModifications: rule._rsms,
 	}
 
-	return yaml.Marshal(aux)
+	var b bytes.Buffer
+	y := yaml.NewEncoder(&b)
+	y.SetIndent(2)
+	err := y.Encode(aux)
+	return b.String(), err
 }

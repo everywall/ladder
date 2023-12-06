@@ -1,6 +1,7 @@
 package ruleset_v2
 
 import (
+	"bytes"
 	"compress/gzip"
 	"errors"
 	"fmt"
@@ -12,13 +13,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"encoding/json"
 	"gopkg.in/yaml.v3"
-	//"encoding/json"
 )
 
 type IRuleset interface {
 	HasRule(url url.URL) bool
 	GetRule(url url.URL) (rule Rule, exists bool)
+	YAML() (string, error)
 }
 
 type Ruleset struct {
@@ -63,6 +65,7 @@ func (rs *Ruleset) MarshalYAML() (interface{}, error) {
 		RequestModifications  []_rqm   `yaml:"requestmodifications"`
 		ResponseModifications []_rsm   `yaml:"responsemodifications"`
 	}
+
 	type Aux struct {
 		Rules []AuxRule `yaml:"rules"`
 	}
@@ -78,9 +81,67 @@ func (rs *Ruleset) MarshalYAML() (interface{}, error) {
 		aux.Rules = append(aux.Rules, auxRule)
 	}
 
-	out, err := yaml.Marshal(&aux)
-	return out, err
+	var b bytes.Buffer
+	y := yaml.NewEncoder(&b)
+	y.SetIndent(2)
+	err := y.Encode(&aux)
+
+	return b.String(), err
 }
+
+// ==========================================================
+
+func (rs *Ruleset) UnmarshalJSON(data []byte) error {
+	type AuxRuleset struct {
+		Rules []Rule `json:"rules"`
+	}
+	ar := &AuxRuleset{}
+
+	if err := json.Unmarshal(data, ar); err != nil {
+		return err
+	}
+
+	rs._rulemap = make(map[string]*Rule)
+	rs.Rules = ar.Rules
+
+	for i, rule := range rs.Rules {
+		rulePtr := &rs.Rules[i]
+		for _, domain := range rule.Domains {
+			rs._rulemap[domain] = rulePtr
+			if !strings.HasPrefix(domain, "www.") {
+				rs._rulemap["www."+domain] = rulePtr
+			}
+		}
+	}
+
+	return nil
+}
+
+func (rs *Ruleset) MarshalJSON() ([]byte, error) {
+	type AuxRule struct {
+		Domains               []string `json:"domains"`
+		RequestModifications  []_rqm   `json:"requestmodifications"`
+		ResponseModifications []_rsm   `json:"responsemodifications"`
+	}
+
+	type Aux struct {
+		Rules []AuxRule `json:"rules"`
+	}
+
+	aux := Aux{}
+	for _, rule := range rs.Rules {
+		auxRule := AuxRule{
+			Domains:               rule.Domains,
+			RequestModifications:  rule._rqms,
+			ResponseModifications: rule._rsms,
+		}
+		aux.Rules = append(aux.Rules, auxRule)
+	}
+
+	return json.Marshal(aux)
+}
+
+// ===========================================================
 
 func (rs Ruleset) GetRule(url *url.URL) (rule *Rule, exists bool) {
 	rule, exists = rs._rulemap[url.Hostname()]
@@ -165,6 +226,9 @@ func (rs *Ruleset) loadRulesFromLocalDir(path string) error {
 
 	// create a map of pointers to rules loaded above based on domain string keys
 	// this way we don't have two copies of the rule in ruleset
+	if rs._rulemap == nil {
+		rs._rulemap = make(map[string]*Rule)
+	}
 	for i, rule := range rs.Rules {
 		rulePtr := &rs.Rules[i]
 		for _, domain := range rule.Domains {
@@ -185,17 +249,22 @@ func (rs *Ruleset) loadRulesFromLocalDir(path string) error {
 // loadRulesFromLocalFile loads rules from a local YAML file specified by the path.
 // Returns an error if the file cannot be read or if there's a syntax error in the YAML.
 func (rs *Ruleset) loadRulesFromLocalFile(path string) error {
-	yamlFile, err := os.ReadFile(path)
+	file, err := os.ReadFile(path)
 	if err != nil {
 		e := fmt.Errorf("failed to read rules from local file: '%s'", path)
 		return errors.Join(e, err)
 	}
 
-	err = yaml.Unmarshal(yamlFile, rs)
+	isJSON := strings.HasSuffix(path, ".json")
+	if isJSON {
+		err = json.Unmarshal(file, rs)
+	} else {
+		err = yaml.Unmarshal(file, rs)
+	}
 
 	if err != nil {
 		e := fmt.Errorf("failed to load rules from local file, possible syntax error in '%s' - %s", path, err)
-		debugPrintRule(string(yamlFile), e)
+		debugPrintRule(string(file), e)
 		return e
 	}
 
@@ -232,7 +301,12 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 		reader = resp.Body
 	}
 
-	err = yaml.NewDecoder(reader).Decode(&rs)
+	isJSON := strings.HasSuffix(rulesURL, ".json") || resp.Header.Get("content-type") == "application/json"
+	if isJSON {
+		err = json.NewDecoder(reader).Decode(&rs)
+	} else {
+		err = yaml.NewDecoder(reader).Decode(&rs)
+	}
 
 	if err != nil {
 		return fmt.Errorf("failed to load rules from remote url '%s' with status code '%s' and possible syntax error - %s", rulesURL, resp.Status, err)
@@ -243,14 +317,29 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 
 // ================= utility methods ==========================
 
-// Yaml returns the ruleset as a Yaml string
-func (rs *Ruleset) Yaml() (string, error) {
+// YAML returns the ruleset as a Yaml string
+func (rs *Ruleset) YAML() (string, error) {
 	y, err := yaml.Marshal(rs)
 	if err != nil {
 		return "", err
 	}
 
-	return string(y), nil
+	// for some reason, MarshalYAML seems to turn everything into a string block
+	// this is a workaround. Don't call yaml.Marshal directly, instead call this helper method.
+	x := strings.ReplaceAll(string(y), "\n    ", "\n")
+	x = strings.Replace(x, "|\n", "", 1)
+	fmt.Println(x)
+
+	return x, nil
+}
+
+// YAML returns the ruleset as a JSON string
+func (rs *Ruleset) JSON() (string, error) {
+	j, err := json.Marshal(rs)
+	if err != nil {
+		return "", err
+	}
+	return string(j), nil
 }
 
 // Domains extracts and returns a slice of all domains present in the RuleSet.
