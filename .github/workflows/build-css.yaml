@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "handlers/form.html"
-      - "proxychain/responsemodifiers/generate_readable_outline.html"
+      - "proxychain/responsemodifiers/vendor/generate_readable_outline.html"
   workflow_dispatch:
 
 jobs:
@@ -30,7 +30,7 @@ jobs:
       -
         name: Commit generated stylesheet
         run: |
-          if git diff --quiet cmd/styles.css; then
+          if git diff --quiet handlers/styles.css; then
             echo "No changes to commit."
             exit 0
           else
