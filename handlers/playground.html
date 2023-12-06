@@ -7,8 +7,6 @@
     <link rel="stylesheet" href="/styles.css" />
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <style>
-      /* Style modiferContainer scrollbar */
-      /* Chrome, Edge, and Safari */
       #modifierContainer::-webkit-scrollbar {
         width: 8px;
       }
@@ -557,7 +555,7 @@
           if (fields[i] === "js") {
             input = document.createElement("textarea");
             input.type = "textarea";
-            input.classList.add("min-h-[80px]");
+            input.classList.add("min-h-[200px]");
           } else {
             input = document.createElement("input");
             input.type = "text";
@@ -1302,7 +1300,7 @@
               (values) => {
                 if (Object.keys(values).length === 0) return;
                 toggleModifier(
-                  payload.requestmodifierquery,
+                  payload.responsemodifierquery,
                   "blockelementremoval",
                   values
                 );
@@ -1323,14 +1321,16 @@
           title: "Bypass Content Security Policy",
           section: "Response Modifiers",
           handler: () => {
-            getValues("Block CSS element removal", "csp").then((values) => {
-              if (Object.keys(values).length === 0) return;
-              toggleModifier(
-                payload.requestmodifierquery,
-                "bypasscontentsecuritypolicy",
-                values
-              );
-            });
+            getValues("Bypass Content Security Policy", "csp").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.responsemodifierquery,
+                  "bypasscontentsecuritypolicy",
+                  values
+                );
+              }
+            );
           },
         },
         {
@@ -1375,14 +1375,16 @@
           parent: "injectScript",
           section: "Inject script...",
           handler: () => {
-            getValues("Block CSS element removal", "js").then((values) => {
-              if (Object.keys(values).length === 0) return;
-              toggleModifier(
-                payload.requestmodifierquery,
-                "injectscriptbeforedomcontentloaded",
-                values
-              );
-            });
+            getValues("Inject script before DOM content loaded", "js").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.responsemodifierquery,
+                  "injectscriptbeforedomcontentloaded",
+                  values
+                );
+              }
+            );
           },
         },
         {
@@ -1391,14 +1393,16 @@
           parent: "injectScript",
           section: "Inject script...",
           handler: () => {
-            getValues("Block CSS element removal", "js").then((values) => {
-              if (Object.keys(values).length === 0) return;
-              toggleModifier(
-                payload.requestmodifierquery,
-                "injectscriptafterdomcontentloaded",
-                values
-              );
-            });
+            getValues("Inject script after DOM content loaded", "js").then(
+              (values) => {
+                if (Object.keys(values).length === 0) return;
+                toggleModifier(
+                  payload.responsemodifierquery,
+                  "injectscriptafterdomcontentloaded",
+                  values
+                );
+              }
+            );
           },
         },
         {
@@ -1407,10 +1411,10 @@
           parent: "injectScript",
           section: "Inject script...",
           handler: () => {
-            getValues("Block CSS element removal", "js").then((values) => {
+            getValues("Inject script after DOM idle", "js").then((values) => {
               if (Object.keys(values).length === 0) return;
               toggleModifier(
-                payload.requestmodifierquery,
+                payload.responsemodifierquery,
                 "injectscriptafterdomidle",
                 values
               );
@@ -1450,11 +1454,11 @@
           parent: "modifyIncomingCookies",
           section: "Modify incoming cookies...",
           handler: () => {
-            getValues("Block CSS element removal", "whitelist").then(
+            getValues("Delete incoming cookies except", "whitelist").then(
               (values) => {
                 if (Object.keys(values).length === 0) return;
                 toggleModifier(
-                  payload.requestmodifierquery,
+                  payload.responsemodifierquery,
                   "deleteincomingcookiesexcept",
                   values
                 );
@@ -1468,10 +1472,10 @@
           parent: "modifyIncomingCookies",
           section: "Modify incoming cookies...",
           handler: () => {
-            getValues("Block CSS element removal", "cookies").then((values) => {
+            getValues("Set incoming cookies", "cookies").then((values) => {
               if (Object.keys(values).length === 0) return;
               toggleModifier(
-                payload.requestmodifierquery,
+                payload.responsemodifierquery,
                 "setincomingcookies",
                 values
               );
@@ -1484,16 +1488,14 @@
           parent: "modifyIncomingCookies",
           section: "Modify incoming cookies...",
           handler: () => {
-            getValues("Block CSS element removal", "name", "val").then(
-              (values) => {
-                if (Object.keys(values).length === 0) return;
-                toggleModifier(
-                  payload.requestmodifierquery,
-                  "setincomingcookie",
-                  values
-                );
-              }
-            );
+            getValues("Set incoming cookie", "name", "val").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.responsemodifierquery,
+                "setincomingcookie",
+                values
+              );
+            });
           },
         },
         {
@@ -1512,16 +1514,14 @@
           parent: "modifyResponseHeaders",
           section: "Modify response headers...",
           handler: () => {
-            getValues("Block CSS element removal", "key", "value").then(
-              (values) => {
-                if (Object.keys(values).length === 0) return;
-                toggleModifier(
-                  payload.requestmodifierquery,
-                  "setresponseheader",
-                  values
-                );
-              }
-            );
+            getValues("Set response header", "key", "value").then((values) => {
+              if (Object.keys(values).length === 0) return;
+              toggleModifier(
+                payload.responsemodifierquery,
+                "setresponseheader",
+                values
+              );
+            });
           },
         },
         {
@@ -1530,10 +1530,10 @@
           parent: "modifyResponseHeaders",
           section: "Modify response headers...",
           handler: () => {
-            getValues("Block CSS element removal", "key").then((values) => {
+            getValues("Delete response header", "key").then((values) => {
               if (Object.keys(values).length === 0) return;
               toggleModifier(
-                payload.requestmodifierquery,
+                payload.responsemodifierquery,
                 "deleteresponseheader",
                 values
               );
