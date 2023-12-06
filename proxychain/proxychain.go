@@ -5,6 +5,7 @@ import (
 	"fmt"
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
+	profiles "github.com/bogdanfinn/tls-client/profiles"
 	"io"
 	"log"
 	"net/url"
@@ -192,15 +193,6 @@ func (chain *ProxyChain) _initializeRequest() (*http.Request, error) {
 		return nil, fmt.Errorf("unsupported request method from client: '%s'", chain.Context.Method())
 	}
 
-	/*
-		// copy client request headers to upstream request headers
-		forwardHeaders := func(key []byte, val []byte) {
-			req.Header.Set(string(key), string(val))
-		}
-		clientHeaders := &chain.Context.Request().Header
-		clientHeaders.VisitAll(forwardHeaders)
-	*/
-
 	return req, nil
 }
 
@@ -312,9 +304,10 @@ func (chain *ProxyChain) SetFiberCtx(ctx *fiber.Ctx) *ProxyChain {
 	url, err := chain.extractURL()
 	if err != nil {
 		chain.abortErr = chain.abort(err)
+	} else {
+		chain.Request.URL = url
+		fmt.Printf("extracted URL: %s\n", chain.Request.URL)
 	}
-	chain.Request.URL = url
-	fmt.Printf("extracted URL: %s\n", chain.Request.URL)
 
 	return chain
 }
@@ -359,7 +352,12 @@ func (chain *ProxyChain) abort(err error) error {
 	// defer chain._reset()
 	chain.abortErr = err
 	chain.Context.Response().SetStatusCode(500)
-	e := fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
+	var e error
+	if chain.Request.URL != nil {
+		e = fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
+	} else {
+		e = fmt.Errorf("ProxyChain error: '%s'", err.Error())
+	}
 	chain.Context.SendString(e.Error())
 	log.Println(e.Error())
 	return e
@@ -382,8 +380,8 @@ func NewProxyChain() *ProxyChain {
 
 	options := []tls_client.HttpClientOption{
 		tls_client.WithTimeoutSeconds(20),
-		tls_client.WithRandomTLSExtensionOrder(),
-		// tls_client.WithClientProfile(profiles.Chrome_117),
+		//tls_client.WithRandomTLSExtensionOrder(),
+		tls_client.WithClientProfile(profiles.Chrome_117),
 		// tls_client.WithNotFollowRedirects(),
 		// tls_client.WithCookieJar(jar), // create cookieJar instance and pass it as argument
 	}

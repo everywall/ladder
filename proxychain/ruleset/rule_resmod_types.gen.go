@@ -36,6 +36,14 @@ func init() {
     return tx.SetContentSecurityPolicy(params[0])
   }
 
+  rsmModMap["DeleteLocalStorageData"] = func(_ ...string) proxychain.ResponseModification {
+    return tx.DeleteLocalStorageData()
+  }
+
+  rsmModMap["DeleteSessionStorageData"] = func(_ ...string) proxychain.ResponseModification {
+    return tx.DeleteSessionStorageData()
+  }
+
   rsmModMap["ForwardResponseHeaders"] = func(_ ...string) proxychain.ResponseModification {
     return tx.ForwardResponseHeaders()
   }

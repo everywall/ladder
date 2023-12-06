@@ -32,25 +32,27 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetFiberCtx(c).
 			SetDebugLogging(opts.Verbose).
 			SetRequestModifications(
-				// rx.SpoofJA3fingerprint(ja3, "Googlebot"),
-				// rx.MasqueradeAsFacebookBot(),
-				// rx.MasqueradeAsGoogleBot(),
-				rx.DeleteOutgoingCookies(),
+				//rx.SpoofJA3fingerprint(ja3, "Googlebot"),
+				rx.AddCacheBusterQuery(),
+				rx.MasqueradeAsGoogleBot(),
 				rx.ForwardRequestHeaders(),
-				// rx.SpoofReferrerFromGoogleSearch(),
-				rx.SpoofReferrerFromLinkedInPost(),
-				// rx.RequestWaybackMachine(),
-				// rx.RequestArchiveIs(),
+				rx.DeleteOutgoingCookies(),
+				rx.SpoofReferrerFromRedditPost(),
+				//rx.SpoofReferrerFromLinkedInPost(),
+				//rx.RequestWaybackMachine(),
+				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
-				tx.ForwardResponseHeaders(),
+				//tx.ForwardResponseHeaders(),
+				tx.DeleteIncomingCookies(),
+				tx.DeleteLocalStorageData(),
+				tx.DeleteSessionStorageData(),
 				tx.BypassCORS(),
 				tx.BypassContentSecurityPolicy(),
-				// tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
 				tx.PatchTrackerScripts(),
 				tx.PatchDynamicResourceURLs(),
-				tx.BlockElementRemoval(".article-content"),
+				//tx.BlockElementRemoval(".article-content"),
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			)
 

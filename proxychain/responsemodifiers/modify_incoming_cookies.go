@@ -13,8 +13,12 @@ import (
 // DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server
 // back down to the client.
 func DeleteIncomingCookies(_ ...string) proxychain.ResponseModification {
-	return func(px *proxychain.ProxyChain) error {
-		px.Response.Header.Del("Set-Cookie")
+	return func(chain *proxychain.ProxyChain) error {
+		chain.Response.Header.Del("Set-Cookie")
+		chain.AddOnceResponseModifications(
+			InjectScriptBeforeDOMContentLoaded(`document.cookie = ""`),
+			InjectScriptAfterDOMContentLoaded(`document.cookie = ""`),
+		)
 		return nil
 	}
 }

@@ -16,7 +16,11 @@ var rqmModMap map[string]RequestModifierFactory
 func init() {
 	rqmModMap = make(map[string]RequestModifierFactory)
 
-	  rqmModMap["ForwardRequestHeaders"] = func(_ ...string) proxychain.RequestModification {
+	  rqmModMap["AddCacheBusterQuery"] = func(_ ...string) proxychain.RequestModification {
+    return rx.AddCacheBusterQuery()
+  }
+
+  rqmModMap["ForwardRequestHeaders"] = func(_ ...string) proxychain.RequestModification {
     return rx.ForwardRequestHeaders()
   }
 
