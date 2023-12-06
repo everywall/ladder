@@ -18,9 +18,10 @@ import (
 )
 
 type IRuleset interface {
-	HasRule(url url.URL) bool
-	GetRule(url url.URL) (rule Rule, exists bool)
 	YAML() (string, error)
+	JSON() (string, error)
+	HasRule(url *url.URL) bool
+	GetRule(url *url.URL) (rule *Rule, exists bool)
 }
 
 type Ruleset struct {
@@ -318,7 +319,7 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 // ================= utility methods ==========================
 
 // YAML returns the ruleset as a Yaml string
-func (rs *Ruleset) YAML() (string, error) {
+func (rs Ruleset) YAML() (string, error) {
 	y, err := yaml.Marshal(rs)
 	if err != nil {
 		return "", err
@@ -333,8 +334,8 @@ func (rs *Ruleset) YAML() (string, error) {
 	return x, nil
 }
 
-// YAML returns the ruleset as a JSON string
-func (rs *Ruleset) JSON() (string, error) {
+// JSON returns the ruleset as a JSON string
+func (rs Ruleset) JSON() (string, error) {
 	j, err := json.Marshal(rs)
 	if err != nil {
 		return "", err

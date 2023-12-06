@@ -10,6 +10,7 @@ import (
 	"ladder/handlers"
 	"ladder/internal/cli"
 	"ladder/proxychain/requestmodifiers/bot"
+	"ladder/proxychain/ruleset"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
@@ -116,6 +117,18 @@ func main() {
 		*prefork = true
 	}
 
+	var rs ruleset_v2.IRuleset
+
+	switch {
+	case *ruleset != "":
+		rs, err = ruleset_v2.NewRuleset(*ruleset)
+		if err != nil {
+			fmt.Printf("ERROR: failed to load ruleset from %s\n", *ruleset)
+		}
+	case os.Getenv("RULESET") != "":
+		rs = ruleset_v2.NewRulesetFromEnv()
+	}
+
 	engine := html.New("./handlers", ".html")
 	engine.AddFunc(
 		// add unescape function
@@ -145,17 +158,17 @@ func main() {
 		})
 	}
 
+	proxyOpts := &handlers.ProxyOptions{
+		Verbose: *verbose,
+		Ruleset: rs,
+	}
+
 	app.Get("/", handlers.Form)
 
 	app.Get("styles.css", handlers.Styles)
 	app.Get("script.js", handlers.Script)
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
-
-	proxyOpts := &handlers.ProxyOptions{
-		Verbose:     *verbose,
-		RulesetPath: *ruleset,
-	}
 
 	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 

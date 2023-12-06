@@ -10,8 +10,8 @@ import (
 )
 
 type ProxyOptions struct {
-	RulesetPath string
-	Verbose     bool
+	Ruleset ruleset_v2.IRuleset
+	Verbose bool
 }
 
 func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
@@ -25,10 +25,6 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			rs = r
 		}
 	*/
-	rs, err := ruleset_v2.NewRuleset("ruleset_v2.yaml")
-	if err != nil {
-		panic(err)
-	}
 
 	return func(c *fiber.Ctx) error {
 		proxychain := proxychain.
@@ -59,7 +55,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			)
 
 		// load ruleset
-		rule, exists := rs.GetRule(proxychain.Request.URL)
+		rule, exists := opts.Ruleset.GetRule(proxychain.Request.URL)
 		if exists {
 			proxychain.AddOnceRequestModifications(rule.RequestModifications...)
 			proxychain.AddOnceResponseModifications(rule.ResponseModifications...)
