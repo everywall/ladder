@@ -9,7 +9,7 @@ import (
 	"ladder/proxychain/responsemodifiers/rewriters"
 )
 
-//go:embed patch_dynamic_resource_urls.js
+//go:embed vendor/patch_dynamic_resource_urls.js
 var patchDynamicResourceURLsScript string
 
 // PatchDynamicResourceURLs patches the javascript runtime to rewrite URLs client-side.

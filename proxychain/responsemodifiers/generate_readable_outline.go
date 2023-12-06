@@ -19,7 +19,7 @@ import (
 	"github.com/markusmobius/go-trafilatura"
 )
 
-//go:embed generate_readable_outline.html
+//go:embed vendor/generate_readable_outline.html
 var templateFS embed.FS
 
 // GenerateReadableOutline creates an reader-friendly distilled representation of the article.
