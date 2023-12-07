@@ -33,7 +33,7 @@ func NewRulesetSiteHandler(opts *ProxyOptions) fiber.Handler {
 				if err != nil {
 					return err
 				}
-				c.Set("content-type", "application/yaml")
+				c.Set("content-type", "text/yaml")
 				return c.Send([]byte(yml))
 			}
 		}
@@ -42,12 +42,13 @@ func NewRulesetSiteHandler(opts *ProxyOptions) fiber.Handler {
 		// return only that particular rule
 		reqURL, err := extractURLFromContext(c, "api/ruleset/")
 		if err != nil {
-			return err
+			c.SendStatus(404)
+			return c.SendString(fmt.Sprintf("A rule that matches '%s' was not found in the ruleset. Possible URL formatting issue.", c.Params("*")))
 		}
 		rule, exists := opts.Ruleset.GetRule(reqURL)
 		if !exists {
 			c.SendStatus(404)
-			c.SendString(fmt.Sprintf("A rule that matches '%s' was not found in the ruleset.", reqURL))
+			return c.SendString(fmt.Sprintf("A rule that matches '%s' was not found in the ruleset.", reqURL))
 		}
 
 		switch c.Get("accept") {
@@ -63,7 +64,7 @@ func NewRulesetSiteHandler(opts *ProxyOptions) fiber.Handler {
 			if err != nil {
 				return err
 			}
-			c.Set("content-type", "application/yaml")
+			c.Set("content-type", "text/yaml")
 			return c.Send(yml)
 		}
 	}
@@ -74,6 +75,9 @@ func extractURLFromContext(ctx *fiber.Ctx, apiPrefix string) (*url.URL, error) {
 	reqURL := ctx.Params("*")
 
 	reqURL = strings.TrimPrefix(reqURL, apiPrefix)
+	if !strings.HasPrefix(reqURL, "http") {
+		reqURL = "https://" + reqURL
+	}
 
 	// sometimes client requests doubleroot '//'
 	// there is a bug somewhere else, but this is a workaround until we find it
