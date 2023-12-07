@@ -525,12 +525,14 @@ func (chain *ProxyChain) Execute() error {
 		return errors.New("no context set")
 	}
 
+	// TODO: this seems broken
 	// in case api user did not set or forward content-type, we do it for them
-	ct := chain.Context.Response().Header.Peek("content-type")
-	CT := chain.Context.Response().Header.Peek("Content-Type")
-	if ct == nil && CT == nil {
-		chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
-	}
+	/*
+		ct := string(chain.Context.Response().Header.Peek("content-type"))
+		if ct == "" {
+			chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
+		}
+	*/
 
 	// Return request back to client
 	return chain.Context.SendStream(body)

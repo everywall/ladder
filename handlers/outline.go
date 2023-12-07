@@ -20,6 +20,7 @@ func NewOutlineHandler(path string, opts *ProxyOptions) fiber.Handler {
 				rx.SpoofReferrerFromGoogleSearch(),
 			).
 			AddResponseModifications(
+				tx.ForwardResponseHeaders(),
 				tx.DeleteIncomingCookies(),
 				tx.RewriteHTMLResourceURLs(),
 				tx.GenerateReadableOutline(), // <-- this response modification does the outline rendering

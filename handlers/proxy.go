@@ -43,7 +43,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				//rx.RequestArchiveIs(),
 			).
 			AddResponseModifications(
-				//tx.ForwardResponseHeaders(),
+				tx.ForwardResponseHeaders(),
 				//tx.BlockThirdPartyScripts(),
 				tx.DeleteIncomingCookies(),
 				tx.DeleteLocalStorageData(),
@@ -53,10 +53,15 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				tx.RewriteHTMLResourceURLs(),
 				tx.PatchDynamicResourceURLs(),
 				tx.PatchTrackerScripts(),
-				//tx.BlockElementRemoval(".article-content"), // techcrunch
-				tx.BlockElementRemoval(".available-content"), // substack
+				tx.BlockElementRemoval(".article-content"), // techcrunch
+				//tx.BlockElementRemoval(".available-content"), // substack
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			)
+
+		// no options passed in, return early
+		if opts == nil {
+			return proxychain.Execute()
+		}
 
 		// load ruleset
 		rule, exists := opts.Ruleset.GetRule(proxychain.Request.URL)

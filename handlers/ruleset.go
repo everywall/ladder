@@ -29,7 +29,6 @@ func NewRulesetSiteHandler(opts *ProxyOptions) fiber.Handler {
 				return c.Send([]byte(jsn))
 
 			default:
-				// TODO: the ruleset.MarshalYAML() method is currently broken and panics
 				yml, err := opts.Ruleset.YAML()
 				if err != nil {
 					return err
