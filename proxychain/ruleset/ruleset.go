@@ -1,7 +1,7 @@
 package ruleset_v2
 
 import (
-	"bytes"
+	//"bytes"
 	"compress/gzip"
 	"errors"
 	"fmt"
@@ -81,13 +81,16 @@ func (rs *Ruleset) MarshalYAML() (interface{}, error) {
 		}
 		aux.Rules = append(aux.Rules, auxRule)
 	}
+	return aux, nil
 
-	var b bytes.Buffer
-	y := yaml.NewEncoder(&b)
-	y.SetIndent(2)
-	err := y.Encode(&aux)
+	/*
+		var b bytes.Buffer
+		y := yaml.NewEncoder(&b)
+		y.SetIndent(2)
+		err := y.Encode(&aux)
 
-	return b.String(), err
+		return b.String(), err
+	*/
 }
 
 // ==========================================================
@@ -320,27 +323,20 @@ func (rs *Ruleset) loadRulesFromRemoteFile(rulesURL string) error {
 
 // YAML returns the ruleset as a Yaml string
 func (rs Ruleset) YAML() (string, error) {
-	y, err := yaml.Marshal(rs)
+	yml, err := yaml.Marshal(&rs)
 	if err != nil {
 		return "", err
 	}
-
-	// for some reason, MarshalYAML seems to turn everything into a string block
-	// this is a workaround. Don't call yaml.Marshal directly, instead call this helper method.
-	x := strings.ReplaceAll(string(y), "\n    ", "\n")
-	x = strings.Replace(x, "|\n", "", 1)
-	fmt.Println(x)
-
-	return x, nil
+	return string(yml), nil
 }
 
 // JSON returns the ruleset as a JSON string
 func (rs Ruleset) JSON() (string, error) {
-	j, err := json.Marshal(rs)
+	jsn, err := json.Marshal(&rs)
 	if err != nil {
 		return "", err
 	}
-	return string(j), nil
+	return string(jsn), nil
 }
 
 // Domains extracts and returns a slice of all domains present in the RuleSet.

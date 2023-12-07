@@ -41,7 +41,7 @@ func NewRulesetSiteHandler(opts *ProxyOptions) fiber.Handler {
 
 		// a specific rule was requested by path /ruleset/https://example.com
 		// return only that particular rule
-		reqURL, err := extractURLFromContext(c, "ruleset/")
+		reqURL, err := extractURLFromContext(c, "api/ruleset/")
 		if err != nil {
 			return err
 		}

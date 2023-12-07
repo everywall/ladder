@@ -91,18 +91,25 @@ Or create a bookmark with the following URL:
 ```javascript
 javascript:window.location.href="http://localhost:8080/"+location.href
 ```
+### Outline
+```bash
+curl -X GET "http://localhost:8080/outline/https://www.example.com"
+```
 
 ### API
 ```bash
-curl -X GET "http://localhost:8080/api/https://www.example.com"
+curl -X GET "http://localhost:8080/api/content/https://www.example.com"
 ```
 
 ### RAW
-http://localhost:8080/raw/https://www.example.com
+http://localhost:8080/api/raw/https://www.example.com
 
 
 ### Running Ruleset
-http://localhost:8080/ruleset
+http://localhost:8080/api/ruleset
+
+### Running Rule
+http://localhost:8080/api/ruleset/https://example.com
 
 ## Configuration
 

@@ -167,10 +167,10 @@ func main() {
 
 	app.Get("styles.css", handlers.Styles)
 	app.Get("script.js", handlers.Script)
-	app.Get("ruleset/*", handlers.NewRulesetSiteHandler(proxyOpts))
 
-	app.All("raw/*", handlers.NewRawProxySiteHandler(proxyOpts))
+	app.All("api/raw/*", handlers.NewRawProxySiteHandler(proxyOpts))
 
+	app.Get("api/ruleset/*", handlers.NewRulesetSiteHandler(proxyOpts))
 	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 
 	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))

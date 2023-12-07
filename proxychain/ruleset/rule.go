@@ -1,11 +1,11 @@
 package ruleset_v2
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/yaml.v3"
+	//"gopkg.in/yaml.v3"
 	"ladder/proxychain"
 )
 
@@ -78,7 +78,7 @@ func (rule *Rule) MarshalJSON() ([]byte, error) {
 		ResponseModifications: rule._rsms,
 	}
 
-	return json.MarshalIndent(aux, "", "    ")
+	return json.MarshalIndent(aux, "", "  ")
 }
 
 // ============================================================
@@ -129,15 +129,9 @@ func (rule *Rule) MarshalYAML() (interface{}, error) {
 		ResponseModifications []_rsm   `yaml:"responsemodifications"`
 	}
 
-	aux := &Aux{
+	return &Aux{
 		Domains:               rule.Domains,
 		RequestModifications:  rule._rqms,
 		ResponseModifications: rule._rsms,
-	}
-
-	var b bytes.Buffer
-	y := yaml.NewEncoder(&b)
-	y.SetIndent(2)
-	err := y.Encode(aux)
-	return b.String(), err
+	}, nil
 }
