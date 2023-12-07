@@ -8,7 +8,9 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"ladder/pkg/ruleset"
 
@@ -21,12 +23,16 @@ var (
 	ForwardedFor   = getenv("X_FORWARDED_FOR", "66.249.66.1")
 	rulesSet       = ruleset.NewRulesetFromEnv()
 	allowedDomains = []string{}
+	defaultTimeout = 15 // in seconds
 )
 
 func init() {
 	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 	if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
 		allowedDomains = append(allowedDomains, rulesSet.Domains()...)
+	}
+	if timeoutStr := os.Getenv("HTTP_TIMEOUT"); timeoutStr != "" {
+		defaultTimeout, _ = strconv.Atoi(timeoutStr)
 	}
 }
 
@@ -181,7 +187,9 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	}
 
 	// Fetch the site
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: time.Second * time.Duration(defaultTimeout),
+	}
 	req, _ := http.NewRequest("GET", url, nil)
 
 	if rule.Headers.UserAgent != "" {
