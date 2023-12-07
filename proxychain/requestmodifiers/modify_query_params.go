@@ -1,7 +1,7 @@
 package requestmodifiers
 
 import (
-	"fmt"
+	//"fmt"
 	"net/url"
 
 	"ladder/proxychain"
@@ -13,7 +13,7 @@ func ModifyQueryParams(key string, value string) proxychain.RequestModification 
 	return func(chain *proxychain.ProxyChain) error {
 		q := chain.Request.URL.Query()
 		chain.Request.URL.RawQuery = modifyQueryParams(key, value, q)
-		fmt.Println(chain.Request.URL.String())
+		//fmt.Println(chain.Request.URL.String())
 		return nil
 	}
 }
