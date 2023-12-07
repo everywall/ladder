@@ -13,7 +13,7 @@ import (
 
 func TestRaw(t *testing.T) {
 	app := fiber.New()
-	app.Get("/raw/*", Raw)
+	app.Get("/raw/*", NewRawProxySiteHandler(nil))
 
 	testCases := []struct {
 		name     string

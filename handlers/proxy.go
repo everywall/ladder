@@ -34,7 +34,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			SetRequestModifications(
 				//rx.SpoofJA3fingerprint(ja3, "Googlebot"),
 				rx.AddCacheBusterQuery(),
-				//rx.MasqueradeAsGoogleBot(),
+				rx.MasqueradeAsGoogleBot(),
 				rx.ForwardRequestHeaders(),
 				rx.DeleteOutgoingCookies(),
 				rx.SpoofReferrerFromRedditPost(),

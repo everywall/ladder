@@ -530,7 +530,10 @@ func (chain *ProxyChain) Execute() error {
 	}
 
 	// in case api user did not set or forward content-type, we do it for them
-	if chain.Context.Get("content-type") == "" {
+	// warning: the fiber method chain.Context.Get() doesn't seem to work as described
+	ct := chain.Context.Response().Header.Peek("content-type")
+	CT := chain.Context.Response().Header.Peek("Content-Type")
+	if ct == nil && CT == nil {
 		chain.Context.Set("content-type", chain.Response.Header.Get("content-type"))
 	}
 
