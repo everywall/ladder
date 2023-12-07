@@ -170,6 +170,7 @@ func main() {
 
 	app.All("api/raw/*", handlers.NewRawProxySiteHandler(proxyOpts))
 
+	app.Get("api/modifiers", handlers.NewAPIModifersListHandler(proxyOpts))
 	app.Get("api/ruleset/*", handlers.NewRulesetSiteHandler(proxyOpts))
 	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 

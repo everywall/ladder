@@ -111,6 +111,9 @@ http://localhost:8080/api/ruleset
 ### Running Rule
 http://localhost:8080/api/ruleset/https://example.com
 
+### List available modifiers
+http://localhost:8080/api/modifiers
+
 ## Configuration
 
 ### Environment Variables

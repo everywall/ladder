@@ -1,64 +1,28 @@
 package handlers
 
-// TODO: this is a work in progress.
-// Needs codegen to populate the rqm and rsm structs from available modifiers in ladder/proxychain/*modifers/*.go
-
 import (
+	"encoding/json"
+	"github.com/gofiber/fiber/v2"
 	"ladder/proxychain/responsemodifiers/api"
 )
 
-type ModifiersAPIResponse struct {
-	Success bool      `json:"success"`
-	Error   api.Error `json:"error"`
-	Result  Modifiers `json:"result"`
-}
+func NewAPIModifersListHandler(opts *ProxyOptions) fiber.Handler {
+	payload := ModifiersAPIResponse{
+		Success: true,
+		Result:  AllMods,
+	}
+	body, err := json.MarshalIndent(payload, "", "  ")
+	if err != nil {
+		panic(err)
+	}
 
-type Modifiers struct {
-	RequestModifiers  []Modifier `json:"requestmodifiers"`
-	ResponseModifiers []Modifier `json:"responsemodifiers"`
-}
+	return func(c *fiber.Ctx) error {
+		c.Set("content-type", "application/json")
+		if err != nil {
+			c.SendStatus(500)
+			return c.SendStream(api.CreateAPIErrReader(err))
+		}
 
-type Modifier struct {
-	Name        string  `json:"name"`
-	Description string  `json:"description"`
-	Params      []Param `json:"params"`
-}
-
-type Param struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-func init() {
-
-	rqm := []Modifier{}
-
-	// ========= loop
-	rqm = append(rqm, Modifier{
-		Name:        "codegen_name",
-		Description: "codegen_description",
-		Params: []Param{
-			{Name: "codegen_name1", Type: "codegen_type1"},
-			{Name: "codegen_name2", Type: "codegen_type2"},
-		},
-	})
-	// ========= loop end
-
-	rsm := []Modifier{}
-
-	// ========= loop
-	rsm = append(rsm, Modifier{
-		Name:        "codegen_name",
-		Description: "codegen_description",
-		Params: []Param{
-			{Name: "codegen_name1", Type: "codegen_type1"},
-			{Name: "codegen_name2", Type: "codegen_type2"},
-		},
-	})
-	// ========= loop end
-
-	m := &ModifiersAPIResponse{Success: true}
-	m.Result.RequestModifiers = rqm
-	m.Result.ResponseModifiers = rsm
-
+		return c.Send(body)
+	}
 }

@@ -1,5 +1,6 @@
 build:
 	cd proxychain/codegen && go run codegen.go
+	cd handlers/api_modifiers_codegen && go run api_modifiers_codegen.go
 	git submodule update --init --recursive
 	git rev-parse --short HEAD > handlers/VERSION
 	git rev-parse --short HEAD > cmd/VERSION
