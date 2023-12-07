@@ -167,7 +167,7 @@ func main() {
 
 	app.Get("styles.css", handlers.Styles)
 	app.Get("script.js", handlers.Script)
-	app.Get("ruleset", handlers.Ruleset)
+	app.Get("ruleset/*", handlers.NewRulesetSiteHandler(proxyOpts))
 
 	app.All("raw/*", handlers.NewRawProxySiteHandler(proxyOpts))
 

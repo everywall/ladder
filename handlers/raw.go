@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"ladder/proxychain"
 	rx "ladder/proxychain/requestmodifiers"
 	tx "ladder/proxychain/responsemodifiers"

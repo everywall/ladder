@@ -283,10 +283,6 @@ func (chain *ProxyChain) extractURLFromSubdomain() (*url.URL, error) {
 func (chain *ProxyChain) extractURLFromPath() (*url.URL, error) {
 	reqURL := chain.Context.Params("*")
 
-	fmt.Println("XXXXXXXXXXXXXXXX")
-	fmt.Println(reqURL)
-	fmt.Println(chain.APIPrefix)
-
 	reqURL = strings.TrimPrefix(reqURL, chain.APIPrefix)
 
 	// sometimes client requests doubleroot '//'
@@ -530,7 +526,6 @@ func (chain *ProxyChain) Execute() error {
 	}
 
 	// in case api user did not set or forward content-type, we do it for them
-	// warning: the fiber method chain.Context.Get() doesn't seem to work as described
 	ct := chain.Context.Response().Header.Peek("content-type")
 	CT := chain.Context.Response().Header.Peek("Content-Type")
 	if ct == nil && CT == nil {
