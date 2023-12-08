@@ -68,7 +68,7 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 			"Success":     true,
 			"Image":       extract.Metadata.Image,
 			"Description": extract.Metadata.Description,
-			"Sitename":    extract.Metadata.Sitename,
+			"Sitename":    strings.Split(extract.Metadata.Sitename, ";")[0],
 			"Hostname":    extract.Metadata.Hostname,
 			"Url":         "/" + chain.Request.URL.String(),
 			"Title":       extract.Metadata.Title, // todo: modify CreateReadableDocument so we don't have <h1> titles duplicated?

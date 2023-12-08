@@ -28,7 +28,7 @@ jobs:
         name: Build Tailwind CSS
         run: pnpm build
       -
-        name: Commit generated stylesheet
+        name: Commit generated stylesheet for handlers/styles.css
         run: |
           if git diff --quiet handlers/styles.css; then
             echo "No changes to commit."
