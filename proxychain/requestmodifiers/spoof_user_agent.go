@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"strings"
 
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // https://github.com/faisalman/ua-parser-js/tree/master

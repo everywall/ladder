@@ -4,7 +4,7 @@ import (
 	//"fmt"
 	"net/url"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // ModifyQueryParams replaces query parameter values in URL's query params in a ProxyChain's URL.

@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/rewriters"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/rewriters"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 //go:embed vendor/patch_dynamic_resource_urls.js

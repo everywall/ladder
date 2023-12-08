@@ -5,8 +5,9 @@ import (
 	"net/url"
 	"regexp"
 
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 const archivistUrl string = "https://archive.is/latest"

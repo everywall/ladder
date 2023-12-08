@@ -5,8 +5,8 @@ package ruleset_v2
 // for use in proxychains.
 
 import (
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	"github.com/everywall/ladder/proxychain"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
 )
 
 type ResponseModifierFactory func(params ...string) proxychain.ResponseModification

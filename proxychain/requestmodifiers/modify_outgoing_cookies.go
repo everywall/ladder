@@ -5,7 +5,7 @@ import (
 	//http "github.com/Danny-Dasilva/fhttp"
 	http "github.com/bogdanfinn/fhttp"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SetOutgoingCookie modifes a specific cookie name

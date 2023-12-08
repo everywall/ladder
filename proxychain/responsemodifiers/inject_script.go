@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"strings"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/rewriters"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/rewriters"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // injectScript modifies HTTP responses

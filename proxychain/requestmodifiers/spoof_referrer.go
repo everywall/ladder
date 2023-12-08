@@ -3,8 +3,9 @@ package requestmodifiers
 import (
 	"fmt"
 
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrer modifies the referrer header.

@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	//"gopkg.in/yaml.v3"
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 type Rule struct {

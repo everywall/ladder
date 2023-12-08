@@ -3,7 +3,7 @@ package requestmodifiers
 import (
 	"net/url"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 const googleCacheUrl string = "https://webcache.googleusercontent.com/search?q=cache:"

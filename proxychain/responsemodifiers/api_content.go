@@ -7,8 +7,9 @@ import (
 
 	"github.com/markusmobius/go-trafilatura"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/api"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // APIContent creates an JSON representation of the article and returns it as an API response.

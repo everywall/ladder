@@ -14,7 +14,7 @@ import (
 		//"net/http"
 	*/
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // resolveWithGoogleDoH resolves DNS using Google's DNS-over-HTTPS
