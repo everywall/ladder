@@ -65,7 +65,7 @@ async function fetchPayload() {
     const response = await fetch("/api/modifiers");
     const data = await response.json();
 
-    Object.entries(data.result.requestmodifiers ?? {}).forEach(([_, value]) => {
+    Object.entries(data.result.requestmodifiers ?? []).forEach(([_, value]) => {
       addModifierToNinjaData(
         value.name,
         value.description,
@@ -74,7 +74,7 @@ async function fetchPayload() {
       );
     });
 
-    Object.entries(data.result.responsemodifiers ?? {}).forEach(
+    Object.entries(data.result.responsemodifiers ?? []).forEach(
       ([_, value]) => {
         addModifierToNinjaData(
           value.name,
