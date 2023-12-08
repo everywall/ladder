@@ -1,7 +1,7 @@
 package requestmodifiers
 
 import (
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrerFromPinterestPost modifies the referrer header

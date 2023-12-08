@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrerFromWeiboPost modifies the referrer header

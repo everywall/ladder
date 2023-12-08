@@ -70,8 +70,8 @@ package ruleset_v2
 // for use in proxychains.
 
 import (
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	"github.com/everywall/ladder/proxychain"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
 )
 
 type ResponseModifierFactory func(params ...string) proxychain.ResponseModification
@@ -142,8 +142,8 @@ package ruleset_v2
 // for use in proxychains.
 
 import (
-	"ladder/proxychain"
-	rx "ladder/proxychain/requestmodifiers"
+	"github.com/everywall/ladder/proxychain"
+	rx "github.com/everywall/ladder/proxychain/requestmodifiers"
 )
 
 type RequestModifierFactory func(params ...string) proxychain.RequestModification

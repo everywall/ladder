@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"testing"
 
-	"ladder/proxychain/responsemodifiers/api"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
 )
 
 func TestCreateAPIErrReader(t *testing.T) {

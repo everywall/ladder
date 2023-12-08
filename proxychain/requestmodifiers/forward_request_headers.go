@@ -3,7 +3,7 @@ package requestmodifiers
 import (
 	"strings"
 	//"fmt"
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 var forwardBlacklist map[string]bool

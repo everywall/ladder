@@ -3,7 +3,7 @@ package requestmodifiers
 import (
 	"fmt"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrerFromNaverSearch modifies the referrer header

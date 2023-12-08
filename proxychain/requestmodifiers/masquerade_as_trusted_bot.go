@@ -1,8 +1,9 @@
 package requestmodifiers
 
 import (
-	"ladder/proxychain"
-	"ladder/proxychain/requestmodifiers/bot"
+	"github.com/everywall/ladder/proxychain/requestmodifiers/bot"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // MasqueradeAsGoogleBot modifies user agent and x-forwarded for

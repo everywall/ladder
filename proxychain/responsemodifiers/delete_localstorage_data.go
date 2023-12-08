@@ -4,7 +4,7 @@ import (
 	_ "embed"
 	"strings"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // DeleteLocalStorageData deletes localstorage cookies.

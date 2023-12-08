@@ -4,8 +4,9 @@ import (
 	_ "embed"
 	"strings"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/rewriters"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/rewriters"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 //go:embed vendor/block_element_removal.js

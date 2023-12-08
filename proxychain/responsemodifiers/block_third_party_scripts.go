@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/rewriters"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/rewriters"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // BlockThirdPartyScripts rewrites HTML and injects JS to block all third party JS from loading.

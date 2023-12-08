@@ -1,7 +1,7 @@
 package responsemodifiers
 
 import (
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // BypassCORS modifies response headers to prevent the browser

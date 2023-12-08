@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrerFromBaiduSearch modifies the referrer header

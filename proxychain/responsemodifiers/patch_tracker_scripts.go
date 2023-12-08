@@ -7,7 +7,7 @@ import (
 	"log"
 	"regexp"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 //go:embed vendor/ddg-tracker-surrogates/mapping.json

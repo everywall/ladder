@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"ladder/proxychain"
-	"ladder/proxychain/responsemodifiers/rewriters"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/rewriters"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // RewriteHTMLResourceURLs modifies HTTP responses

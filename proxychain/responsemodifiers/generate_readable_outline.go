@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"

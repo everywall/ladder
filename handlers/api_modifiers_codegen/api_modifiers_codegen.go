@@ -146,7 +146,7 @@ package handlers
 // for use in proxychains.
 
 import (
-	"ladder/proxychain/responsemodifiers/api"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
 )
 
 type ModifiersAPIResponse struct {
