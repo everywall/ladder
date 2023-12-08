@@ -7,16 +7,15 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"math"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/everywall/ladder/proxychain"
-
+	"github.com/markusmobius/go-trafilatura"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
-
-	//"github.com/go-shiori/dom"
-	"github.com/markusmobius/go-trafilatura"
 )
 
 //go:embed vendor/generate_readable_outline.html
@@ -63,19 +62,24 @@ func GenerateReadableOutline() proxychain.ResponseModification {
 		html.Render(&b, extract.ContentNode)
 		distilledHTML := b.String()
 
+		siteName := strings.Split(extract.Metadata.Sitename, ";")[0]
+		title := strings.Split(extract.Metadata.Title, "|")[0]
+		fmtDate := createWikipediaDateLink(extract.Metadata.Date)
+		readingTime := formatDuration(estimateReadingTime(extract.ContentText))
+
 		// populate template parameters
 		data := map[string]interface{}{
 			"Success":     true,
 			"Image":       extract.Metadata.Image,
 			"Description": extract.Metadata.Description,
-			"Sitename":    strings.Split(extract.Metadata.Sitename, ";")[0],
+			"Sitename":    siteName,
 			"Hostname":    extract.Metadata.Hostname,
 			"Url":         "/" + chain.Request.URL.String(),
-			"Title":       extract.Metadata.Title, // todo: modify CreateReadableDocument so we don't have <h1> titles duplicated?
-			"Date":        extract.Metadata.Date.String(),
-			"Author":      createWikipediaSearchLinks(extract.Metadata.Author),
-			//"Author": extract.Metadata.Author,
-			"Body": distilledHTML,
+			"Title":       title,
+			"Date":        fmtDate,
+			"Author":      createDDGFeelingLuckyLinks(extract.Metadata.Author, extract.Metadata.Hostname),
+			"Body":        distilledHTML,
+			"ReadingTime": readingTime,
 		}
 
 		// ============================================================================
@@ -157,9 +161,20 @@ func rewriteHrefLinks(n *html.Node, baseURL string, apiPath string) {
 	recurse(n)
 }
 
-// createWikipediaSearchLinks takes in comma or semicolon separated terms,
-// then turns them into <a> links searching for the term.
-func createWikipediaSearchLinks(searchTerms string) string {
+// createWikipediaDateLink takes in a date
+// and returns an <a> link pointing to the current events page for that day
+func createWikipediaDateLink(t time.Time) string {
+	url := fmt.Sprintf("https://en.wikipedia.org/wiki/Portal:Current_events#%s", t.Format("2006_January_2"))
+	date := t.Format("January 2, 2006")
+	return fmt.Sprintf("<a rel=\"noreferrer\" href=\"%s\">%s</a>", url, date)
+}
+
+// createDDGFeelingLuckyLinks takes in comma or semicolon separated terms,
+// then turns them into <a> links searching for the term using DuckDuckGo's I'm
+// feeling lucky feature. It will redirect the user immediately to the first search result.
+func createDDGFeelingLuckyLinks(searchTerms string, siteHostname string) string {
+
+	siteHostname = strings.TrimSpace(siteHostname)
 	semiColonSplit := strings.Split(searchTerms, ";")
 
 	var links []string
@@ -171,11 +186,13 @@ func createWikipediaSearchLinks(searchTerms string) string {
 				continue
 			}
 
-			encodedTerm := url.QueryEscape(trimmedTerm)
+			ddgQuery := fmt.Sprintf(` site:%s intitle:"%s"`, strings.TrimPrefix(siteHostname, "www."), trimmedTerm)
 
-			wikiURL := fmt.Sprintf("https://en.wikipedia.org/w/index.php?search=%s", encodedTerm)
+			encodedTerm := `\%s:` + url.QueryEscape(ddgQuery)
+			//ddgURL := `https://html.duckduckgo.com/html/?q=` + encodedTerm
+			ddgURL := `https://www.duckduckgo.com/?q=` + encodedTerm
 
-			link := fmt.Sprintf("<a href=\"%s\">%s</a>", wikiURL, trimmedTerm)
+			link := fmt.Sprintf("<a rel=\"noreferrer\" href=\"%s\">%s</a>", ddgURL, trimmedTerm)
 			links = append(links, link)
 		}
 
@@ -186,4 +203,67 @@ func createWikipediaSearchLinks(searchTerms string) string {
 	}
 
 	return strings.Join(links, " ")
+}
+
+// estimateReadingTime estimates how long the given text will take to read using the given configuration.
+func estimateReadingTime(text string) time.Duration {
+	if len(text) == 0 {
+		return 0
+	}
+
+	// Init options with default values.
+	WordsPerMinute := 200
+	WordBound := func(b byte) bool {
+		return b == ' ' || b == '\n' || b == '\r' || b == '\t'
+	}
+
+	words := 0
+	start := 0
+	end := len(text) - 1
+
+	// Fetch bounds.
+	for WordBound(text[start]) {
+		start++
+	}
+	for WordBound(text[end]) {
+		end--
+	}
+
+	// Calculate the number of words.
+	for i := start; i <= end; {
+		for i <= end && !WordBound(text[i]) {
+			i++
+		}
+
+		words++
+
+		for i <= end && WordBound(text[i]) {
+			i++
+		}
+	}
+
+	// Reading time stats.
+	minutes := math.Ceil(float64(words) / float64(WordsPerMinute))
+	duration := time.Duration(math.Ceil(minutes) * float64(time.Minute))
+
+	return duration
+
+}
+
+func formatDuration(d time.Duration) string {
+	// Check if the duration is less than one minute
+	if d < time.Minute {
+		seconds := int(d.Seconds())
+		return fmt.Sprintf("%d seconds", seconds)
+	}
+
+	// Convert the duration to minutes
+	minutes := int(d.Minutes())
+
+	// Format the string for one or more minutes
+	if minutes == 1 {
+		return "1 minute"
+	} else {
+		return fmt.Sprintf("%d minutes", minutes)
+	}
 }
