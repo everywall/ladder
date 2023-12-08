@@ -4,7 +4,7 @@
 
 @layer base {
   a {
-    @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300;
+    @apply text-slate-600 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-500 underline underline-offset-4 transition-colors duration-300;
   }
   h1 {
     @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-slate-900 dark:text-slate-200;

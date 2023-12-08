@@ -39,6 +39,7 @@
         <div class="flex">
           <a
             href="/"
+            aria-label="ladder"
             class="flex -ml-2 h-8 font-extrabold tracking-tight hover:no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
           >
             <svg
@@ -70,7 +71,9 @@
         <div class="flex justify-center z-10">
           <div class="relative" id="dropdown">
             <button
-              aria-expanded="closed"
+              aria-expanded="false"
+              id="dropdownButton"
+              aria-label="Toggle dropdown menu"
               onclick="toggleDropdown()"
               type="button"
               class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"

@@ -32,7 +32,9 @@
       <div class="place-self-end z-10">
         <div class="relative" id="dropdown">
           <button
-            aria-expanded="closed"
+            aria-expanded="false"
+            id="dropdownButton"
+            aria-label="Toggle dropdown menu"
             onclick="toggleDropdown()"
             type="button"
             class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
@@ -248,6 +250,7 @@
           </button>
           <button
             type="submit"
+            id="submitButton"
             class="inline-flex items-center justify-center h-11 px-8 whitespace-nowrap rounded-md text-sm font-medium text-slate-200 dark:text-slate-900 ring-offset-white dark:ring-offset-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-slate-800 dark:bg-slate-200 hover:bg-slate-800/90 dark:hover:bg-slate-200/90"
           >
             Proxy Search
@@ -258,17 +261,9 @@
       <footer class="mx-4 text-center text-slate-600 dark:text-slate-400">
         <p>
           Code Licensed Under GPL v3.0 |
-          <a
-            href="https://github.com/everywall/ladder"
-            class="hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-            >View Source</a
-          >
+          <a href="https://github.com/everywall/ladder">View Source</a>
           |
-          <a
-            href="https://github.com/everywall"
-            class="hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-            >Everywall</a
-          >
+          <a href="https://github.com/everywall">Everywall</a>
         </p>
       </footer>
     </div>
