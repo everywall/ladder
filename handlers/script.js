@@ -1,8 +1,12 @@
 const labels = document.querySelectorAll("label");
 const inputs = document.querySelectorAll('input[type="radio"]');
 const mainElement = document.querySelector("main");
+const inputField = document.getElementById("inputField");
+const clearButton = document.getElementById("clearButton");
 
-const handleDOMContentLoaded = () => {
+window.addEventListener("DOMContentLoaded", handleDOMContentLoaded);
+
+function handleDOMContentLoaded() {
   handleFontChange();
   handleFontSizeChange();
   inputs.forEach((input) => {
@@ -12,7 +16,36 @@ const handleDOMContentLoaded = () => {
     }
   });
   window.removeEventListener("DOMContentLoaded", handleDOMContentLoaded);
-};
+}
+
+function clearInput() {
+  inputField.value = "";
+  clearButton.style.display = "none";
+  inputField.focus();
+}
+
+if (inputField !== null && clearButton !== null) {
+  inputField.addEventListener("input", () => {
+    const clearButton = document.getElementById("clearButton");
+    if (clearButton !== null) {
+      if (inputField.value.trim().length > 0) {
+        clearButton.style.display = "block";
+      } else {
+        clearButton.style.display = "none";
+      }
+    }
+  });
+
+  inputField.addEventListener("keydown", (event) => {
+    if (event.code === "Escape") {
+      clearInput();
+    }
+  });
+
+  clearButton.addEventListener("click", () => {
+    clearInput();
+  });
+}
 
 function focusable_children(node) {
   const nodes = Array.from(
@@ -95,7 +128,7 @@ const toggleDropdown = () => {
   };
 
   const handleClickOutside = (e) => {
-    if (!dropdown.contains(e.target)) {
+    if (dropdown !== null && !dropdown.contains(e.target)) {
       closeDropdown();
     }
   };
@@ -292,5 +325,3 @@ const handleFontSizeChange = () => {
     changeFontSize(node, classes);
   });
 };
-
-window.addEventListener("DOMContentLoaded", handleDOMContentLoaded);

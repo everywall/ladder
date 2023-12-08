@@ -210,6 +210,7 @@
             class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
             autocomplete="off"
             autofocus
+            required
           />
           <button
             id="clearButton"
@@ -233,10 +234,6 @@
               <path d="m6 6 12 12" />
             </svg>
           </button>
-          <p
-            id="errorContainer"
-            class="absolute ml-2 left-0 -bottom-6 text-red-700 dark:text-red-400 text-sm"
-          />
         </div>
 
         <div
@@ -279,32 +276,10 @@
     <script>
       function validateAndRedirect(destination) {
         let url = inputField.value;
-        let error = "";
-        if (!url || typeof url !== "string") {
-          error = "Please enter a valid URL.";
-        }
-        if (typeof url === "string" && url.indexOf("http") === -1) {
-          url = "https://" + url;
-        }
-        const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,})(\/\S*)?$/i;
-        if (!urlPattern.test(url)) {
-          error = "Please enter a valid URL.";
-        }
-        if (error) {
-          errorContainer.textContent = error;
-          return false;
-        }
         const redirectUrl =
           destination === "outline" ? "/outline/" + url : "/" + url;
         window.location.href = redirectUrl;
         return true;
-      }
-
-      function clearInput() {
-        inputField.value = "";
-        clearButton.style.display = "none";
-        errorContainer.textContent = "";
-        inputField.focus();
       }
 
       document
@@ -319,33 +294,6 @@
         .addEventListener("click", function () {
           validateAndRedirect("outline");
         });
-
-      const inputField = document.getElementById("inputField");
-      const clearButton = document.getElementById("clearButton");
-      const errorContainer = document.getElementById("errorContainer");
-
-      if (inputField !== null && clearButton !== null) {
-        inputField.addEventListener("input", () => {
-          const clearButton = document.getElementById("clearButton");
-          if (clearButton !== null) {
-            if (inputField.value.trim().length > 0) {
-              clearButton.style.display = "block";
-            } else {
-              clearButton.style.display = "none";
-            }
-          }
-        });
-
-        inputField.addEventListener("keydown", (event) => {
-          if (event.code === "Escape") {
-            clearInput();
-          }
-        });
-
-        clearButton.addEventListener("click", () => {
-          clearInput();
-        });
-      }
     </script>
   </body>
 </html>
