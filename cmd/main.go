@@ -3,18 +3,16 @@ package main
 import (
 	_ "embed"
 	"fmt"
-	"html/template"
 	"log"
 	"os"
 
 	"ladder/handlers"
 	"ladder/internal/cli"
 	"ladder/proxychain/requestmodifiers/bot"
-	"ladder/proxychain/ruleset"
+	ruleset_v2 "ladder/proxychain/ruleset"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/template/html/v2"
 )
 
 //go:embed VERSION
@@ -129,21 +127,12 @@ func main() {
 		rs = ruleset_v2.NewRulesetFromEnv()
 	}
 
-	engine := html.New("./handlers", ".html")
-	engine.AddFunc(
-		// add unescape function
-		"unescape", func(s string) template.HTML {
-			return template.HTML(s)
-		},
-	)
-
 	app := fiber.New(
 		fiber.Config{
 			Prefork:               *prefork,
 			GETOnly:               false,
 			ReadBufferSize:        4096 * 4, // increase max header size
 			DisableStartupMessage: true,
-			Views:                 engine,
 		},
 	)
 
@@ -167,6 +156,7 @@ func main() {
 
 	app.Get("styles.css", handlers.Styles)
 	app.Get("script.js", handlers.Script)
+	app.Get("playground-script.js", handlers.Script)
 
 	app.All("api/raw/*", handlers.NewRawProxySiteHandler(proxyOpts))
 
@@ -175,6 +165,7 @@ func main() {
 	app.Get("api/content/*", handlers.NewAPIContentHandler("api/outline/*", proxyOpts))
 
 	app.Get("outline/*", handlers.NewOutlineHandler("outline/*", proxyOpts))
+	app.All("playground/*", handlers.PlaygroundHandler("playground/*", proxyOpts))
 
 	app.All("/*", handlers.NewProxySiteHandler(proxyOpts))
 

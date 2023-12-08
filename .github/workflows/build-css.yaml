@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "handlers/form.html"
+      - "handlers/playground.html"
       - "proxychain/responsemodifiers/vendor/generate_readable_outline.html"
   workflow_dispatch:
 
@@ -37,7 +38,8 @@ jobs:
             echo "Changes detected, committing..."
             git config --global user.name "Github action"
             git config --global user.email "username@users.noreply.github.com"
-            git add cmd
+            git add handlers
+            git add "proxychain/responsemodifiers/vendor/
             git commit -m "Generated stylesheet"
             git push
           fi
