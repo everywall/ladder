@@ -2,9 +2,8 @@
 // TODO: Parse JSON to YAML
 // TODO: Download YAML
 // Injection scripts
-// TODO: Javascript syntax highlighting within textarea layout, styling and event listeners
-// TODO: Textarea handlers and logic for javascript (e.g. tab, newline)
-// TODO: Javascript escaping/unescaping as required
+// TODO: Textarea handle events (tab key, shift tab, scroll)
+// TODO: Javascript escaping/unescaping as required to prevent XSS and satisfy API requirements
 // TODO: remove tailwind play cdn script in head of playground.html after syntax highlighting work complete
 // Ninja Keys improvements
 // TODO: Group related items for Ninja Keys
@@ -161,14 +160,14 @@ function getValues(id, description, params) {
 
   function closeModal() {
     focusTrap.destroy();
-    modalBody.removeEventListener("keydown", handleEscapeKey);
-    modalBody.removeEventListener("keydown", handleEnterKey);
+    modalBody.removeEventListener("keydown", handleKeyboardEvents);
     modalContainer.removeEventListener("click", handleClickOutside);
     modalSubmitButton.removeEventListener("click", closeModal);
     modalClose.removeEventListener("click", closeModal);
     inputEventListeners.forEach((listener, index) => {
       inputs[index].removeEventListener("input", listener);
     });
+    modalContent.classList.remove("relative", "h-[220px]");
     inputEventListeners.length = 0;
     inputs.length = 0;
     values = [];
@@ -182,13 +181,10 @@ function getValues(id, description, params) {
     }
   }
 
-  function handleEscapeKey(e) {
+  function handleKeyboardEvents(e) {
     if (e.key === "Escape") {
       closeModal();
     }
-  }
-
-  function handleEnterKey(e) {
     if (e.key === "Enter") {
       if (e.target.tagName.toLowerCase() === "textarea") {
         return;
@@ -196,20 +192,43 @@ function getValues(id, description, params) {
         modalSubmitButton.click();
       }
     }
+    if (
+      e.key === "Tab" &&
+      !e.shiftKey &&
+      e.target.tagName.toLowerCase() === "textarea"
+    ) {
+      e.preventDefault();
+      let text = e.target.value;
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      e.target.value = text.substring(0, start) + "\t" + text.substring(end);
+      e.target.dispatchEvent(new Event("input"));
+      e.target.setSelectionRange(start + 1, start + 1);
+    }
   }
 
   document.getElementById("modal-title").innerHTML = id;
   document.getElementById("modal-description").innerHTML = description;
 
   params.map((param, i) => {
-    function textareaEventListener(event) {
+    function textareaEventListener(e) {
       codeElement = document.querySelector("code");
-      codeElement.innerText = event.target.value;
+      let text = e.target.value;
+
+      if (text[text.length - 1] == "\n") {
+        text += " ";
+      }
+
+      codeElement.innerHTML = text
+        .replace(new RegExp("&", "g"), "&amp;")
+        .replace(new RegExp("<", "g"), "&lt;");
+
       Prism.highlightElement(codeElement);
-      values[i] = "|" + "&nbsp;" + event.target.value;
+      values[i] = text;
     }
-    function inputEventListener(event) {
-      values[i] = event.target.value;
+
+    function inputEventListener(e) {
+      values[i] = e.target.value;
     }
 
     const label = document.createElement("label");
@@ -219,39 +238,87 @@ function getValues(id, description, params) {
     if (param.name === "js") {
       input = document.createElement("textarea");
       input.type = "textarea";
+      input.setAttribute("spellcheck", "false");
+      input.placeholder = "Enter your JavaScript injection code ...";
       input.classList.add(
-        "min-h-[200px]",
+        "h-[200px]",
+        "w-full",
         "font-mono",
         "whitespace-break-spaces",
-        "font-semibold"
+        "font-semibold",
+        "absolute",
+        "text-base",
+        "leading-6",
+        "rounded-md",
+        "ring-1",
+        "ring-slate-900/10",
+        "shadow-sm",
+        "z-10",
+        "p-4",
+        "m-0",
+        "my-2",
+        "bg-transparent",
+        "text-transparent",
+        "overflow-auto",
+        "resize-none",
+        "caret-white",
+        "hover:ring-slate-300",
+        "dark:bg-slate-800",
+        "dark:highlight-white/5",
+        "hyphens-none"
       );
+      input.style.tabSize = "4";
     } else {
       input = document.createElement("input");
       input.type = "text";
+      input.classList.add(
+        "w-full",
+        "text-sm",
+        "leading-6",
+        "text-slate-400",
+        "rounded-md",
+        "ring-1",
+        "ring-slate-900/10",
+        "shadow-sm",
+        "py-1.5",
+        "pl-2",
+        "pr-3",
+        "mt-0",
+        "hover:ring-slate-300",
+        "dark:bg-slate-800",
+        "dark:highlight-white/5",
+        "overflow-auto"
+      );
     }
     input.id = `input-${i}`;
-    input.classList.add(
-      "w-full",
-      "text-sm",
-      "leading-6",
-      "text-slate-400",
-      "rounded-md",
-      "ring-1",
-      "ring-slate-900/10",
-      "shadow-sm",
-      "py-1.5",
-      "pl-2",
-      "pr-3",
-      "hover:ring-slate-300",
-      "dark:bg-slate-800",
-      "dark:highlight-white/5"
-    );
     modalContent.appendChild(label);
     modalContent.appendChild(input);
     if (input.type === "textarea") {
+      label.classList.add("sr-only", "hidden");
       preElement = document.createElement("pre");
       codeElement = document.createElement("code");
       preElement.setAttribute("aria-hidden", "true");
+      preElement.classList.add(
+        "bg-[#2d2d2d]",
+        "h-[200px]",
+        "w-full",
+        "rounded-md",
+        "ring-1",
+        "ring-slate-900/10",
+        "shadow-sm",
+        "p-0",
+        "m-0",
+        "my-2",
+        "font-mono",
+        "text-base",
+        "leading-6",
+        "whitespace-break-spaces",
+        "font-semibold",
+        "absolute",
+        "z-0",
+        "overflow-auto"
+      );
+      modalContent.classList.add("relative", "h-[220px]");
       preElement.setAttribute("tabindex", "-1");
       codeElement.classList.add("language-javascript");
       preElement.appendChild(codeElement);
@@ -269,8 +336,7 @@ function getValues(id, description, params) {
   document.getElementById("input-0").focus();
 
   return new Promise((resolve) => {
-    modalBody.addEventListener("keydown", handleEscapeKey);
-    modalBody.addEventListener("keydown", handleEnterKey);
+    modalBody.addEventListener("keydown", handleKeyboardEvents);
     modalContainer.addEventListener("click", handleClickOutside);
     modalClose.addEventListener("click", () => {
       closeModal();
