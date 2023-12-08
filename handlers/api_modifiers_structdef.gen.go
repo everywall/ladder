@@ -485,7 +485,7 @@ var AllMods Modifiers = Modifiers{
   Description: "DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server back down to the client.",
   CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
-    {Name: "_", Type: "&{Ellipsis:18778 Elt:string}"},
+    {Name: "_", Type: "&{Ellipsis:18780 Elt:string}"},
   },
 },
 {
@@ -493,7 +493,7 @@ var AllMods Modifiers = Modifiers{
   Description: "DeleteIncomingCookiesExcept prevents non-whitelisted cookies from being sent from the proxy server to the client. Cookies whose names are in the whitelist are not removed.",
   CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
-    {Name: "whitelist", Type: "&{Ellipsis:19323 Elt:string}"},
+    {Name: "whitelist", Type: "&{Ellipsis:19325 Elt:string}"},
   },
 },
 {

@@ -164,8 +164,8 @@ func rewriteHrefLinks(n *html.Node, baseURL string, apiPath string) {
 // createWikipediaDateLink takes in a date
 // and returns an <a> link pointing to the current events page for that day
 func createWikipediaDateLink(t time.Time) string {
-	url := fmt.Sprintf("https://en.wikipedia.org/wiki/Portal:Current_events#%s", t.Format("2006_January_2"))
-	date := t.Format("January 2, 2006")
+	url := fmt.Sprintf("https://en.wikipedia.org/wiki/Portal:Current_events#%s", t.Format("2006_January_02"))
+	date := t.Format("January 02, 2006")
 	return fmt.Sprintf("<a rel=\"noreferrer\" href=\"%s\">%s</a>", url, date)
 }
 
