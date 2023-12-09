@@ -1,10 +1,8 @@
 // Export button
 // TODO: Parse JSON to YAML
 // TODO: Download YAML
-// Injection scripts
-// TODO: Textarea handle events (tab key, shift tab, scroll)
-// TODO: Javascript escaping/unescaping as required to prevent XSS and satisfy API requirements
-// TODO: remove tailwind play cdn script in head of playground.html after syntax highlighting work complete
+
+// TODO: Pre/Code block styling fix when existing values are present
 // Ninja Keys improvements
 // TODO: Group related items for Ninja Keys
 // TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
@@ -136,25 +134,84 @@ if (navigator.userAgent.includes("Mac")) {
 }
 
 function downloadYaml() {
-  function parseYaml() {
-    //* PARSE PAYLOAD TO YAML
-    return payload;
+  function jsonToYamlHelper(jsonObject, indent = 0) {
+    const yamlLines = [];
+
+    function processObject(obj, indent = 0) {
+      Object.entries(obj).forEach(([key, value]) => {
+        const indentation = " ".repeat(indent * 2);
+
+        if (
+          Array.isArray(value) &&
+          value.length > 0 &&
+          typeof value[0] === "object"
+        ) {
+          // Handle arrays of objects
+          yamlLines.push(`${indentation}${key}:`);
+          value.forEach((item) => {
+            yamlLines.push(`${" ".repeat((indent + 1) * 2)}-`);
+            processObject(item, indent + 2);
+          });
+        } else if (Array.isArray(value)) {
+          // Handle flat arrays
+          yamlLines.push(
+            `${indentation}${key}: [${value
+              .map((item) => `"${item}"`)
+              .join(", ")}]`
+          );
+        } else if (typeof value === "object" && value !== null) {
+          // Handle nested objects
+          yamlLines.push(`${indentation}${key}:`);
+          processObject(value, indent + 1);
+        } else {
+          // Handle other types
+          yamlLines.push(`${indentation}${key}: ${JSON.stringify(value)}`);
+        }
+      });
+    }
+
+    processObject(jsonObject, indent);
+
+    return yamlLines.join("\n");
   }
 
-  const yamlData = parseYaml();
-  const blob = new Blob([yamlData], { type: "text/yaml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  //* CONSTRUCT FILENAME FROM HOSTNAME
-  link.download = `name_of_report.yaml`;
-  link.click();
-  URL.revokeObjectURL(url);
+  function jsonToYaml(payload) {
+    if (!document.getElementById("inputForm").checkValidity()) {
+      alert("Please enter a valid URL.");
+      return;
+    }
+    const url = new URL(inputField.value);
+    const hostname = url.hostname;
+
+    const jsonObject = {
+      rules: [
+        {
+          domains: [hostname],
+          responsemodifications: [],
+          requestmodifications: [],
+          ...payload,
+        },
+      ],
+    };
+    return jsonToYamlHelper(jsonObject);
+  }
+
+  const yamlString = jsonToYaml(payload);
+  console.log(yamlString);
+  // const blob = new Blob([yamlString], { type: "text/yaml;charset=utf-8" });
+  // const url = URL.createObjectURL(blob);
+  // const link = document.createElement("a");
+  // link.href = url;
+  // //* CONSTRUCT FILENAME FROM HOSTNAME
+  // link.download = `name_of_report.yaml`;
+  // link.click();
+  // URL.revokeObjectURL(url);
 }
 
-function getValues(id, description, params) {
+function getValues(type, id, description, params) {
   const focusTrap = trap(modalBody);
   let values = [];
+  let existingValues = [];
   const inputs = [];
   const inputEventListeners = [];
 
@@ -165,12 +222,13 @@ function getValues(id, description, params) {
     modalSubmitButton.removeEventListener("click", closeModal);
     modalClose.removeEventListener("click", closeModal);
     inputEventListeners.forEach((listener, index) => {
-      inputs[index].removeEventListener("input", listener);
+      if (listener !== undefined && inputs[index] !== undefined)
+        inputs[index].removeEventListener("input", listener);
     });
     modalContent.classList.remove("relative", "h-[220px]");
     inputEventListeners.length = 0;
     inputs.length = 0;
-    values = [];
+    // values = [];
     modalContainer.classList.add("hidden");
     modalContent.innerHTML = "";
   }
@@ -192,27 +250,19 @@ function getValues(id, description, params) {
         modalSubmitButton.click();
       }
     }
-    if (
-      e.key === "Tab" &&
-      !e.shiftKey &&
-      e.target.tagName.toLowerCase() === "textarea"
-    ) {
-      e.preventDefault();
-      let text = e.target.value;
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      e.target.value = text.substring(0, start) + "\t" + text.substring(end);
-      e.target.dispatchEvent(new Event("input"));
-      e.target.setSelectionRange(start + 1, start + 1);
-    }
   }
 
   document.getElementById("modal-title").innerHTML = id;
   document.getElementById("modal-description").innerHTML = description;
 
+  existingValues =
+    payload[type].find(
+      (modifier) => modifier.name === id && modifier.params !== undefined
+    )?.params ?? [];
+
   params.map((param, i) => {
     function textareaEventListener(e) {
-      codeElement = document.querySelector("code");
+      const codeElement = document.querySelector("code");
       let text = e.target.value;
 
       if (text[text.length - 1] == "\n") {
@@ -225,10 +275,33 @@ function getValues(id, description, params) {
 
       Prism.highlightElement(codeElement);
       values[i] = text;
+      syncScroll(e.target);
+    }
+
+    function textareaKeyEventListener(e) {
+      if (e.key === "Tab" && !e.shiftKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        let text = e.target.value;
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        e.target.value = text.substring(0, start) + "\t" + text.substring(end);
+        e.target.setSelectionRange(start + 1, start + 1);
+        e.target.dispatchEvent(new Event("input"));
+      }
+      syncScroll(e.target);
+    }
+
+    function syncScroll(el) {
+      const codeElement = document.querySelector("code");
+      codeElement.scrollTop = el.scrollTop;
+      codeElement.scrollLeft = el.scrollLeft;
     }
 
     function inputEventListener(e) {
-      values[i] = e.target.value;
+      if (e.key !== "Enter") {
+        values[i] = e.target.value;
+      }
     }
 
     const label = document.createElement("label");
@@ -244,7 +317,7 @@ function getValues(id, description, params) {
         "h-[200px]",
         "w-full",
         "font-mono",
-        "whitespace-break-spaces",
+        "whitespace-nowrap",
         "font-semibold",
         "absolute",
         "text-base",
@@ -258,13 +331,12 @@ function getValues(id, description, params) {
         "m-0",
         "my-2",
         "bg-transparent",
+        "dark:bg-transparent",
         "text-transparent",
         "overflow-auto",
         "resize-none",
         "caret-white",
         "hover:ring-slate-300",
-        "dark:bg-slate-800",
-        "dark:highlight-white/5",
         "hyphens-none"
       );
       input.style.tabSize = "4";
@@ -291,6 +363,7 @@ function getValues(id, description, params) {
       );
     }
     input.id = `input-${i}`;
+    input.value = existingValues[i] ?? "";
     modalContent.appendChild(label);
     modalContent.appendChild(input);
     if (input.type === "textarea") {
@@ -300,6 +373,7 @@ function getValues(id, description, params) {
       preElement.setAttribute("aria-hidden", "true");
       preElement.classList.add(
         "bg-[#2d2d2d]",
+        "dark:bg-[#2d2d2d]",
         "h-[200px]",
         "w-full",
         "rounded-md",
@@ -312,19 +386,42 @@ function getValues(id, description, params) {
         "font-mono",
         "text-base",
         "leading-6",
-        "whitespace-break-spaces",
+        "overflow-auto",
+        "whitespace-nowrap",
         "font-semibold",
         "absolute",
         "z-0",
-        "overflow-auto"
+        "hyphens-none"
       );
       modalContent.classList.add("relative", "h-[220px]");
       preElement.setAttribute("tabindex", "-1");
-      codeElement.classList.add("language-javascript");
+      codeElement.classList.add(
+        "language-javascript",
+        "absolute",
+        "w-full",
+        "font-mono",
+        "text-base",
+        "leading-6",
+        "z-0",
+        "p-4",
+        "-mx-4",
+        "-my-4",
+        "h-full",
+        "whitespace-nowrap",
+        "overflow-auto",
+        "hyphens-none"
+      );
+      codeElement.textContent = input.value;
       preElement.appendChild(codeElement);
       modalContent.appendChild(preElement);
       input.addEventListener("input", textareaEventListener);
-      inputEventListeners.push(textareaEventListener);
+      input.addEventListener("keydown", textareaKeyEventListener);
+      input.addEventListener("scroll", () => syncScroll(input));
+      inputEventListeners.push(
+        textareaEventListener,
+        textareaKeyEventListener,
+        syncScroll
+      );
     } else {
       input.addEventListener("input", inputEventListener);
       inputEventListeners.push(inputEventListener);
@@ -341,7 +438,10 @@ function getValues(id, description, params) {
     modalClose.addEventListener("click", () => {
       closeModal();
     });
-    modalSubmitButton.addEventListener("click", () => {
+    modalSubmitButton.addEventListener("click", (e) => {
+      inputs.forEach((input, i) => {
+        values[i] = input.value;
+      });
       resolve(values);
       closeModal();
     });
@@ -380,7 +480,10 @@ function toggleModifier(type, id, params = []) {
     pill.addEventListener("click", () => pillClickHandler(pill));
   }
 
-  if (payload[type].some((modifier) => modifier.name === id)) {
+  if (
+    params === undefined &&
+    payload[type].some((modifier) => modifier.name === id)
+  ) {
     payload[type] = payload[type].filter((modifier) => modifier.name !== id);
     const existingPill = document.getElementById(id);
     if (existingPill !== null) {
@@ -389,7 +492,10 @@ function toggleModifier(type, id, params = []) {
     }
   } else {
     payload[type].push({ name: id, params: params });
-    createPill(type, id);
+    const existingPill = document.getElementById(id);
+    if (existingPill === null) {
+      createPill(type, id);
+    }
   }
 
   submitForm();
@@ -412,7 +518,7 @@ function addModifierToNinjaData(id, description, params, type) {
         if (params[0].name === "_") {
           toggleModifier(type, id, (params = [""]));
         } else {
-          getValues(id, description, params).then((values) => {
+          getValues(type, id, description, params).then((values) => {
             if (Object.keys(values).length === 0) return;
             toggleModifier(type, id, values);
           });
