@@ -35,18 +35,15 @@ func (rs *Ruleset) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	yamlRuleset := &AuxRuleset{}
 
-	if err := unmarshal(&yamlRuleset); err != nil {
-		// if there is no top-level rule key, we'll try to unmarshal as if it is just a bare rule
-		recovered := false
-		yamlRule := &Rule{}
-		if err := unmarshal(&yamlRule); err != nil {
-			yamlRuleset.Rules = append(yamlRuleset.Rules, *yamlRule)
-			recovered = true
-		}
-
-		if !recovered {
+	// First, try to unmarshal as AuxRuleset
+	err := unmarshal(yamlRuleset)
+	if err != nil {
+		// If that fails, try to unmarshal directly into a slice of Rules
+		var directRules []Rule
+		if err := unmarshal(&directRules); err != nil {
 			return err
 		}
+		yamlRuleset.Rules = directRules
 	}
 
 	rs._rulemap = make(map[string]*Rule)
@@ -224,6 +221,7 @@ func (rs *Ruleset) loadRulesFromLocalDir(path string) error {
 		if !isYAML {
 			return nil
 		}
+		fmt.Printf("loadRulesFromLocalDir :: loading rule: %s\n", path)
 
 		tmpRs := Ruleset{_rulemap: make(map[string]*Rule)}
 		err = tmpRs.loadRulesFromLocalFile(path)
@@ -268,6 +266,7 @@ func (rs *Ruleset) loadRulesFromLocalFile(path string) error {
 		e := fmt.Errorf("failed to read rules from local file: '%s'", path)
 		return errors.Join(e, err)
 	}
+	fmt.Printf("loadRulesFromLocalFile :: %s\n", path)
 
 	isJSON := strings.HasSuffix(path, ".json")
 	if isJSON {
