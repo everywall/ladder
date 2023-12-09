@@ -84,6 +84,10 @@ func init() {
     return tx.SetIncomingCookie(params[0], params[1])
   }
 
+  rsmModMap["ModifyIncomingScriptsWithRegex"] = func(params ...string) proxychain.ResponseModification {
+    return tx.ModifyIncomingScriptsWithRegex(params[0], params[1])
+  }
+
   rsmModMap["SetResponseHeader"] = func(params ...string) proxychain.ResponseModification {
     return tx.SetResponseHeader(params[0], params[1])
   }

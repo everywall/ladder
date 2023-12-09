@@ -52,6 +52,19 @@ func PatchDynamicResourceURLs() proxychain.ResponseModification {
 		htmlRewriter := rewriters.NewHTMLRewriter(chain.Response.Body, rr)
 		chain.Response.Body = htmlRewriter
 
+		// window.location
+		/*
+				spoofedLocationAPI := fmt.Sprintf(`{href:"%s", origin:"%s", pathname:"%s", protocol:"%s:", port:"%s"}`,
+					reqURL.String(), reqURL.Host,
+					reqURL.Path, reqURL.Scheme, reqURL.Port())
+			spoofedLocationAPI := fmt.Sprintf(`{origin: "%s"}`, reqURL.Host)
+			fmt.Println(spoofedLocationAPI)
+
+			chain.AddOnceResponseModifications(
+				ModifyIncomingScriptsWithRegex(`window\.location`, spoofedLocationAPI),
+			)
+		*/
+
 		return nil
 	}
 }

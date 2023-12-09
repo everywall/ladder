@@ -514,6 +514,15 @@ var AllMods Modifiers = Modifiers{
   },
 },
 {
+  Name:        "ModifyIncomingScriptsWithRegex",
+  Description: "ModifyIncomingScriptsWithRegex modifies all incoming javascript (application/javascript and inline <script> in text/html) using a regex match and replacement.",
+  CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_scripts_with_regex.go",
+  Params: []Param{
+    {Name: "matchRegex", Type: "string"},
+    {Name: "replacement", Type: "string"},
+  },
+},
+{
   Name:        "SetResponseHeader",
   Description: "SetResponseHeader modifies response headers from the upstream server",
   CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_response_header.go",

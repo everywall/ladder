@@ -45,7 +45,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 			).
 			AddResponseModifications(
 				tx.ForwardResponseHeaders(),
-				//tx.BlockThirdPartyScripts(),
+				tx.BlockThirdPartyScripts(),
 				tx.DeleteIncomingCookies(),
 				tx.DeleteLocalStorageData(),
 				tx.DeleteSessionStorageData(),
@@ -54,7 +54,7 @@ func NewProxySiteHandler(opts *ProxyOptions) fiber.Handler {
 				tx.RewriteHTMLResourceURLs(),
 				tx.PatchDynamicResourceURLs(),
 				tx.PatchTrackerScripts(),
-				tx.BlockElementRemoval(".article-content"), // techcrunch
+				//tx.BlockElementRemoval(".article-content"), // techcrunch
 				//tx.BlockElementRemoval(".available-content"), // substack
 			// tx.SetContentSecurityPolicy("default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"),
 			)

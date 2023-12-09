@@ -33,14 +33,24 @@ func (rs *Ruleset) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	type AuxRuleset struct {
 		Rules []Rule `yaml:"rules"`
 	}
-	yr := &AuxRuleset{}
+	yamlRuleset := &AuxRuleset{}
 
-	if err := unmarshal(&yr); err != nil {
-		return err
+	if err := unmarshal(&yamlRuleset); err != nil {
+		// if there is no top-level rule key, we'll try to unmarshal as if it is just a bare rule
+		recovered := false
+		yamlRule := &Rule{}
+		if err := unmarshal(&yamlRule); err != nil {
+			yamlRuleset.Rules = append(yamlRuleset.Rules, *yamlRule)
+			recovered = true
+		}
+
+		if !recovered {
+			return err
+		}
 	}
 
 	rs._rulemap = make(map[string]*Rule)
-	rs.Rules = yr.Rules
+	rs.Rules = yamlRuleset.Rules
 
 	// create a map of pointers to rules loaded above based on domain string keys
 	// this way we don't have two copies of the rule in ruleset
