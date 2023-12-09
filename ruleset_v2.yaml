@@ -31,3 +31,6 @@ rules:
       - "window\\.location"
       - |
         {origin: "techcrunch.com"} 
+    - name: BlockElementRemoval
+      params:
+      - ".article-content"
