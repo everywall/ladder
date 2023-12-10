@@ -1,13 +1,4 @@
-// Export button
-// TODO: Parse JSON to YAML
-// TODO: Download YAML
-
-// TODO: Pre/Code block styling fix when existing values are present
-// Ninja Keys improvements
-// TODO: Group related items for Ninja Keys
-// TODO: Untoggle related items that may be toggled (e.g. should only have one masquerade as bot toggled)
-// Testing
-// TODO: Testing
+// TODO: Fix pre/code block styling fix when existing values are present
 
 const modifierContainer = document.getElementById("modifierContainer");
 const modalContainer = document.getElementById("modalContainer");
@@ -134,55 +125,7 @@ if (navigator.userAgent.includes("Mac")) {
 }
 
 function downloadYaml() {
-  function jsonToYamlHelper(jsonObject, indent = 0) {
-    const yamlLines = [];
-
-    function processObject(obj, indent = 0) {
-      Object.entries(obj).forEach(([key, value]) => {
-        const indentation = " ".repeat(indent * 2);
-
-        if (
-          Array.isArray(value) &&
-          value.length > 0 &&
-          typeof value[0] === "object"
-        ) {
-          // Handle arrays of objects
-          yamlLines.push(`${indentation}${key}:`);
-          value.forEach((item) => {
-            yamlLines.push(`${" ".repeat((indent + 1) * 2)}-`);
-            processObject(item, indent + 2);
-          });
-        } else if (Array.isArray(value)) {
-          // Handle flat arrays
-          yamlLines.push(
-            `${indentation}${key}: [${value
-              .map((item) => `"${item}"`)
-              .join(", ")}]`
-          );
-        } else if (typeof value === "object" && value !== null) {
-          // Handle nested objects
-          yamlLines.push(`${indentation}${key}:`);
-          processObject(value, indent + 1);
-        } else {
-          // Handle other types
-          yamlLines.push(`${indentation}${key}: ${JSON.stringify(value)}`);
-        }
-      });
-    }
-
-    processObject(jsonObject, indent);
-
-    return yamlLines.join("\n");
-  }
-
   function jsonToYaml(payload) {
-    if (!document.getElementById("inputForm").checkValidity()) {
-      alert("Please enter a valid URL.");
-      return;
-    }
-    const url = new URL(inputField.value);
-    const hostname = url.hostname;
-
     const jsonObject = {
       rules: [
         {
@@ -193,19 +136,23 @@ function downloadYaml() {
         },
       ],
     };
-    return jsonToYamlHelper(jsonObject);
+    return jsyaml.dump(jsonObject);
   }
 
+  if (!document.getElementById("inputForm").checkValidity()) {
+    alert("Please enter a valid URL.");
+    return;
+  }
+  const hostname = new URL(inputField.value).hostname;
+  const ruleHostname = hostname.replace(/^www\./, "").replace(/\./g, "-");
   const yamlString = jsonToYaml(payload);
-  console.log(yamlString);
-  // const blob = new Blob([yamlString], { type: "text/yaml;charset=utf-8" });
-  // const url = URL.createObjectURL(blob);
-  // const link = document.createElement("a");
-  // link.href = url;
-  // //* CONSTRUCT FILENAME FROM HOSTNAME
-  // link.download = `name_of_report.yaml`;
-  // link.click();
-  // URL.revokeObjectURL(url);
+  const blob = new Blob([yamlString], { type: "text/yaml;charset=utf-8" });
+  const href = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = href;
+  link.download = `${ruleHostname}.yaml`;
+  link.click();
+  URL.revokeObjectURL(href);
 }
 
 function getValues(type, id, description, params) {
@@ -491,7 +438,14 @@ function toggleModifier(type, id, params = []) {
       existingPill.remove();
     }
   } else {
-    payload[type].push({ name: id, params: params });
+    const existingModifier = payload[type].find(
+      (modifier) => modifier.name === id
+    );
+    if (existingModifier) {
+      existingModifier.params = params;
+    } else {
+      payload[type].push({ name: id, params: params });
+    }
     const existingPill = document.getElementById(id);
     if (existingPill === null) {
       createPill(type, id);
