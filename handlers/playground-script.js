@@ -1,5 +1,3 @@
-// TODO: Fix pre/code block styling fix when existing values are present
-
 const modifierContainer = document.getElementById("modifierContainer");
 const modalContainer = document.getElementById("modalContainer");
 const modalBody = document.getElementById("modal-body");
@@ -119,9 +117,9 @@ document.getElementById("inputForm").addEventListener("submit", function (e) {
 });
 
 if (navigator.userAgent.includes("Mac")) {
-  document.getElementById("ninjaKey").innerHTML = "⌘";
+  document.getElementById("ninjaKey").textContent = "⌘";
 } else {
-  document.getElementById("ninjaKey").innerHTML = "Ctrl";
+  document.getElementById("ninjaKey").textContent = "Ctrl";
 }
 
 function downloadYaml() {
@@ -175,7 +173,6 @@ function getValues(type, id, description, params) {
     modalContent.classList.remove("relative", "h-[220px]");
     inputEventListeners.length = 0;
     inputs.length = 0;
-    // values = [];
     modalContainer.classList.add("hidden");
     modalContent.innerHTML = "";
   }
@@ -199,8 +196,8 @@ function getValues(type, id, description, params) {
     }
   }
 
-  document.getElementById("modal-title").innerHTML = id;
-  document.getElementById("modal-description").innerHTML = description;
+  document.getElementById("modal-title").textContent = id;
+  document.getElementById("modal-description").textContent = description;
 
   existingValues =
     payload[type].find(
@@ -252,7 +249,7 @@ function getValues(type, id, description, params) {
     }
 
     const label = document.createElement("label");
-    label.innerHTML = param.name;
+    label.textContent = param.name;
     label.setAttribute("for", `input-${i}`);
     let input;
     if (param.name === "js") {
@@ -358,9 +355,12 @@ function getValues(type, id, description, params) {
         "overflow-auto",
         "hyphens-none"
       );
-      codeElement.textContent = input.value;
       preElement.appendChild(codeElement);
       modalContent.appendChild(preElement);
+      codeElement.innerHTML = input.value
+        .replace(new RegExp("&", "g"), "&amp;")
+        .replace(new RegExp("<", "g"), "&lt;");
+      Prism.highlightElement(codeElement);
       input.addEventListener("input", textareaEventListener);
       input.addEventListener("keydown", textareaKeyEventListener);
       input.addEventListener("scroll", () => syncScroll(input));
