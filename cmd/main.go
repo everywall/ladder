@@ -6,10 +6,11 @@ import (
 	"log"
 	"os"
 
-	"ladder/handlers"
-	"ladder/internal/cli"
-	"ladder/proxychain/requestmodifiers/bot"
-	ruleset_v2 "ladder/proxychain/ruleset"
+	"github.com/everywall/ladder/handlers"
+	"github.com/everywall/ladder/internal/cli"
+
+	"github.com/everywall/ladder/proxychain/requestmodifiers/bot"
+	ruleset_v2 "github.com/everywall/ladder/proxychain/ruleset"
 
 	"github.com/akamensky/argparse"
 	"github.com/gofiber/fiber/v2"

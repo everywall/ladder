@@ -15,3 +15,22 @@ rules:
     requestmodifications:
     - name: ForwardRequestHeaders
       params: []
+
+  - domains:
+    - quantamagzine.org
+    responsemodifications:
+    - name: BlockElementRemoval
+      params:
+      - "#postContent"
+
+  - domains:
+    - techcrunch.com
+    responsemodifications:
+    - name: ModifyIncomingScriptsWithRegex
+      params:
+      - "window\\.location"
+      - |
+        {origin: "techcrunch.com"} 
+    - name: BlockElementRemoval
+      params:
+      - ".article-content"

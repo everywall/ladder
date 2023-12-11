@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 func ModifyPathWithRegex(matchRegex string, replacement string) proxychain.RequestModification {

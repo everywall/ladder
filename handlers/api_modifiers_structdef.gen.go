@@ -5,7 +5,7 @@ package handlers
 // for use in proxychains.
 
 import (
-	"ladder/proxychain/responsemodifiers/api"
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
 )
 
 type ModifiersAPIResponse struct {
@@ -160,7 +160,7 @@ var AllMods Modifiers = Modifiers{
   Description: "DeleteOutGoingCookiesExcept prevents non-whitelisted cookies from being sent from the client to the upstream proxy server. Cookies whose names are in the whitelist are not removed.",
   CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
-    {Name: "whitelist", Type: "&{Ellipsis:12348 Elt:string}"},
+    {Name: "whitelist", Type: "&{Ellipsis:12476 Elt:string}"},
   },
 },
 {
@@ -485,7 +485,7 @@ var AllMods Modifiers = Modifiers{
   Description: "DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server back down to the client.",
   CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
-    {Name: "_", Type: "&{Ellipsis:16319 Elt:string}"},
+    {Name: "_", Type: "&{Ellipsis:18780 Elt:string}"},
   },
 },
 {
@@ -493,7 +493,7 @@ var AllMods Modifiers = Modifiers{
   Description: "DeleteIncomingCookiesExcept prevents non-whitelisted cookies from being sent from the proxy server to the client. Cookies whose names are in the whitelist are not removed.",
   CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
-    {Name: "whitelist", Type: "&{Ellipsis:16864 Elt:string}"},
+    {Name: "whitelist", Type: "&{Ellipsis:19325 Elt:string}"},
   },
 },
 {
@@ -511,6 +511,15 @@ var AllMods Modifiers = Modifiers{
   Params: []Param{
     {Name: "name", Type: "string"},
     {Name: "val", Type: "string"},
+  },
+},
+{
+  Name:        "ModifyIncomingScriptsWithRegex",
+  Description: "ModifyIncomingScriptsWithRegex modifies all incoming javascript (application/javascript and inline <script> in text/html) using a regex match and replacement.",
+  CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_scripts_with_regex.go",
+  Params: []Param{
+    {Name: "matchRegex", Type: "string"},
+    {Name: "replacement", Type: "string"},
   },
 },
 {

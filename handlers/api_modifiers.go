@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
 	"github.com/gofiber/fiber/v2"
-	"ladder/proxychain/responsemodifiers/api"
 )
 
 func NewAPIModifersListHandler(opts *ProxyOptions) fiber.Handler {

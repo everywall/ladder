@@ -1,0 +1,23 @@
+- domains:
+  - demorgen.be
+
+  requestmodifiers:
+    - name: MasqueradeAsGoogleBot
+
+    - name: SpoofReferrer
+      params: ["https://news.google.com"]
+
+    - name: SetOutgoingCookie
+      params: ["isBot", "true"]
+
+    - name: SetOutgoingCookie
+      params: ["authId", "1"]
+
+  responsemodifiers:
+    - name: BypassContentSecurityPolicy
+    - name: InjectScriptAfterDOMContentLoaded
+      params:
+        - | 
+            let paywall = document.querySelectorAll('script[src*="advertising-cdn.dpgmedia.cloud"], div[data-temptation-position="ARTICLE_BOTTOM"]');
+            paywall.forEach(el => { el.remove(); });
+            document.querySelector('div[data-advert-placeholder-collapses]').remove();

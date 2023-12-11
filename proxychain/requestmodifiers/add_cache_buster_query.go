@@ -1,8 +1,9 @@
 package requestmodifiers
 
 import (
-	"ladder/proxychain"
 	"math/rand"
+
+	"github.com/everywall/ladder/proxychain"
 )
 
 // AddCacheBusterQuery modifies query params to add a random parameter key

@@ -1,7 +1,7 @@
 package responsemodifiers
 
 import (
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // TODO: handle edge case where CSP is specified in meta tag:

@@ -7,7 +7,7 @@ import (
 	//"net/http"
 	//http "github.com/Danny-Dasilva/fhttp"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server

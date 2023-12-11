@@ -5,8 +5,8 @@ package ruleset_v2
 // for use in proxychains.
 
 import (
-	"ladder/proxychain"
-	tx "ladder/proxychain/responsemodifiers"
+	"github.com/everywall/ladder/proxychain"
+	tx "github.com/everywall/ladder/proxychain/responsemodifiers"
 )
 
 type ResponseModifierFactory func(params ...string) proxychain.ResponseModification
@@ -82,6 +82,10 @@ func init() {
 
   rsmModMap["SetIncomingCookie"] = func(params ...string) proxychain.ResponseModification {
     return tx.SetIncomingCookie(params[0], params[1])
+  }
+
+  rsmModMap["ModifyIncomingScriptsWithRegex"] = func(params ...string) proxychain.ResponseModification {
+    return tx.ModifyIncomingScriptsWithRegex(params[0], params[1])
   }
 
   rsmModMap["SetResponseHeader"] = func(params ...string) proxychain.ResponseModification {

@@ -1,7 +1,7 @@
 package requestmodifiers
 
 import (
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SpoofReferrerFromTwitterPost modifies the referrer header

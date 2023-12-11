@@ -1,7 +1,7 @@
 package responsemodifiers
 
 import (
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 // SetResponseHeader modifies response headers from the upstream server

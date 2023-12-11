@@ -46,7 +46,7 @@
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               viewBox="0 0 512 512"
-              class="h-8 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+              class="noprint h-8 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
             >
               <path
                 fill="#7AA7D1"
@@ -68,7 +68,7 @@
 
         </div>
 
-        <div class="flex justify-center z-10">
+        <div class="noprint flex justify-center z-10">
           <div class="relative" id="dropdown">
             <button
               aria-expanded="false"
@@ -93,6 +93,15 @@
                 />
                 <circle cx="12" cy="12" r="3" />
               </svg>
+            </button>
+
+            <button
+              aria-expanded="closed"
+              onclick="document.getElementById('readingtime').innerText = 'Date Accessed: '+(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })); [...document.querySelectorAll('.noprint')].forEach(e => e.remove()); window.print()"
+              type="button"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="16" width="16" viewBox="0 0 512 512"><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg>
             </button>
 
             <div
@@ -329,6 +338,7 @@
           {{.Error}}
         </code>
         {{else}}
+
         <div class="flex flex-col gap-1 mt-3">
           <h1>
             <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200 no-underline hover:underline"> {{.Title}} </a>
@@ -347,6 +357,27 @@
           {{end}}
         </div>
 
+        <h2>
+          <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200"> {{.Title}} </a>
+        </h2>
+
+        <div class="flex justify-between items-center gap-1 mt-3">
+
+
+          <div>
+            {{if ne .Author ""}}
+            <small class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">{{.Author}} | </small>
+            {{end}}
+
+            {{if ne .Date ""}}
+            <small class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">{{.Date}}</small>
+            {{end}}
+          </div>
+
+          <div>
+            <small id="readingtime" class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">Reading Time: {{.ReadingTime}}</small>
+          </div>
+        </div>
         <div class="flex flex-col space-y-3">
           <div>
             <div class="grid grid-cols-1 justify-items-center">
@@ -360,21 +391,22 @@
       </main>
 
       <div class="my-2"></div>
-      <footer class="mx-4 text-center text-slate-600 dark:text-slate-400">
-        <p>
-          Code Licensed Under GPL v3.0 |
-          <a
-            href="https://github.com/everywall/ladder"
-            class="hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
-            >View Source</a
-          >
-          |
+      <footer class="noprint mx-4 my-2 pt-2 border-t border-gray-300 dark:border-gray-700 text-center text-slate-600 dark:text-slate-400">
+
+        <small>
           <a
             href="https://github.com/everywall"
             class="hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
             >Everywall</a
           >
-        </p>
+          |
+          <a
+            href="https://github.com/everywall/ladder"
+            class="hover:text-blue-500 dark:hover:text-blue-500 hover:underline underline-offset-2 transition-colors duration-300"
+            >Source</a
+          >
+          | Code Licensed Under GPL v3.0
+        </small>
       </footer>
       <div class="my-2"></div>
     </div>

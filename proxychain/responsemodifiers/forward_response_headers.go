@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"ladder/proxychain"
+	"github.com/everywall/ladder/proxychain"
 )
 
 var forwardBlacklist map[string]bool

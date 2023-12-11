@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"ladder/proxychain/ruleset"
+	ruleset_v2 "github.com/everywall/ladder/proxychain/ruleset"
 )
 
 // HandleRulesetMerge merges a set of ruleset files, specified by the rulesetPath or RULESET env variable, into either YAML or Gzip format.
