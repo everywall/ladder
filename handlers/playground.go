@@ -2,8 +2,9 @@ package handlers
 
 import (
 	_ "embed"
-	"ladder/proxychain"
-	ruleset_v2 "ladder/proxychain/ruleset"
+
+	"github.com/everywall/ladder/proxychain"
+	ruleset_v2 "github.com/everywall/ladder/proxychain/ruleset"
 
 	"net/http"
 
