@@ -111,11 +111,13 @@ function trap(node) {
 
 const toggleDropdown = () => {
   const dropdown = document.getElementById("dropdown");
+  const dropdown_button = dropdown.querySelector("button");
   const dropdown_panel = document.getElementById("dropdown_panel");
   const focusTrap = trap(dropdown);
 
   const closeDropdown = () => {
     dropdown_panel.classList.add("hidden");
+    dropdown_button.setAttribute("aria-expanded", "false");
     focusTrap.destroy();
     dropdown.removeEventListener("keydown", handleEscapeKey);
     document.removeEventListener("click", handleClickOutside);
@@ -175,6 +177,7 @@ const toggleDropdown = () => {
 
   if (dropdown_panel.classList.contains("hidden")) {
     dropdown_panel.classList.remove("hidden");
+    dropdown_button.setAttribute("aria-expanded", "true");
     dropdown.addEventListener("keydown", handleEscapeKey);
     inputs.forEach((input) => {
       input.addEventListener("change", handleInputChange);
