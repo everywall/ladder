@@ -23,6 +23,26 @@
         }
       };
       handleThemeChange();
+      function prepareForPrint() {
+        document.getElementById("readingtime").innerText =
+          "Date Accessed: " +
+          new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        [...document.querySelectorAll(".noprint")].forEach((e) =>
+          e.classList.toggle("hidden")
+        );
+        window.addEventListener("afterprint", handleAfterPrint);
+        window.print();
+      }
+      function handleAfterPrint() {
+        [...document.querySelectorAll(".noprint")].forEach((e) =>
+          e.classList.toggle("hidden")
+        );
+        window.removeEventListener("afterprint", handleAfterPrint);
+      }
     </script>
     <title>ladder | {{.Title}}</title>
   </head>
@@ -35,37 +55,37 @@
         <div
           class="hover:drop-shadow-[0_0px_4px_rgba(122,167,209,.3)] transition-colors duration-300 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
         >
-
-        <div class="flex">
-          <a
-            href="/"
-            aria-label="ladder"
-            class="flex -ml-2 h-8 font-extrabold tracking-tight no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 512 512"
-              class="noprint h-8 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+          <div class="flex">
+            <a
+              href="/"
+              aria-label="ladder"
+              class="flex -ml-2 h-8 font-extrabold tracking-tight no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
             >
-              <path
-                fill="#7AA7D1"
-                d="M262.074 485.246C254.809 485.265 247.407 485.534 240.165 484.99L226.178 483.306C119.737 468.826 34.1354 383.43 25.3176 274.714C24.3655 262.975 23.5876 253.161 24.3295 241.148C31.4284 126.212 123.985 31.919 238.633 24.1259L250.022 23.8366C258.02 23.8001 266.212 23.491 274.183 24.1306C320.519 27.8489 366.348 45.9743 402.232 75.4548L416.996 88.2751C444.342 114.373 464.257 146.819 475.911 182.72L480.415 197.211C486.174 219.054 488.67 242.773 487.436 265.259L486.416 275.75C478.783 352.041 436.405 418.1 369.36 455.394L355.463 462.875C326.247 477.031 294.517 484.631 262.074 485.246ZM253.547 72.4475C161.905 73.0454 83.5901 144.289 73.0095 234.5C69.9101 260.926 74.7763 292.594 83.9003 317.156C104.53 372.691 153.9 416.616 211.281 430.903C226.663 434.733 242.223 436.307 258.044 436.227C353.394 435.507 430.296 361.835 438.445 267.978C439.794 252.442 438.591 236.759 435.59 221.5C419.554 139.955 353.067 79.4187 269.856 72.7052C264.479 72.2714 258.981 72.423 253.586 72.4127L253.547 72.4475Z"
-              />
-              <path
-                fill="#7AA7D1"
-                d="M153.196 310.121L133.153 285.021C140.83 283.798 148.978 285.092 156.741 284.353L156.637 277.725L124.406 278.002C123.298 277.325 122.856 276.187 122.058 275.193L116.089 267.862C110.469 260.975 103.827 254.843 98.6026 247.669C103.918 246.839 105.248 246.537 111.14 246.523L129.093 246.327C130.152 238.785 128.62 240.843 122.138 240.758C111.929 240.623 110.659 242.014 105.004 234.661L97.9953 225.654C94.8172 221.729 91.2219 218.104 88.2631 214.005C84.1351 208.286 90.1658 209.504 94.601 209.489L236.752 209.545C257.761 209.569 268.184 211.009 285.766 221.678L285.835 206.051C285.837 197.542 286.201 189.141 284.549 180.748C280.22 158.757 260.541 143.877 240.897 135.739C238.055 134.561 232.259 133.654 235.575 129.851C244.784 119.288 263.680 111.990 277.085 111.105C288.697 109.828 301.096 113.537 311.75 117.703C360.649 136.827 393.225 183.042 398.561 234.866C402.204 270.253 391.733 308.356 367.999 335.1C332.832 374.727 269.877 384.883 223.294 360.397C206.156 351.388 183.673 333.299 175.08 316.6C173.511 313.551 174.005 313.555 170.443 313.52L160.641 313.449C158.957 313.435 156.263 314.031 155.122 312.487L153.196 310.121Z"
-              />
-            </svg>
-          </a>
-          <a
-            href="/https://{{.Hostname}}"
-            class="flex ml-1 h-8 font-extrabold tracking-tight no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 512 512"
+                class="noprint h-8 focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
+              >
+                <path
+                  fill="#7AA7D1"
+                  d="M262.074 485.246C254.809 485.265 247.407 485.534 240.165 484.99L226.178 483.306C119.737 468.826 34.1354 383.43 25.3176 274.714C24.3655 262.975 23.5876 253.161 24.3295 241.148C31.4284 126.212 123.985 31.919 238.633 24.1259L250.022 23.8366C258.02 23.8001 266.212 23.491 274.183 24.1306C320.519 27.8489 366.348 45.9743 402.232 75.4548L416.996 88.2751C444.342 114.373 464.257 146.819 475.911 182.72L480.415 197.211C486.174 219.054 488.67 242.773 487.436 265.259L486.416 275.75C478.783 352.041 436.405 418.1 369.36 455.394L355.463 462.875C326.247 477.031 294.517 484.631 262.074 485.246ZM253.547 72.4475C161.905 73.0454 83.5901 144.289 73.0095 234.5C69.9101 260.926 74.7763 292.594 83.9003 317.156C104.53 372.691 153.9 416.616 211.281 430.903C226.663 434.733 242.223 436.307 258.044 436.227C353.394 435.507 430.296 361.835 438.445 267.978C439.794 252.442 438.591 236.759 435.59 221.5C419.554 139.955 353.067 79.4187 269.856 72.7052C264.479 72.2714 258.981 72.423 253.586 72.4127L253.547 72.4475Z"
+                />
+                <path
+                  fill="#7AA7D1"
+                  d="M153.196 310.121L133.153 285.021C140.83 283.798 148.978 285.092 156.741 284.353L156.637 277.725L124.406 278.002C123.298 277.325 122.856 276.187 122.058 275.193L116.089 267.862C110.469 260.975 103.827 254.843 98.6026 247.669C103.918 246.839 105.248 246.537 111.14 246.523L129.093 246.327C130.152 238.785 128.62 240.843 122.138 240.758C111.929 240.623 110.659 242.014 105.004 234.661L97.9953 225.654C94.8172 221.729 91.2219 218.104 88.2631 214.005C84.1351 208.286 90.1658 209.504 94.601 209.489L236.752 209.545C257.761 209.569 268.184 211.009 285.766 221.678L285.835 206.051C285.837 197.542 286.201 189.141 284.549 180.748C280.22 158.757 260.541 143.877 240.897 135.739C238.055 134.561 232.259 133.654 235.575 129.851C244.784 119.288 263.680 111.990 277.085 111.105C288.697 109.828 301.096 113.537 311.75 117.703C360.649 136.827 393.225 183.042 398.561 234.866C402.204 270.253 391.733 308.356 367.999 335.1C332.832 374.727 269.877 384.883 223.294 360.397C206.156 351.388 183.673 333.299 175.08 316.6C173.511 313.551 174.005 313.555 170.443 313.52L160.641 313.449C158.957 313.435 156.263 314.031 155.122 312.487L153.196 310.121Z"
+                />
+              </svg>
+            </a>
+            <a
+              href="/https://{{.Hostname}}"
+              class="flex ml-1 h-8 font-extrabold tracking-tight no-underline focus:outline-none focus:ring focus:border-[#7AA7D1] ring-offset-2"
             >
-            <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle">{{.Sitename}}</span>
-          </a>
-        </div>
-
+              <span class="text-3xl mr-1 text-[#7AA7D1] leading-8 align-middle"
+                >{{.Sitename}}</span
+              >
+            </a>
+          </div>
         </div>
 
         <div class="noprint flex justify-center z-10">
@@ -73,10 +93,10 @@
             <button
               aria-expanded="false"
               id="dropdownButton"
-              aria-label="Toggle dropdown menu"
+              aria-label="Toggle preferences menu"
               onclick="toggleDropdown()"
               type="button"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
+              class="inline-flex items-center justify-center align-middle whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -96,12 +116,22 @@
             </button>
 
             <button
-              aria-expanded="closed"
-              onclick="document.getElementById('readingtime').innerText = 'Date Accessed: '+(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })); [...document.querySelectorAll('.noprint')].forEach(e => e.remove()); window.print()"
+              aria-expanded="false"
+              title="Print"
+              onclick="prepareForPrint()"
               type="button"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
+              class="inline-flex items-center justify-center align-middle whitespace-nowrap rounded-full h-12 px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-500 dark:hover:text-slate-200"
             >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="16" width="16" viewBox="0 0 512 512"><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 512 512"
+                class="h-4 w-4"
+              >
+                <path
+                  d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"
+                />
+              </svg>
             </button>
 
             <div
@@ -327,29 +357,29 @@
 
       <main class="flex flex-col space-y-3">
         {{if not .Success}}
-        <h1>
-          Error
-        </h1>
+        <h1>Error</h1>
         <p>
           There was a problem querying
           <a href="{{.Params}}">{{.Params}}</a>
         </p>
-        <code class="text-red-500 dark:text-red-400">
-          {{.Error}}
-        </code>
+        <code class="text-red-500 dark:text-red-400"> {{.Error}} </code>
         {{else}}
 
         <div class="flex flex-col gap-1 mt-3">
           <h1>
-            <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200 no-underline hover:underline"> {{.Title}} </a>
+            <a
+              href="{{.Url}}"
+              class="text-slate-900 dark:text-slate-200 no-underline hover:underline"
+            >
+              {{.Title}}
+            </a>
           </h1>
           {{if ne .Date ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
             >{{.Date}}</small
           >
-          {{end}} 
-          {{if ne .Author ""}}
+          {{end}} {{if ne .Author ""}}
           <small
             class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
             >{{.Author}}</small
@@ -358,31 +388,49 @@
         </div>
 
         <h2>
-          <a href="{{.Url}}" class="text-slate-900 dark:text-slate-200"> {{.Title}} </a>
+          <a
+            href="{{.Url}}"
+            class="text-slate-900 dark:text-slate-200 no-underline hover:underline"
+          >
+            {{.Title}}
+          </a>
         </h2>
 
         <div class="flex justify-between items-center gap-1 mt-3">
-
-
           <div>
             {{if ne .Author ""}}
-            <small class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">{{.Author}} | </small>
-            {{end}}
-
-            {{if ne .Date ""}}
-            <small class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">{{.Date}}</small>
+            <small
+              class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
+              >{{.Author}} |
+            </small>
+            {{end}} {{if ne .Date ""}}
+            <small
+              class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
+              >{{.Date}}</small
+            >
             {{end}}
           </div>
 
           <div>
-            <small id="readingtime" class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400">Reading Time: {{.ReadingTime}}</small>
+            <small
+              id="readingtime"
+              class="text-sm font-medium leading-none text-slate-600 dark:text-slate-400"
+              >Reading Time: {{.ReadingTime}}</small
+            >
           </div>
         </div>
         <div class="flex flex-col space-y-3">
-          <div>
-            <div class="grid grid-cols-1 justify-items-center">
-            <div><img src="{{.Image}}" alt="{{.Description}}" class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"/></div>
-            <div class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{.Description}}</div>
+          <div class="grid grid-cols-1 justify-items-center">
+            <div>
+              <img
+                src="{{.Image}}"
+                alt="{{.Description}}"
+                class="h-auto w-auto object-cover max-w-full mx-auto rounded-md shadow-md dark:shadow-slate-700"
+              />
+            </div>
+            <div class="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {{.Description}}
+            </div>
           </div>
         </div>
 
@@ -390,9 +438,9 @@
         {{end}}
       </main>
 
-      <div class="my-2"></div>
-      <footer class="noprint mx-4 my-2 pt-2 border-t border-gray-300 dark:border-gray-700 text-center text-slate-600 dark:text-slate-400">
-
+      <footer
+        class="noprint mx-4 my-2 pt-2 border-t border-gray-300 dark:border-gray-700 text-center text-slate-600 dark:text-slate-400"
+      >
         <small>
           <a
             href="https://github.com/everywall"
@@ -408,8 +456,6 @@
           | Code Licensed Under GPL v3.0
         </small>
       </footer>
-      <div class="my-2"></div>
     </div>
-
   </body>
 </html>
