@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
 	"html/template"
@@ -26,7 +25,7 @@ func RenderErrorPage() fiber.Handler {
 				tmpl.Execute(c.Response().BodyWriter(), err.Error())
 				return nil
 			}
-			return c.SendStream(bytes.NewBufferString(err.Error()))
+			return c.SendString(err.Error())
 		}
 		return err
 	}
