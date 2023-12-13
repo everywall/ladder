@@ -36,7 +36,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "AddCacheBusterQuery",
   Description: "AddCacheBusterQuery modifies query params to add a random parameter key In order to get the upstream network stack to serve a fresh copy of the page.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/add_cache_buster_query.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/add_cache_buster_query.go",
   Params: []Param{
 
   },
@@ -44,7 +44,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ForwardRequestHeaders",
   Description: "ForwardRequestHeaders forwards the requests headers sent from the client to the upstream server",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/forward_request_headers.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/forward_request_headers.go",
   Params: []Param{
 
   },
@@ -52,7 +52,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsGoogleBot",
   Description: "MasqueradeAsGoogleBot modifies user agent and x-forwarded for to appear to be a Google Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -60,7 +60,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsBingBot",
   Description: "MasqueradeAsBingBot modifies user agent and x-forwarded for to appear to be a Bing Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -68,7 +68,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsWaybackMachineBot",
   Description: "MasqueradeAsWaybackMachineBot modifies user agent and x-forwarded for to appear to be a archive.org (wayback machine) Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -76,7 +76,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsFacebookBot",
   Description: "MasqueradeAsFacebookBot modifies user agent and x-forwarded for to appear to be a Facebook Bot (link previews?)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -84,7 +84,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsYandexBot",
   Description: "MasqueradeAsYandexBot modifies user agent and x-forwarded for to appear to be a Yandex Spider Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -92,7 +92,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsBaiduBot",
   Description: "MasqueradeAsBaiduBot modifies user agent and x-forwarded for to appear to be a Baidu Spider Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -100,7 +100,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsDuckDuckBot",
   Description: "MasqueradeAsDuckDuckBot modifies user agent and x-forwarded for to appear to be a DuckDuckGo Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -108,7 +108,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "MasqueradeAsYahooBot",
   Description: "MasqueradeAsYahooBot modifies user agent and x-forwarded for to appear to be a Yahoo Bot",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/masquerade_as_trusted_bot.go",
   Params: []Param{
 
   },
@@ -116,7 +116,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ModifyDomainWithRegex",
   Description: "",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_domain_with_regex.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_domain_with_regex.go",
   Params: []Param{
     {Name: "matchRegex", Type: "string"},
     {Name: "replacement", Type: "string"},
@@ -125,7 +125,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetOutgoingCookie",
   Description: "SetOutgoingCookie modifes a specific cookie name by modifying the request cookie headers going to the upstream server. If the cookie name does not already exist, it is created.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
     {Name: "name", Type: "string"},
     {Name: "val", Type: "string"},
@@ -134,7 +134,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetOutgoingCookies",
   Description: "SetOutgoingCookies modifies a client request's cookie header to a raw Cookie string, overwriting existing cookies",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
     {Name: "cookies", Type: "string"},
   },
@@ -142,7 +142,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteOutgoingCookie",
   Description: "DeleteOutgoingCookie modifies the http request's cookies header to delete a specific request cookie going to the upstream server. If the cookie does not exist, it does not do anything.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
     {Name: "name", Type: "string"},
   },
@@ -150,7 +150,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteOutgoingCookies",
   Description: "DeleteOutgoingCookies removes the cookie header entirely, preventing any cookies from reaching the upstream server.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
 
   },
@@ -158,7 +158,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteOutgoingCookiesExcept",
   Description: "DeleteOutGoingCookiesExcept prevents non-whitelisted cookies from being sent from the client to the upstream proxy server. Cookies whose names are in the whitelist are not removed.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_outgoing_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_outgoing_cookies.go",
   Params: []Param{
     {Name: "whitelist", Type: "&{Ellipsis:12476 Elt:string}"},
   },
@@ -166,7 +166,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ModifyPathWithRegex",
   Description: "",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_path_with_regex.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_path_with_regex.go",
   Params: []Param{
     {Name: "matchRegex", Type: "string"},
     {Name: "replacement", Type: "string"},
@@ -175,7 +175,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ModifyQueryParams",
   Description: "ModifyQueryParams replaces query parameter values in URL's query params in a ProxyChain's URL. If the query param key doesn't exist, it is created.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_query_params.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_query_params.go",
   Params: []Param{
     {Name: "key", Type: "string"},
     {Name: "value", Type: "string"},
@@ -184,7 +184,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetRequestHeader",
   Description: "SetRequestHeader modifies a specific outgoing header This is the header that the upstream server will see.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_request_headers.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_request_headers.go",
   Params: []Param{
     {Name: "name", Type: "string"},
     {Name: "val", Type: "string"},
@@ -193,7 +193,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteRequestHeader",
   Description: "DeleteRequestHeader modifies a specific outgoing header This is the header that the upstream server will see.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/modify_request_headers.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/modify_request_headers.go",
   Params: []Param{
     {Name: "name", Type: "string"},
   },
@@ -201,7 +201,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "RequestArchiveIs",
   Description: "RequestArchiveIs modifies a ProxyChain's URL to request an archived version from archive.is",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/request_archive_is.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/request_archive_is.go",
   Params: []Param{
 
   },
@@ -209,7 +209,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "RequestGoogleCache",
   Description: "RequestGoogleCache modifies a ProxyChain's URL to request its Google Cache version.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/request_google_cache.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/request_google_cache.go",
   Params: []Param{
 
   },
@@ -217,7 +217,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "RequestWaybackMachine",
   Description: "RequestWaybackMachine modifies a ProxyChain's URL to request the wayback machine (archive.org) version.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/request_wayback_machine.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/request_wayback_machine.go",
   Params: []Param{
 
   },
@@ -225,7 +225,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ResolveWithGoogleDoH",
   Description: "ResolveWithGoogleDoH modifies a ProxyChain's client to make the request by resolving the URL using Google's DNS over HTTPs service",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/resolve_with_google_doh.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/resolve_with_google_doh.go",
   Params: []Param{
 
   },
@@ -233,7 +233,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofOrigin",
   Description: "SpoofOrigin modifies the origin header if the upstream server returns a Vary header it means you might get a different response if you change this",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_origin.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_origin.go",
   Params: []Param{
     {Name: "url", Type: "string"},
   },
@@ -241,7 +241,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "HideOrigin",
   Description: "HideOrigin modifies the origin header so that it is the original origin, not the proxy",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_origin.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_origin.go",
   Params: []Param{
 
   },
@@ -249,7 +249,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrer",
   Description: "SpoofReferrer modifies the referrer header. It is useful if the page can be accessed from a search engine or social media site, but not by browsing the website itself. if url is \"\", then the referrer header is removed.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer.go",
   Params: []Param{
     {Name: "url", Type: "string"},
   },
@@ -257,7 +257,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "HideReferrer",
   Description: "HideReferrer modifies the referrer header so that it is the original referrer, not the proxy",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer.go",
   Params: []Param{
 
   },
@@ -265,7 +265,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromBaiduSearch",
   Description: "SpoofReferrerFromBaiduSearch modifies the referrer header pretending to be from a BaiduSearch",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_baidu_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_baidu_post.go",
   Params: []Param{
 
   },
@@ -273,7 +273,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromBingSearch",
   Description: "SpoofReferrerFromBingSearch modifies the referrer header pretending to be from a bing search site",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_bing_search.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_bing_search.go",
   Params: []Param{
 
   },
@@ -281,7 +281,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromGoogleSearch",
   Description: "SpoofReferrerFromGoogleSearch modifies the referrer header pretending to be from a google search site",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_google_search.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_google_search.go",
   Params: []Param{
 
   },
@@ -289,7 +289,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromLinkedInPost",
   Description: "SpoofReferrerFromLinkedInPost modifies the referrer header pretending to be from a linkedin post",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_linkedin_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_linkedin_post.go",
   Params: []Param{
 
   },
@@ -297,7 +297,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromNaverSearch",
   Description: "SpoofReferrerFromNaverSearch modifies the referrer header pretending to be from a Naver search (popular in South Korea)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_naver_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_naver_post.go",
   Params: []Param{
 
   },
@@ -305,7 +305,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromPinterestPost",
   Description: "SpoofReferrerFromPinterestPost modifies the referrer header pretending to be from a pinterest post",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_pinterest_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_pinterest_post.go",
   Params: []Param{
 
   },
@@ -313,7 +313,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromQQPost",
   Description: "SpoofReferrerFromQQPost modifies the referrer header pretending to be from a QQ post (popular social media in China)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_qq_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_qq_post.go",
   Params: []Param{
 
   },
@@ -321,7 +321,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromRedditPost",
   Description: "SpoofReferrerFromRedditPost modifies the referrer header pretending to be from a reddit post",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_reddit_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_reddit_post.go",
   Params: []Param{
 
   },
@@ -329,7 +329,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromTumblrPost",
   Description: "SpoofReferrerFromTumblrPost modifies the referrer header pretending to be from a tumblr post",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_tumblr_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_tumblr_post.go",
   Params: []Param{
 
   },
@@ -337,7 +337,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromTwitterPost",
   Description: "SpoofReferrerFromTwitterPost modifies the referrer header pretending to be from a twitter post",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_twitter_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_twitter_post.go",
   Params: []Param{
 
   },
@@ -345,7 +345,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromVkontaktePost",
   Description: "SpoofReferrerFromVkontaktePost modifies the referrer header pretending to be from a vkontakte post (popular in Russia)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_vkontake_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_vkontake_post.go",
   Params: []Param{
 
   },
@@ -353,7 +353,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofReferrerFromWeiboPost",
   Description: "SpoofReferrerFromWeiboPost modifies the referrer header pretending to be from a Weibo post (popular in China)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_referrer_from_weibo_post.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_referrer_from_weibo_post.go",
   Params: []Param{
 
   },
@@ -361,7 +361,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofUserAgent",
   Description: "SpoofUserAgent modifies the user agent",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_user_agent.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_user_agent.go",
   Params: []Param{
     {Name: "ua", Type: "string"},
   },
@@ -369,7 +369,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SpoofXForwardedFor",
   Description: "SpoofXForwardedFor modifies the X-Forwarded-For header in some cases, a forward proxy may interpret this as the source IP",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/requestmodifiers/spoof_x_forwarded_for.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/requestmodifiers/spoof_x_forwarded_for.go",
   Params: []Param{
     {Name: "ip", Type: "string"},
   },
@@ -379,7 +379,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "APIContent",
   Description: "APIContent creates an JSON representation of the article and returns it as an API response.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/api_content.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/api_content.go",
   Params: []Param{
 
   },
@@ -387,7 +387,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "BlockElementRemoval",
   Description: "BlockElementRemoval prevents paywall javascript from removing a particular element by detecting the removal, then immediately reinserting it. This is useful when a page will return a \"fake\" 404, after flashing the content briefly. If the /outline/ API works, but the regular API doesn't, try this modifier.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/block_element_removal.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/block_element_removal.go",
   Params: []Param{
     {Name: "cssSelector", Type: "string"},
   },
@@ -395,7 +395,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "BlockThirdPartyScripts",
   Description: "BlockThirdPartyScripts rewrites HTML and injects JS to block all third party JS from loading.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/block_third_party_scripts.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/block_third_party_scripts.go",
   Params: []Param{
 
   },
@@ -403,7 +403,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "BypassCORS",
   Description: "BypassCORS modifies response headers to prevent the browser from enforcing any CORS restrictions. This should run at the end of the chain.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/bypass_cors.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/bypass_cors.go",
   Params: []Param{
 
   },
@@ -411,7 +411,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "BypassContentSecurityPolicy",
   Description: "BypassContentSecurityPolicy modifies response headers to prevent the browser from enforcing any CSP restrictions. This should run at the end of the chain.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/bypass_csp.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/bypass_csp.go",
   Params: []Param{
 
   },
@@ -419,7 +419,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetContentSecurityPolicy",
   Description: "SetContentSecurityPolicy modifies response headers to a specific CSP",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/bypass_csp.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/bypass_csp.go",
   Params: []Param{
     {Name: "csp", Type: "string"},
   },
@@ -427,7 +427,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteLocalStorageData",
   Description: "DeleteLocalStorageData deletes localstorage cookies. If the page works once in a fresh incognito window, but fails for subsequent loads, try this response modifier alongside DeleteSessionStorageData and DeleteIncomingCookies",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/delete_localstorage_data.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/delete_localstorage_data.go",
   Params: []Param{
 
   },
@@ -435,7 +435,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteSessionStorageData",
   Description: "DeleteSessionStorageData deletes localstorage cookies. If the page works once in a fresh incognito window, but fails for subsequent loads, try this response modifier alongside DeleteLocalStorageData and DeleteIncomingCookies",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/delete_sessionstorage_data.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/delete_sessionstorage_data.go",
   Params: []Param{
 
   },
@@ -443,7 +443,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ForwardResponseHeaders",
   Description: "ForwardResponseHeaders forwards the response headers from the upstream server to the client",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/forward_response_headers.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/forward_response_headers.go",
   Params: []Param{
 
   },
@@ -451,7 +451,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "GenerateReadableOutline",
   Description: "GenerateReadableOutline creates an reader-friendly distilled representation of the article. This is a reliable way of bypassing soft-paywalled articles, where the content is hidden, but still present in the DOM.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/generate_readable_outline.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/generate_readable_outline.go",
   Params: []Param{
 
   },
@@ -459,7 +459,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "InjectScriptBeforeDOMContentLoaded",
   Description: "InjectScriptBeforeDOMContentLoaded modifies HTTP responses to inject a JS before DOM Content is loaded (script tag in head)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/inject_script.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/inject_script.go",
   Params: []Param{
     {Name: "js", Type: "string"},
   },
@@ -467,7 +467,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "InjectScriptAfterDOMContentLoaded",
   Description: "InjectScriptAfterDOMContentLoaded modifies HTTP responses to inject a JS after DOM Content is loaded (script tag in head)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/inject_script.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/inject_script.go",
   Params: []Param{
     {Name: "js", Type: "string"},
   },
@@ -475,7 +475,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "InjectScriptAfterDOMIdle",
   Description: "InjectScriptAfterDOMIdle modifies HTTP responses to inject a JS after the DOM is idle (ie: js framework loaded)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/inject_script.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/inject_script.go",
   Params: []Param{
     {Name: "js", Type: "string"},
   },
@@ -483,7 +483,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteIncomingCookies",
   Description: "DeleteIncomingCookies prevents ALL cookies from being sent from the proxy server back down to the client.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
     {Name: "_", Type: "&{Ellipsis:18780 Elt:string}"},
   },
@@ -491,7 +491,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteIncomingCookiesExcept",
   Description: "DeleteIncomingCookiesExcept prevents non-whitelisted cookies from being sent from the proxy server to the client. Cookies whose names are in the whitelist are not removed.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
     {Name: "whitelist", Type: "&{Ellipsis:19325 Elt:string}"},
   },
@@ -499,7 +499,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetIncomingCookies",
   Description: "SetIncomingCookies adds a raw cookie string being sent from the proxy server down to the client",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
     {Name: "cookies", Type: "string"},
   },
@@ -507,7 +507,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetIncomingCookie",
   Description: "SetIncomingCookie modifies a specific cookie in the response from the proxy server to the client.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_incoming_cookies.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_cookies.go",
   Params: []Param{
     {Name: "name", Type: "string"},
     {Name: "val", Type: "string"},
@@ -516,7 +516,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "ModifyIncomingScriptsWithRegex",
   Description: "ModifyIncomingScriptsWithRegex modifies all incoming javascript (application/javascript and inline <script> in text/html) using a regex match and replacement.",
-  CodeEditLink: "https://github.com/everywall/ladder/edit/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_scripts_with_regex.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_incoming_scripts_with_regex.go",
   Params: []Param{
     {Name: "matchRegex", Type: "string"},
     {Name: "replacement", Type: "string"},
@@ -525,7 +525,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "SetResponseHeader",
   Description: "SetResponseHeader modifies response headers from the upstream server",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_response_header.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_response_header.go",
   Params: []Param{
     {Name: "key", Type: "string"},
     {Name: "value", Type: "string"},
@@ -534,7 +534,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "DeleteResponseHeader",
   Description: "DeleteResponseHeader removes response headers from the upstream server",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/modify_response_header.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/modify_response_header.go",
   Params: []Param{
     {Name: "key", Type: "string"},
   },
@@ -542,7 +542,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "PatchDynamicResourceURLs",
   Description: "PatchDynamicResourceURLs patches the javascript runtime to rewrite URLs client-side.   - This function is designed to allow the proxified page     to still be browsible by routing all resource URLs through the proxy.   - Native APIs capable of network requests will be hooked     and the URLs arguments modified to point to the proxy instead.   - fetch('/relative_path') -> fetch('/https://proxiedsite.com/relative_path')   - Element.setAttribute('src', \"/assets/img.jpg\") -> Element.setAttribute('src', \"/https://proxiedsite.com/assets/img.jpg\") -> fetch('/https://proxiedsite.com/relative_path')",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/patch_dynamic_resource_urls.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/patch_dynamic_resource_urls.go",
   Params: []Param{
 
   },
@@ -550,7 +550,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "PatchTrackerScripts",
   Description: "PatchTrackerScripts replaces any request to tracker scripts such as google analytics with a no-op stub that mocks the API structure of the original scripts they replace. Some pages depend on the existence of these structures for proper loading, so this may fix some broken elements. Surrogate script code borrowed from: DuckDuckGo Privacy Essentials browser extension for Firefox, Chrome. (Apache 2.0 license)",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/patch_tracker_scripts.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/patch_tracker_scripts.go",
   Params: []Param{
 
   },
@@ -558,7 +558,7 @@ var AllMods Modifiers = Modifiers{
 {
   Name:        "RewriteHTMLResourceURLs",
   Description: "RewriteHTMLResourceURLs modifies HTTP responses to rewrite URLs attributes in HTML content (such as src, href)   - `<img src='/relative_path'>` -> `<img src='/https://proxiedsite.com/relative_path'>`   - This function is designed to allow the proxified page     to still be browsible by routing all resource URLs through the proxy.",
-  CodeEditLink: "https://github.com/joncrangle/ladder.git/edit/proxy_v2/playground/proxychain/responsemodifiers/rewrite_http_resource_urls.go",
+  CodeEditLink: "https://github.com/everywall/ladder.git/edit/heads/origin/proxy_v2/proxychain/responsemodifiers/rewrite_http_resource_urls.go",
   Params: []Param{
 
   },

@@ -3,13 +3,14 @@ package proxychain
 import (
 	"errors"
 	"fmt"
-	http "github.com/bogdanfinn/fhttp"
-	tls_client "github.com/bogdanfinn/tls-client"
-	profiles "github.com/bogdanfinn/tls-client/profiles"
 	"io"
 	"log"
 	"net/url"
 	"strings"
+
+	http "github.com/bogdanfinn/fhttp"
+	tls_client "github.com/bogdanfinn/tls-client"
+	profiles "github.com/bogdanfinn/tls-client/profiles"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -398,7 +399,7 @@ func (chain *ProxyChain) abort(err error) error {
 	} else {
 		e = fmt.Errorf("ProxyChain error: '%s'", err.Error())
 	}
-	chain.Context.SendString(e.Error())
+	// chain.Context.SendString(e.Error()) // <- RenderErrorPage middleware to render error
 	log.Println(e.Error())
 	return e
 }

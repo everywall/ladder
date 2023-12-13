@@ -139,6 +139,7 @@ func main() {
 
 	app.Use(handlers.Auth())
 	app.Use(handlers.Favicon())
+	app.Use(handlers.RenderErrorPage())
 
 	if os.Getenv("NOLOGS") != "true" {
 		app.Use(func(c *fiber.Ctx) error {
