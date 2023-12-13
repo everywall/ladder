@@ -3,6 +3,7 @@ name: Build Tailwind CSS
 on:
   push:
     paths:
+      - "handlers/error_page.html"
       - "handlers/form.html"
       - "handlers/playground.html"
       - "proxychain/responsemodifiers/vendor/generate_readable_outline.html"
