@@ -390,18 +390,18 @@ func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
 // this will prevent Execute from firing and reset the state
 // returns the initial error enriched with context
 func (chain *ProxyChain) abort(err error) error {
-	// defer chain._reset()
+	defer chain._reset()
 	chain.abortErr = err
-	chain.Context.Response().SetStatusCode(500)
-	var e error
-	if chain.Request.URL != nil {
-		e = fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
-	} else {
-		e = fmt.Errorf("ProxyChain error: '%s'", err.Error())
-	}
+	// chain.Context.Response().SetStatusCode(500)
+	// var e error
+	// if chain.Request.URL != nil {
+	// 	e = fmt.Errorf("ProxyChain error for '%s': %s", chain.Request.URL.String(), err.Error())
+	// } else {
+	// 	e = fmt.Errorf("ProxyChain error: '%s'", err.Error())
+	// }
 	// chain.Context.SendString(e.Error()) // <- RenderErrorPage middleware to render error
-	log.Println(e.Error())
-	return e
+	// log.Println(e.Error())
+	return err
 }
 
 // internal function to reset state of ProxyChain for reuse

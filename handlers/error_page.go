@@ -2,10 +2,14 @@ package handlers
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
+	"net/http"
 	"strings"
 
+	"github.com/everywall/ladder/proxychain/responsemodifiers/api"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,12 +24,35 @@ func RenderErrorPage() fiber.Handler {
 	}
 	return func(c *fiber.Ctx) error {
 		if err := c.Next(); err != nil {
+			c.Response().SetStatusCode(500)
+
+			errReader := api.CreateAPIErrReader(err)
+			errMessageBytes, err := io.ReadAll(errReader)
+			if err != nil {
+				return err
+			}
+
+			var errMsg api.Error
+			if err := json.Unmarshal(errMessageBytes, &errMsg); err != nil {
+				return err
+			}
+
+			if strings.Contains(c.Get("Accept"), "text/plain") {
+				c.Set("Content-Type", "text/plain")
+				return c.SendString(errMsg.Error.Message)
+			}
 			if strings.Contains(c.Get("Accept"), "text/html") {
 				c.Set("Content-Type", "text/html")
-				tmpl.Execute(c.Response().BodyWriter(), err.Error())
+				tmpl.Execute(c.Response().BodyWriter(), fiber.Map{
+					"Status":  http.StatusText(c.Response().StatusCode()) + ": " + fmt.Sprint(c.Response().StatusCode()),
+					"Message": errMsg.Error.Message,
+					"Type":    errMsg.Error.Type,
+					"Cause":   errMsg.Error.Cause,
+				})
 				return nil
 			}
-			return c.SendString(err.Error())
+			c.Set("Content-Type", "text/json")
+			return c.JSON(errMsg)
 		}
 		return err
 	}

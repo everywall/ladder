@@ -26,7 +26,7 @@
   kbd,
   pre,
   code {
-    @apply relative whitespace-break-spaces rounded bg-slate-200 dark:bg-slate-800 py-[0.2rem] font-mono text-sm font-semibold;
+    @apply relative whitespace-break-spaces break-words rounded bg-slate-200 dark:bg-slate-800 py-[0.2rem] font-mono text-sm font-semibold;
   }
   blockquote {
     @apply mt-6 border-l-2 pl-6 italic;

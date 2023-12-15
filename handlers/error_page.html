@@ -214,7 +214,14 @@
       <div class="flex flex-col space-y-3">
         <h1>Error</h1>
         <div class="my-4"></div>
-        <code class="p-4 mx-auto text-red-500 dark:text-red-400"> {{.}} </code>
+        <pre
+          class="mx-auto px-6 py-4 space-y-3 whitespace-normal break-all text-red-500 dark:text-red-400"
+        >
+          <div><span class="underline">{{.Status}}</span></div>
+          <div>{{.Message}}</div>
+          <div><span class="underline">Type</span>:&nbsp;{{.Type}}</div>
+          <div><span class="underline">Cause</span>:&nbsp;{{.Cause}}</div>
+        </pre>
       </div>
 
       <footer class="mx-4 my-2 text-center text-slate-600 dark:text-slate-400">
