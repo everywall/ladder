@@ -27,6 +27,11 @@ func RenderErrorPage() fiber.Handler {
 			c.Response().SetStatusCode(500)
 
 			errReader := api.CreateAPIErrReader(err)
+			if strings.HasPrefix(c.Path(), "/api/") {
+				c.Set("Content-Type", "application/json")
+				return c.SendStream(errReader)
+			}
+
 			errMessageBytes, err := io.ReadAll(errReader)
 			if err != nil {
 				return err
@@ -51,7 +56,7 @@ func RenderErrorPage() fiber.Handler {
 				})
 				return nil
 			}
-			c.Set("Content-Type", "text/json")
+			c.Set("Content-Type", "application/json")
 			return c.JSON(errMsg)
 		}
 		return err
