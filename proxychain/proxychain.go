@@ -390,7 +390,7 @@ func (chain *ProxyChain) SetDebugLogging(isDebugMode bool) *ProxyChain {
 // this will prevent Execute from firing and reset the state
 // returns the initial error enriched with context
 func (chain *ProxyChain) abort(err error) error {
-	defer chain._reset()
+	// defer chain._reset()
 	chain.abortErr = err
 	// chain.Context.Response().SetStatusCode(500)
 	// var e error
