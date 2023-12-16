@@ -156,6 +156,13 @@ func (chain *ProxyChain) AddOnceResponseModifications(mods ...ResponseModificati
 // AddResponseModifications sets the ProxyChain's response modifiers
 // the modifier will not fire until ProxyChain.Execute() is run.
 func (chain *ProxyChain) AddResponseModifications(mods ...ResponseModification) *ProxyChain {
+	chain.responseModifications = append(chain.responseModifications, mods...)
+	return chain
+}
+
+// SetResponseModifications sets the ProxyChain's response modifiers
+// the modifier will not fire until ProxyChain.Execute() is run.
+func (chain *ProxyChain) SetResponseModifications(mods ...ResponseModification) *ProxyChain {
 	chain.responseModifications = mods
 	return chain
 }
@@ -462,13 +469,16 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	}
 
 	// Apply onceRequestModifications to proxychain and clear them
-	for _, applyOnceRequestModificationsTo := range chain.onceRequestModifications {
-		err := applyOnceRequestModificationsTo(chain)
+	for len(chain.onceRequestModifications) > 0 {
+		i := 0
+		modFn := chain.onceRequestModifications[i]
+		err := modFn(chain)
 		if err != nil {
 			return nil, chain.abort(err)
 		}
+		// pop modFn off slice
+		chain.onceRequestModifications = append(chain.onceRequestModifications[:i], chain.onceRequestModifications[i+1:]...)
 	}
-	chain.onceRequestModifications = []RequestModification{}
 
 	// ======== SEND REQUEST UPSTREAM :: client -> [ladder -> upstream] -> ladder -> client =============================
 	// Send Request Upstream
@@ -499,13 +509,16 @@ func (chain *ProxyChain) _execute() (io.Reader, error) {
 	}
 
 	// Apply onceResponseModifications to proxychain and clear them
-	for _, applyOnceResponseModificationsTo := range chain.onceResponseModifications {
-		err := applyOnceResponseModificationsTo(chain)
+	for len(chain.onceResponseModifications) > 0 {
+		i := 0
+		modFn := chain.onceResponseModifications[i]
+		err := modFn(chain)
 		if err != nil {
 			return nil, chain.abort(err)
 		}
+		// pop modFn off slice
+		chain.onceResponseModifications = append(chain.onceResponseModifications[:i], chain.onceResponseModifications[i+1:]...)
 	}
-	chain.onceResponseModifications = []ResponseModification{}
 
 	// ======== RETURN BODY TO CLIENT :: client -> ladder -> upstream -> [ladder -> client] =============================
 	return chain.Response.Body, nil
