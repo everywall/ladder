@@ -1,4 +1,4 @@
-module ladder
+module github.com/everywall/ladder
 
 go 1.21.1
 
