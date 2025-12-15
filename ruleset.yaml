@@ -1,5 +1,16 @@
+- domain: hilversumsnieuws.nl
+  # Uncomment the line below to try Google Cache if direct access still fails
+  # googleCache: true
+  headers:
+    # Use a real browser user-agent instead of Googlebot
+    user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36
+    # Don't send X-Forwarded-For to avoid detection
+    x-forwarded-for: none
+    # Set referer to the same domain to appear as internal navigation
+    referer: https://www.hilversumsnieuws.nl/
+
 - domain: example.com
-  domains: 
+  domains:
   - www.beispiel.de
   googleCache: true
   headers:

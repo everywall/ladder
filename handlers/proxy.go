@@ -46,6 +46,10 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 		reqUrl = c.Params("*")
 	}
 
+	// Fix URL normalization issue: Fiber removes double slashes, so https:// becomes https:/
+	// We need to restore the double slash after the scheme
+	reqUrl = regexp.MustCompile(`^(https?):/([^/])`).ReplaceAllString(reqUrl, "$1://$2")
+
 	// Extract the actual path from req ctx
 	urlQuery, err := url.Parse(reqUrl)
 	if err != nil {
