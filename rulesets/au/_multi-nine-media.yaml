@@ -1,0 +1,38 @@
+- domains:
+  - www.smh.com.au
+  - www.theage.com.au
+  - www.brisbanetimes.com.au
+  - www.watoday.com.au
+  headers:
+    referer: https://www.google.com/
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            // Remove paywall overlays and banners
+            const paywallElements = document.querySelectorAll('.subscription-wall, .paywall-overlay, .premium-content-banner, .subscribe-banner, [class*="paywall"], [class*="subscription"], [id*="paywall"], [id*="subscription"]');
+            paywallElements.forEach(el => { el.remove(); });
+            
+            // Remove locked content notices
+            const lockedContent = document.querySelectorAll('[class*="locked"], [class*="premium"], [class*="subscriber-only"]');
+            lockedContent.forEach(el => {
+              el.style.display = '';
+              el.classList.remove('locked', 'premium', 'subscriber-only');
+            });
+            
+            // Unlock article content
+            const articleContent = document.querySelectorAll('article, [class*="article"], [class*="story"]');
+            articleContent.forEach(el => {
+              el.style.overflow = '';
+              el.style.maxHeight = '';
+              el.classList.remove('locked', 'truncated');
+            });
+            
+            // Remove subscription prompts
+            const subscribePrompts = document.querySelectorAll('[class*="subscribe"], [class*="sign-up"], [id*="subscribe"]');
+            subscribePrompts.forEach(el => { el.remove(); });
+          });
+        </script>
+
