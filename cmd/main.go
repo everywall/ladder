@@ -91,6 +91,10 @@ func main() {
 		*prefork = true
 	}
 
+	if p := os.Getenv("BROWSER_PROFILE"); p != "" {
+		log.Printf("Fingerprint profile: %s (ROTATE_FINGERPRINT=%s)", p, os.Getenv("ROTATE_FINGERPRINT"))
+	}
+
 	app := fiber.New(
 		fiber.Config{
 			Prefork: *prefork,

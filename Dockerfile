@@ -1,5 +1,5 @@
 # Building the binary of the App
-FROM golang:1.21 AS build
+FROM golang:1.25-bookworm AS build
 
 WORKDIR /go/src/ladder
 

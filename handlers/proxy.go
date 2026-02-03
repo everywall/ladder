@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -10,10 +9,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
+	"sync"
 
 	"ladder/pkg/ruleset"
 
+	"github.com/Danny-Dasilva/CycleTLS/cycletls"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,6 +24,8 @@ var (
 	rulesSet       = ruleset.NewRulesetFromEnv()
 	allowedDomains = []string{}
 	defaultTimeout = 15 // in seconds
+	cycleClient    cycletls.CycleTLS
+	cycleOnce      sync.Once
 )
 
 func init() {
@@ -156,6 +158,13 @@ func modifyURL(uri string, rule ruleset.Rule) (string, error) {
 	return newUrl.String(), nil
 }
 
+func getCycleClient() cycletls.CycleTLS {
+	cycleOnce.Do(func() {
+		cycleClient = cycletls.Init()
+	})
+	return cycleClient
+}
+
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
 	urlQuery := "?"
 	if len(queries) > 0 {
@@ -179,64 +188,74 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		log.Println(u.String() + urlQuery)
 	}
 
-	// Modify the URI according to ruleset
 	rule := fetchRule(u.Host, u.Path)
-	url, err := modifyURL(u.String()+urlQuery, rule)
+	targetURL, err := modifyURL(u.String()+urlQuery, rule)
 	if err != nil {
 		return "", nil, nil, err
 	}
 
-	// Fetch the site
-	client := &http.Client{
-		Timeout: time.Second * time.Duration(defaultTimeout),
-	}
-	req, _ := http.NewRequest("GET", url, nil)
-
+	profile := getBrowserProfile(rule.Fingerprint.Profile)
+	userAgent := profile.UserAgent
 	if rule.Headers.UserAgent != "" {
-		req.Header.Set("User-Agent", rule.Headers.UserAgent)
-	} else {
-		req.Header.Set("User-Agent", UserAgent)
+		userAgent = rule.Headers.UserAgent
+	}
+	xForwardedFor := ForwardedFor
+	if rule.Headers.XForwardedFor != "" && rule.Headers.XForwardedFor != "none" {
+		xForwardedFor = rule.Headers.XForwardedFor
+	}
+	referer := u.String()
+	if rule.Headers.Referer != "" && rule.Headers.Referer != "none" {
+		referer = rule.Headers.Referer
 	}
 
-	if rule.Headers.XForwardedFor != "" {
-		if rule.Headers.XForwardedFor != "none" {
-			req.Header.Set("X-Forwarded-For", rule.Headers.XForwardedFor)
-		}
-	} else {
-		req.Header.Set("X-Forwarded-For", ForwardedFor)
+	headers := map[string]string{
+		"User-Agent":       userAgent,
+		"X-Forwarded-For":   xForwardedFor,
+		"Referer":          referer,
 	}
-
-	if rule.Headers.Referer != "" {
-		if rule.Headers.Referer != "none" {
-			req.Header.Set("Referer", rule.Headers.Referer)
-		}
-	} else {
-		req.Header.Set("Referer", u.String())
+	if rule.Headers.XForwardedFor == "none" {
+		delete(headers, "X-Forwarded-For")
 	}
-
+	if rule.Headers.Referer == "none" {
+		delete(headers, "Referer")
+	}
 	if rule.Headers.Cookie != "" {
-		req.Header.Set("Cookie", rule.Headers.Cookie)
+		headers["Cookie"] = rule.Headers.Cookie
 	}
 
-	resp, err := client.Do(req)
+	client := getCycleClient()
+	cycResp, err := client.Do(targetURL, cycletls.Options{
+		Ja3:                profile.JA3,
+		HTTP2Fingerprint:   profile.HTTP2,
+		UserAgent:          userAgent,
+		Headers:            headers,
+		Timeout:            defaultTimeout,
+		EnableConnectionReuse: true,
+	}, "GET")
 	if err != nil {
 		return "", nil, nil, err
 	}
-	defer resp.Body.Close()
 
-	bodyB, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil, nil, err
+	respHeader := make(http.Header)
+	for k, v := range cycResp.Headers {
+		respHeader.Add(k, v)
 	}
-
 	if rule.Headers.CSP != "" {
-		// log.Println(rule.Headers.CSP)
-		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
+		respHeader.Set("Content-Security-Policy", rule.Headers.CSP)
 	}
 
-	// log.Print("rule", rule) TODO: Add a debug mode to print the rule
-	body := rewriteHtml(bodyB, u, rule)
-	return body, req, resp, nil
+	body := rewriteHtml([]byte(cycResp.Body), u, rule)
+
+	fakeReq, _ := http.NewRequest("GET", targetURL, nil)
+	for k, v := range headers {
+		fakeReq.Header.Set(k, v)
+	}
+
+	fakeResp := &http.Response{
+		StatusCode: cycResp.Status,
+		Header:     respHeader,
+	}
+	return body, fakeReq, fakeResp, nil
 }
 
 func rewriteHtml(bodyB []byte, u *url.URL, rule ruleset.Rule) string {

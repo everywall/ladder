@@ -52,6 +52,10 @@ type Rule struct {
 		Prepend  string `yaml:"prepend,omitempty"`
 		Replace  string `yaml:"replace,omitempty"`
 	} `yaml:"injections,omitempty"`
+
+	Fingerprint struct {
+		Profile string `yaml:"profile,omitempty"`
+	} `yaml:"fingerprint,omitempty"`
 }
 
 var remoteRegex = regexp.MustCompile(`^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)`)
