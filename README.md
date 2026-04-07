@@ -122,7 +122,7 @@ http://localhost:8080/ruleset
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
-| `FLARESOLVERR_URL` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
+| `FLARESOLVERR_HOST` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
 
 `ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
 
@@ -202,7 +202,7 @@ Ladder now supports integration with [FlareSolverr](https://github.com/FlareSolv
          - "8080:8080"
        environment:
          - RULESET=https://t.ly/14PSf
-         - FLARESOLVERR_URL=http://flaresolverr:8191
+         # - FLARESOLVERR_HOST=http://flaresolverr:8191
        depends_on:
          - flaresolverr
      
@@ -224,7 +224,7 @@ Ladder now supports integration with [FlareSolverr](https://github.com/FlareSolv
 
    Then start Ladder with the FlareSolverr URL:
    ```bash
-   FLARESOLVERR_URL=http://localhost:8191 ./ladder
+   FLARESOLVERR_HOST=http://localhost:8191 ./ladder
    ```
 
 ### Configuring Rules for FlareSolverr
