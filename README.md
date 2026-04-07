@@ -122,6 +122,7 @@ http://localhost:8080/ruleset
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
+| `FLARESOLVERR_URL` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
 
 `ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
 
@@ -155,6 +156,7 @@ There is a basic ruleset available in a separate repository [ruleset.yaml](https
           alert("Hello!");
         </script>
 - domain: www.anotherdomain.com # Domain where the rule applies
+  useFlareSolverr: false        # Use FlareSolverr for Cloudflare bypass (optional, default: false)
   paths:                        # Paths where the rule applies
     - /article
   googleCache: false            # Use Google Cache to fetch the content
@@ -183,6 +185,80 @@ There is a basic ruleset available in a separate repository [ruleset.yaml](https
       - match: ^        # regex to match part of path
         replace: /amp/  # (modify the url from https://www.demo.com/article/ to https://www.demo.de/amp/article/)
 ```
+
+## FlareSolverr Integration
+
+Ladder now supports integration with [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr) to bypass Cloudflare protection and other anti-bot challenges. This is particularly useful for sites that employ sophisticated bot detection mechanisms.
+
+### Setting up FlareSolverr
+
+1. **Using Docker Compose (Recommended):**
+   ```yaml
+   # docker-compose.yaml
+   services:
+     ladder:
+       image: ghcr.io/everywall/ladder:latest
+       ports:
+         - "8080:8080"
+       environment:
+         - RULESET=https://t.ly/14PSf
+         - FLARESOLVERR_URL=http://flaresolverr:8191
+       depends_on:
+         - flaresolverr
+     
+     flaresolverr:
+       image: ghcr.io/flaresolverr/flaresolverr:latest
+       ports:
+         - "8191:8191"
+       environment:
+         - LOG_LEVEL=info
+   ```
+
+2. **Running FlareSolverr separately:**
+   ```bash
+   docker run -d \
+     --name flaresolverr \
+     -p 8191:8191 \
+     ghcr.io/flaresolverr/flaresolverr:latest
+   ```
+
+   Then start Ladder with the FlareSolverr URL:
+   ```bash
+   FLARESOLVERR_URL=http://localhost:8191 ./ladder
+   ```
+
+### Configuring Rules for FlareSolverr
+
+To use FlareSolverr for specific domains, add the `useFlareSolverr: true` flag in your ruleset:
+
+```yaml
+# Example ruleset with FlareSolverr
+- domain: cloudflare-protected-site.com
+  useFlareSolverr: true  # Enable FlareSolverr for this domain
+  headers:
+    user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+
+# Regular site without FlareSolverr
+- domain: regular-site.com
+  headers:
+    user-agent: "Custom User Agent 1.0"
+```
+
+### Use Cases
+
+FlareSolverr integration is particularly useful for:
+- **Cloudflare-protected sites**: Sites using Cloudflare's anti-bot challenges
+- **Sites with JavaScript challenges**: Pages that require JavaScript execution to access content
+- **Dynamic content loading**: Sites that load content dynamically through JavaScript
+- **Advanced bot detection**: Sites using sophisticated fingerprinting and bot detection techniques
+
+### Important Notes
+
+- FlareSolverr adds additional latency to requests as it needs to solve challenges
+- Only enable `useFlareSolverr` for domains that actually need it to maintain performance
+- FlareSolverr requires more resources as it runs a headless browser
+- Make sure FlareSolverr is running and accessible before enabling it in your ruleset
 
 ## Development
 

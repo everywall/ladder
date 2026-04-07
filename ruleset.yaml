@@ -1,7 +1,8 @@
 - domain: example.com
-  domains: 
+  domains:
   - www.beispiel.de
   googleCache: true
+  # useFlareSolverr: true  # Optional: Set to true to bypass Cloudflare protection using FlareSolverr service
   headers:
     x-forwarded-for: none
     referer: none

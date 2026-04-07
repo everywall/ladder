@@ -1,9 +1,9 @@
 version: '3'
 services:
   ladder:
-    image: ghcr.io/everywall/ladder:latest
+    # image: ghcr.io/everywall/ladder:latest
     container_name: ladder
-    #build: .
+    build: .
     #restart: always
     #command: sh -c ./ladder
     environment:
@@ -18,10 +18,25 @@ services:
       #- X_FORWARDED_FOR=66.249.66.1
       #- USER_AGENT=Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
       #- USERPASS=foo:bar
-      #- LOG_URLS=true
+      - LOG_URLS=true
       #- GODEBUG=netdns=go
+      - FLARESOLVERR_HOST=http://flaresolverr:8191
     ports:
-      - "8080:8080"
+      - "8088:8080"
     volumes:
       - ./ruleset.yaml:/app/ruleset.yaml
       - ./handlers/form.html:/app/form.html
+  
+  # Optional FlareSolverr service for Cloudflare bypass
+  # Uncomment the following lines to enable FlareSolverr
+  flaresolverr:
+   image: ghcr.io/flaresolverr/flaresolverr:latest
+   container_name: flaresolverr
+   restart: unless-stopped
+   environment:
+     - LOG_LEVEL=info
+     - LOG_HTML=false
+     - CAPTCHA_SOLVER=none
+     - TZ=UTC
+   ports:
+     - "8191:8191"

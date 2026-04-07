@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -18,12 +20,44 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// FlareSolverrRequest represents the request structure for FlareSolverr API
+type FlareSolverrRequest struct {
+	Cmd        string `json:"cmd"`
+	URL        string `json:"url"`
+	MaxTimeout int    `json:"maxTimeout"`
+}
+
+// FlareSolverrResponse represents the response structure from FlareSolverr API
+type FlareSolverrResponse struct {
+	Solution struct {
+		URL     string `json:"url"`
+		Status  int    `json:"status"`
+		Cookies []struct {
+			Name     string  `json:"name"`
+			Value    string  `json:"value"`
+			Domain   string  `json:"domain"`
+			Path     string  `json:"path"`
+			Expires  float64 `json:"expires"`
+			Size     int     `json:"size"`
+			HTTPOnly bool    `json:"httpOnly"`
+			Secure   bool    `json:"secure"`
+			Session  bool    `json:"session"`
+			SameSite string  `json:"sameSite"`
+		} `json:"cookies"`
+		Response string            `json:"response"`
+		Headers  map[string]string `json:"headers"`
+	} `json:"solution"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
+
 var (
-	UserAgent      = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	ForwardedFor   = getenv("X_FORWARDED_FOR", "66.249.66.1")
-	rulesSet       = ruleset.NewRulesetFromEnv()
-	allowedDomains = []string{}
-	defaultTimeout = 15 // in seconds
+	UserAgent       = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+	ForwardedFor    = getenv("X_FORWARDED_FOR", "66.249.66.1")
+	flareSolverrHost = os.Getenv("FLARESOLVERR_HOST")
+	rulesSet        = ruleset.NewRulesetFromEnv()
+	allowedDomains  = []string{}
+	defaultTimeout  = 15 // in seconds
 )
 
 func init() {
@@ -86,6 +120,47 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 	// default behavior:
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
 	return urlQuery.String(), nil
+}
+
+// getFlareSolverrCookies retrieves cookies from FlareSolverr for the given URL
+func getFlareSolverrCookies(targetURL string) (string, error) {
+	if flareSolverrHost == "" {
+		return "", fmt.Errorf("FLARESOLVERR_HOST environment variable not set")
+	}
+
+	reqBody := FlareSolverrRequest{
+		Cmd:        "request.get",
+		URL:        targetURL,
+		MaxTimeout: 60000,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.Post(flareSolverrHost+"/v1", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	var fsResp FlareSolverrResponse
+	if err := json.NewDecoder(resp.Body).Decode(&fsResp); err != nil {
+		return "", err
+	}
+
+	if fsResp.Status != "ok" {
+		return "", fmt.Errorf("FlareSolverr error: %s", fsResp.Message)
+	}
+
+	// Build cookie string from the response
+	var cookies []string
+	for _, cookie := range fsResp.Solution.Cookies {
+		cookies = append(cookies, fmt.Sprintf("%s=%s", cookie.Name, cookie.Value))
+	}
+
+	return strings.Join(cookies, "; "), nil
 }
 
 func ProxySite(rulesetPath string) fiber.Handler {
@@ -214,8 +289,27 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		req.Header.Set("Referer", u.String())
 	}
 
-	if rule.Headers.Cookie != "" {
-		req.Header.Set("Cookie", rule.Headers.Cookie)
+	// Handle FlareSolverr integration
+	cookieValue := rule.Headers.Cookie
+	debug := os.Getenv("LOG_URLS") == "true"
+	
+	if rule.UseFlareSolverr && flareSolverrHost != "" {
+		if fsCookies, err := getFlareSolverrCookies(url); err == nil {
+			if cookieValue != "" {
+				cookieValue = cookieValue + "; " + fsCookies
+			} else {
+				cookieValue = fsCookies
+			}
+			if debug {
+				log.Printf("Using FlareSolverr cookies for %s", url)
+			}
+		} else if debug {
+			log.Printf("FlareSolverr error for %s: %v", url, err)
+		}
+	}
+	
+	if cookieValue != "" {
+		req.Header.Set("Cookie", cookieValue)
 	}
 
 	resp, err := client.Do(req)
