@@ -7,16 +7,35 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type JsonRequest struct {
+	URL string `json:"url"`
+}
+
 //nolint:all
 //go:embed VERSION
 var version string
 
 func Api(c *fiber.Ctx) error {
-	// Get the url from the URL
-	urlQuery := c.Params("*")
-
+	var url string
 	queries := c.Queries()
-	body, req, resp, err := fetchSite(urlQuery, queries)
+
+	// Check content type to determine if it's JSON
+	contentType := c.Get("Content-Type")
+	if contentType == "application/json" {
+		// Parse JSON body
+		var jsonReq JsonRequest
+		if err := c.BodyParser(&jsonReq); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid JSON request",
+			})
+		}
+		url = jsonReq.URL
+	} else {
+		// Get the url from the URL params
+		url = c.Params("*")
+	}
+
+	body, req, resp, err := fetchSite(url, queries)
 	if err != nil {
 		log.Println("ERROR:", err)
 		c.SendStatus(500)
