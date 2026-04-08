@@ -42,7 +42,7 @@ jobs:
       - name: Set version
         id: version
         run: |
-          echo ${GITHUB_REF#refs/tags/v} > handlers/VERSION
+          echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
@@ -93,6 +93,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.version.outputs.version }}
 
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker

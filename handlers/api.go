@@ -11,9 +11,7 @@ type JsonRequest struct {
 	URL string `json:"url"`
 }
 
-//nolint:all
-//go:embed VERSION
-var version string
+var version = "dev"
 
 func Api(c *fiber.Ctx) error {
 	var url string
