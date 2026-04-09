@@ -94,7 +94,6 @@ func main() {
 	app := fiber.New(
 		fiber.Config{
 			Prefork: *prefork,
-			GETOnly: true,
 		},
 	)
 
@@ -137,7 +136,8 @@ func main() {
 
 	app.Get("ruleset", handlers.Ruleset)
 	app.Get("raw/*", handlers.Raw)
-	app.Get("api/*", handlers.Api)
+	app.Post("/api", handlers.Api)
+	app.Get("/api/*", handlers.Api)
 	app.Get("/*", handlers.ProxySite(*ruleset))
 
 	log.Fatal(app.Listen(":" + *port))

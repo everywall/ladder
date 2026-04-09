@@ -37,8 +37,9 @@ type Rule struct {
 		Cookie        string `yaml:"cookie,omitempty"`
 		CSP           string `yaml:"content-security-policy,omitempty"`
 	} `yaml:"headers,omitempty"`
-	GoogleCache bool    `yaml:"googleCache,omitempty"`
-	RegexRules  []Regex `yaml:"regexRules,omitempty"`
+	GoogleCache     bool    `yaml:"googleCache,omitempty"`
+	UseFlareSolverr bool    `yaml:"useFlareSolverr,omitempty"`
+	RegexRules      []Regex `yaml:"regexRules,omitempty"`
 
 	URLMods struct {
 		Domain []Regex `yaml:"domain,omitempty"`

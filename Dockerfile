@@ -1,15 +1,16 @@
 # Building the binary of the App
-FROM golang:1.25 AS build
+ARG VERSION=build
 
+FROM golang:1.26 AS build
 WORKDIR /go/src/ladder
 
 COPY . .
 
 RUN go mod download
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o ladder cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-X ladder/handlers.version=${VERSION}" -o ladder cmd/main.go
 
-FROM debian:12-slim as release
+FROM debian:13-slim AS release
 
 WORKDIR /app
 
