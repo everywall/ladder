@@ -52,12 +52,12 @@ type FlareSolverrResponse struct {
 }
 
 var (
-	UserAgent       = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	ForwardedFor    = getenv("X_FORWARDED_FOR", "66.249.66.1")
+	UserAgent        = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+	ForwardedFor     = getenv("X_FORWARDED_FOR", "66.249.66.1")
 	flareSolverrHost = os.Getenv("FLARESOLVERR_HOST")
-	rulesSet        = ruleset.NewRulesetFromEnv()
-	allowedDomains  = []string{}
-	defaultTimeout  = 15 // in seconds
+	rulesSet         = ruleset.NewRulesetFromEnv()
+	allowedDomains   = []string{}
+	defaultTimeout   = 15 // in seconds
 )
 
 func init() {
@@ -292,7 +292,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	// Handle FlareSolverr integration
 	cookieValue := rule.Headers.Cookie
 	debug := os.Getenv("LOG_URLS") == "true"
-	
+
 	if rule.UseFlareSolverr && flareSolverrHost != "" {
 		if fsCookies, err := getFlareSolverrCookies(url); err == nil {
 			if cookieValue != "" {
@@ -307,7 +307,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 			log.Printf("FlareSolverr error for %s: %v", url, err)
 		}
 	}
-	
+
 	if cookieValue != "" {
 		req.Header.Set("Cookie", cookieValue)
 	}
@@ -326,6 +326,8 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	if rule.Headers.CSP != "" {
 		// log.Println(rule.Headers.CSP)
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
+	} else {
+		resp.Header.Del("Content-Security-Policy")
 	}
 
 	// log.Print("rule", rule) TODO: Add a debug mode to print the rule
