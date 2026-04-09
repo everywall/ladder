@@ -52,12 +52,12 @@ type FlareSolverrResponse struct {
 }
 
 var (
-	UserAgent       = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
-	ForwardedFor    = getenv("X_FORWARDED_FOR", "66.249.66.1")
+	UserAgent        = getenv("USER_AGENT", "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)")
+	ForwardedFor     = getenv("X_FORWARDED_FOR", "66.249.66.1")
 	flareSolverrHost = os.Getenv("FLARESOLVERR_HOST")
-	rulesSet        = ruleset.NewRulesetFromEnv()
-	allowedDomains  = []string{}
-	defaultTimeout  = 15 // in seconds
+	rulesSet         = ruleset.NewRulesetFromEnv()
+	allowedDomains   = []string{}
+	defaultTimeout   = 15 // in seconds
 )
 
 func init() {
@@ -261,9 +261,24 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
+	debug := os.Getenv("LOG_URLS") == "true"
+
 	// Fetch the site
 	client := &http.Client{
 		Timeout: time.Second * time.Duration(defaultTimeout),
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if debug {
+				srcURL := ""
+				if len(via) > 0 {
+					srcURL = via[len(via)-1].URL.String()
+				}
+				log.Printf("Redirect %d: %s -> %s", len(via), srcURL, req.URL.String())
+			}
+			if len(via) >= 3 {
+				return fmt.Errorf("too many redirects (>3) for URL: %s", req.URL.String())
+			}
+			return nil
+		},
 	}
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -291,8 +306,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 
 	// Handle FlareSolverr integration
 	cookieValue := rule.Headers.Cookie
-	debug := os.Getenv("LOG_URLS") == "true"
-	
+
 	if rule.UseFlareSolverr && flareSolverrHost != "" {
 		if fsCookies, err := getFlareSolverrCookies(url); err == nil {
 			if cookieValue != "" {
@@ -307,7 +321,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 			log.Printf("FlareSolverr error for %s: %v", url, err)
 		}
 	}
-	
+
 	if cookieValue != "" {
 		req.Header.Set("Cookie", cookieValue)
 	}
