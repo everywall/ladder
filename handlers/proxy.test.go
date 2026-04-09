@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 
 	"ladder/pkg/ruleset"
@@ -55,6 +56,36 @@ func TestRewriteHtml(t *testing.T) {
 
 	actual := rewriteHtml(bodyB, u, ruleset.Rule{})
 	assert.Equal(t, expected, actual)
+}
+
+func TestSplitProxyQueries(t *testing.T) {
+	queries := map[string]string{
+		"q":                     "news",
+		"page":                  "2",
+		"__ladder_debug":        "1",
+		"__ladder_show_request": "1",
+		"__ladder_other":        "x",
+	}
+
+	proxyQueries, options := splitProxyQueries(queries)
+
+	assert.Equal(t, map[string]string{
+		"q":    "news",
+		"page": "2",
+	}, proxyQueries)
+	assert.True(t, options.Enabled)
+	assert.True(t, options.ShowRequest)
+}
+
+func TestInjectDebugUI(t *testing.T) {
+	body := `<html><body><p>hello</p></body></html>`
+	updated := injectDebugUI(body, debugUIOptions{Enabled: true, ShowRequest: true})
+
+	assert.True(t, strings.Contains(updated, `id="__ladderGear"`))
+	assert.True(t, strings.Contains(updated, `id="__ladderPanel"`))
+	assert.True(t, strings.Contains(updated, `data-param="__ladder_debug" checked`))
+	assert.True(t, strings.Contains(updated, `data-param="__ladder_show_request" checked`))
+	assert.True(t, strings.Contains(updated, `id="__ladderDebugInfo"`))
 }
 
 // END: 6f8b3f5d5d5d
