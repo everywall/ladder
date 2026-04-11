@@ -60,6 +60,15 @@ var (
 	defaultTimeout   = 15 // in seconds
 )
 
+const ladderParamPrefix = "__ladder_"
+
+type debugUIOptions struct {
+	Enabled     bool
+	ShowRequest bool
+	HasUI       bool
+	ShowUI      bool
+}
+
 func init() {
 	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
 	if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
@@ -180,11 +189,17 @@ func ProxySite(rulesetPath string) fiber.Handler {
 		}
 
 		queries := c.Queries()
-		body, _, resp, err := fetchSite(url, queries)
+		proxyQueries, debugOptions := splitProxyQueries(queries)
+		body, _, resp, err := fetchSite(url, proxyQueries)
 		if err != nil {
 			log.Println("ERROR:", err)
 			c.SendStatus(fiber.StatusInternalServerError)
 			return c.SendString(err.Error())
+		}
+
+		contentType := strings.ToLower(resp.Header.Get("Content-Type"))
+		if strings.Contains(contentType, "text/html") && shouldInjectDebugUI(debugOptions) {
+			body = injectDebugUI(body, debugOptions)
 		}
 
 		c.Cookie(&fiber.Cookie{})
@@ -193,6 +208,166 @@ func ProxySite(rulesetPath string) fiber.Handler {
 
 		return c.SendString(body)
 	}
+}
+
+func shouldInjectDebugUI(options debugUIOptions) bool {
+	if os.Getenv("DEBUG_UI") == "false" {
+		return false
+	}
+
+	if options.HasUI {
+		return options.ShowUI
+	}
+
+	if os.Getenv("DEBUG_UI") == "true" {
+		return true
+	}
+
+	return true
+}
+
+func splitProxyQueries(queries map[string]string) (map[string]string, debugUIOptions) {
+	proxyQueries := map[string]string{}
+	options := debugUIOptions{}
+
+	for key, value := range queries {
+		switch key {
+		case "__ladder_debug":
+			options.Enabled = value == "1"
+			continue
+		case "__ladder_show_request":
+			options.ShowRequest = value == "1"
+			continue
+		case "__ladder_ui":
+			options.HasUI = true
+			options.ShowUI = value == "1"
+			continue
+		}
+
+		if strings.HasPrefix(key, ladderParamPrefix) {
+			continue
+		}
+
+		proxyQueries[key] = value
+	}
+
+	return proxyQueries, options
+}
+
+func injectDebugUI(body string, options debugUIOptions) string {
+	if !strings.Contains(strings.ToLower(body), "<html") {
+		return body
+	}
+
+	debugChecked := ""
+	if options.Enabled {
+		debugChecked = "checked"
+	}
+
+	showRequestChecked := ""
+	if options.ShowRequest {
+		showRequestChecked = "checked"
+	}
+
+	requestInfo := ""
+	if options.Enabled {
+		requestInfo = `<div id="__ladderDebugInfo" style="margin-top:12px;padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;color:#334155;background:#f8fafc;word-break:break-all;">Request: <span id="__ladderRequestValue"></span></div>`
+	}
+
+	injection := fmt.Sprintf(`
+<button id="__ladderGear" type="button" aria-label="Open Properties" title="Open Properties" style="position:fixed;top:12px;right:12px;z-index:2147483646;width:32px;height:32px;border:1px solid #cbd5e1;border-radius:9999px;background:#fff;color:#475569;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(15,23,42,.12);cursor:pointer;">
+	<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		<path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path>
+		<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"></path>
+	</svg>
+</button>
+<aside id="__ladderPanel" aria-hidden="true" style="position:fixed;top:0;right:0;height:100vh;width:min(300px,85vw);transform:translateX(100%%);transition:transform .2s ease-in-out;z-index:2147483647;background:#fff;border-left:1px solid #e2e8f0;padding:12px 14px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;color:#334155;box-shadow:-1px 0 2px rgba(15,23,42,.08);">
+	<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+		<strong style="font-size:14px;">Properties</strong>
+		<button id="__ladderClose" type="button" aria-label="Close Properties" style="font-size:18px;line-height:1;color:#64748b;cursor:pointer;">×</button>
+	</div>
+	<label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:10px;">
+		<span>Debug mode</span>
+		<input id="__ladderOptDebug" type="checkbox" data-param="__ladder_debug" %s>
+	</label>
+	<label style="display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:10px;">
+		<span>Show request</span>
+		<input id="__ladderOptRequest" type="checkbox" data-param="__ladder_show_request" %s>
+	</label>
+	%s
+</aside>
+<script>
+(function () {
+	var gear = document.getElementById('__ladderGear');
+	var panel = document.getElementById('__ladderPanel');
+	var closeBtn = document.getElementById('__ladderClose');
+	var controls = panel ? panel.querySelectorAll('input[data-param]') : [];
+
+	function setOpen(isOpen) {
+		if (!panel) { return; }
+		panel.style.transform = isOpen ? 'translateX(0)' : 'translateX(100%%)';
+		panel.setAttribute('aria-hidden', String(!isOpen));
+	}
+
+	function applyAndReload(input) {
+		var param = input.getAttribute('data-param');
+		if (!param) { return; }
+		var params = new URLSearchParams(window.location.search);
+		if (input.checked) {
+			params.set(param, '1');
+		} else {
+			params.delete(param);
+		}
+		var next = window.location.pathname;
+		var query = params.toString();
+		if (query.length > 0) {
+			next += '?' + query;
+		}
+		window.location.href = next;
+	}
+
+	if (gear) {
+		gear.addEventListener('click', function () {
+			var hidden = panel && panel.getAttribute('aria-hidden') === 'true';
+			setOpen(hidden);
+		});
+	}
+
+	if (closeBtn) {
+		closeBtn.addEventListener('click', function () { setOpen(false); });
+	}
+
+	document.addEventListener('keydown', function (event) {
+		if (event.key === 'Escape') {
+			setOpen(false);
+		}
+	});
+
+	document.addEventListener('click', function (event) {
+		if (!panel || panel.getAttribute('aria-hidden') === 'true') { return; }
+		if (!panel.contains(event.target) && (!gear || !gear.contains(event.target))) {
+			setOpen(false);
+		}
+	});
+
+	for (var i = 0; i < controls.length; i++) {
+		controls[i].addEventListener('change', function () { applyAndReload(this); });
+	}
+
+	var reqValue = document.getElementById('__ladderRequestValue');
+	if (reqValue) {
+		reqValue.textContent = decodeURIComponent(window.location.pathname.replace(/^\//, ''));
+	}
+})();
+</script>
+`, debugChecked, showRequestChecked, requestInfo)
+
+	bodyClose := regexp.MustCompile(`(?i)</body>`)
+	if bodyClose.MatchString(body) {
+		return bodyClose.ReplaceAllString(body, injection+"</body>")
+	}
+
+	return body + injection
 }
 
 func modifyURL(uri string, rule ruleset.Rule) (string, error) {
