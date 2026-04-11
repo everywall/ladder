@@ -1,7 +1,7 @@
 version: '3'
 services:
   ladder:
-    image: ghcr.io/everywall/ladder:latest
+    image: ghcr.io/everywall/ladder:v0.0.22
     container_name: ladder
     build: .
     #restart: always
@@ -21,6 +21,9 @@ services:
       - LOG_URLS=true
       #- GODEBUG=netdns=go
       - FLARESOLVERR_HOST=http://flaresolverr:8191
+    read_only: true
+    tmpfs:
+      - /tmp
     ports:
       - "8080:8080"
     volumes:
