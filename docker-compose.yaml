@@ -1,7 +1,6 @@
-version: '3'
 services:
   ladder:
-    image: ghcr.io/everywall/ladder:v0.0.22
+    image: ghcr.io/everywall/ladder:latest
     container_name: ladder
     build: .
     #restart: always
@@ -24,6 +23,9 @@ services:
     read_only: true
     cap_drop:
       - ALL
+    security_opt:
+      - apparmor:runtime/default
+      #- label:type:container_t  # SELinux alternative
     tmpfs:
       - /tmp
     ports:
