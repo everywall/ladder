@@ -22,6 +22,8 @@ services:
       #- GODEBUG=netdns=go
       - FLARESOLVERR_HOST=http://flaresolverr:8191
     read_only: true
+    cap_drop:
+      - ALL
     tmpfs:
       - /tmp
     ports:
