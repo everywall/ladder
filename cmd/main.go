@@ -97,6 +97,10 @@ func main() {
 		},
 	)
 
+	app.Get("/healthz", func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusOK)
+	})
+
 	userpass := os.Getenv("USERPASS")
 	if userpass != "" {
 		userpass := strings.Split(userpass, ":")
