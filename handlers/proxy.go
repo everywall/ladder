@@ -58,7 +58,18 @@ var (
 	rulesSet         = ruleset.NewRulesetFromEnv()
 	allowedDomains   = []string{}
 	defaultTimeout   = 15 // in seconds
+	basePath         = normalizeBasePath(os.Getenv("BASE_PATH"))
 )
+
+func normalizeBasePath(p string) string {
+	if p == "" {
+		return ""
+	}
+	if !strings.HasPrefix(p, "/") {
+		p = "/" + p
+	}
+	return strings.TrimRight(p, "/")
+}
 
 func init() {
 	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
@@ -339,25 +350,23 @@ func rewriteHtml(bodyB []byte, u *url.URL, rule ruleset.Rule) string {
 	// Rewrite the HTML
 	body := string(bodyB)
 
+	proxyPrefix := basePath + "/https://" + u.Host + "/"
+
 	// images
 	imagePattern := `<img\s+([^>]*\s+)?src="(/)([^"]*)"`
 	re := regexp.MustCompile(imagePattern)
-	body = re.ReplaceAllString(body, fmt.Sprintf(`<img $1 src="%s$3"`, "/https://"+u.Host+"/"))
+	body = re.ReplaceAllString(body, fmt.Sprintf(`<img $1 src="%s$3"`, proxyPrefix))
 
 	// scripts
 	scriptPattern := `<script\s+([^>]*\s+)?src="(/)([^"]*)"`
 	reScript := regexp.MustCompile(scriptPattern)
-	body = reScript.ReplaceAllString(body, fmt.Sprintf(`<script $1 script="%s$3"`, "/https://"+u.Host+"/"))
+	body = reScript.ReplaceAllString(body, fmt.Sprintf(`<script $1 script="%s$3"`, proxyPrefix))
 
-	// body = strings.ReplaceAll(body, "srcset=\"/", "srcset=\"/https://"+u.Host+"/") // TODO: Needs a regex to rewrite the URL's
-	body = strings.ReplaceAll(body, "href=\"/", "href=\"/https://"+u.Host+"/")
-	body = strings.ReplaceAll(body, "url('/", "url('/https://"+u.Host+"/")
-	body = strings.ReplaceAll(body, "url(/", "url(/https://"+u.Host+"/")
-	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\"/https://"+u.Host+"/")
-
-	if os.Getenv("RULESET") != "" {
-		body = applyRules(body, rule)
-	}
+	// body = strings.ReplaceAll(body, "srcset=\"/", "srcset=\""+proxyPrefix) // TODO: Needs a regex to rewrite the URL's
+	body = strings.ReplaceAll(body, "href=\"/", "href=\""+proxyPrefix)
+	body = strings.ReplaceAll(body, "url('/", "url('"+proxyPrefix)
+	body = strings.ReplaceAll(body, "url(/", "url("+proxyPrefix)
+	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\""+proxyPrefix)
 	return body
 }
 
