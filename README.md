@@ -6,13 +6,13 @@
 <div><img alt="License" src="https://img.shields.io/github/license/everywall/ladder"> <img alt="go.mod Go version " src="https://img.shields.io/github/go-mod/go-version/everywall/ladder"> <img alt="GitHub tag (with filter)" src="https://img.shields.io/github/v/tag/everywall/ladder"> <img alt="GitHub (Pre-)Release Date" src="https://img.shields.io/github/release-date-pre/everywall/ladder"> <img alt="GitHub Downloads all releases" src="https://img.shields.io/github/downloads/everywall/ladder/total"> <img alt="GitHub Build Status (with event)" src="https://img.shields.io/github/actions/workflow/status/everywall/ladder/release-binaries.yaml"></div>
 
 
-*Ladder is a http web proxy.* This is a selfhosted version of [1ft.io](https://1ft.io) and [12ft.io](https://12ft.io). It is inspired by [13ft](https://github.com/wasi-master/13ft).
+*Ladder is a http web proxy.* 
 
-### Why
+Ladder is a developer tool for testing and analyzing paywall implementations and content delivery behavior on modern websites.
 
-Freedom of information is an essential pillar of democracy and informed decision-making. While media organizations have legitimate financial interests, it is crucial to strike a balance between profitability and the public's right to access information. The proliferation of paywalls raises concerns about the erosion of this fundamental freedom, and it is imperative for society to find innovative ways to preserve access to vital information without compromising the sustainability of journalism. In a world where knowledge should be shared and not commodified, paywalls should be critically examined to ensure that they do not undermine the principles of an open and informed society.
+It allows developers, researchers, and publishers to simulate different client environments (such as browsers and crawlers) and observe how content is served under varying conditions. This makes it useful for debugging paywall configurations, verifying access controls, http headers, and ensuring consistent behavior across different user agents.
 
-> **Disclaimer:** This project is intended for educational purposes only. The author does not endorse or encourage any unethical or illegal activity. Use this tool at your own risk.
+Ladder is intended for legitimate testing, research, and quality assurance purposes only. It should only be used in compliance with applicable laws and the terms of service of the target website.
 
 ### How it works
 
@@ -27,8 +27,9 @@ sequenceDiagram
 ```
 
 ### Features
-- [x] Bypass Paywalls
-- [x] Remove CORS headers from responses, assets, and images ...
+- [x] Remove/modify CORS headers from responses, assets, and images ...
+- [x] Remove/modify other headers (e.g. Content-Security-Policy)
+- [x] Remove/inject custom code (HTML, CSS, JavaScript) into the page
 - [x] Apply domain based ruleset/code to modify response / requested URL
 - [x] Keep site browsable
 - [x] API
@@ -39,33 +40,34 @@ sequenceDiagram
 - [x] Linux binary
 - [x] Mac OS binary
 - [x] Windows binary (untested)
-- [x] Removes most of the ads (unexpected side effect ¯\\\_(ツ)_/¯ )
 - [x] Basic Auth
-- [x] Disable logs
-- [x] No Tracking
+- [x] Access logs
+- [x] Might break tracking, adds and other 3rd party content
 - [x] Limit the proxy to a list of domains
 - [x] Expose Ruleset to other ladders
-- [x] Fetch from Google Cache
+- [ ] Robots.txt testing
 - [ ] Optional TOR proxy
-- [ ] A key to share only one URL
+- [ ] A key to share a proxied URL
 
 ### Limitations
-Some sites do not expose their content to search engines, which means that the proxy cannot access the content. A future version will try to fetch the content from Google Cache.
+Some websites deliver different content (Cloaking) depending on the type of client accessing them (for example, search engine crawlers versus standard web browsers). Ladder can be configured to emulate different client types in order to retrieve publicly accessible content for testing, automation, or research purposes.
 
-Certain sites may display missing images or encounter formatting issues. This can be attributed to the site's reliance on JavaScript or CSS for image and resource loading, which presents a limitation when accessed through this proxy. If you prefer a full experience, please consider buying a subscription for the site.
+However, many websites implement advanced mechanisms to restrict automated access, such as fingerprinting, rate limiting, or behavioral analysis. Ladder does not circumvent such protections and may not function correctly on services that actively restrict or control access.
+
+Third-party tools such as FlareSolverr exist and may be used independently to render web pages in a headless browser environment. These tools are not part of Ladder, and their use may be subject to legal and contractual restrictions. Users are solely responsible for ensuring that their usage complies with all applicable regulations.
 
 ## Installation
 
-> **Warning:** If your instance will be publicly accessible, make sure to enable Basic Auth. This will prevent unauthorized users from using your proxy. If you do not enable Basic Auth, anyone can use your proxy to browse nasty/illegal stuff. And you will be responsible for it.
+> **Warning:** If your instance will be publicly accessible, make sure to enable Basic Auth. This will prevent unauthorized users from using your proxy. If you do not enable Basic Auth, anyone can use your proxy to browse nasty/illegal stuff. And you will be made responsible for it.
 
 ### Binary
 1) Download binary [here](https://github.com/everywall/ladder/releases/latest)
-2) Unpack and run the binary `./ladder -r https://t.ly/14PSf`
+2) Unpack and run the binary `./ladder -r https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml`
 3) Open Browser (Default: http://localhost:8080)
 
 ### Docker
 ```bash
-docker run -p 8080:8080 -d --env RULESET=https://t.ly/14PSf --name ladder ghcr.io/everywall/ladder:latest
+docker run -p 8080:8080 -d --env RULESET=https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml --name ladder ghcr.io/everywall/ladder:latest
 ```
 
 ### Docker Compose
@@ -201,7 +203,7 @@ Ladder now supports integration with [FlareSolverr](https://github.com/FlareSolv
        ports:
          - "8080:8080"
        environment:
-         - RULESET=https://t.ly/14PSf
+         - RULESET=https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml
          # - FLARESOLVERR_HOST=http://flaresolverr:8191
        depends_on:
          - flaresolverr
