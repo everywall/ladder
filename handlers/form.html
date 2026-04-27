@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ladder</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="antialiased text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900">
@@ -41,7 +42,7 @@
             if (url.indexOf('http') === -1) {
                 url = 'https://' + url;
             }
-            window.location.href = '/' + url;
+            window.location.href = window.location.pathname.replace(/\/$/, '') + '/' + url;
             return false;
         });
         document.getElementById('inputField').addEventListener('input', function() {

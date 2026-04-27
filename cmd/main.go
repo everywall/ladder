@@ -91,9 +91,19 @@ func main() {
 		*prefork = true
 	}
 
+	// BASE_PATH allows running ladder under a sub-path, e.g. /mypath
+	basePath := os.Getenv("BASE_PATH")
+	if basePath != "" {
+		if !strings.HasPrefix(basePath, "/") {
+			basePath = "/" + basePath
+		}
+		basePath = strings.TrimRight(basePath, "/")
+	}
+
 	app := fiber.New(
 		fiber.Config{
-			Prefork:        *prefork,
+			Prefork:       *prefork,
+			StrictRouting: true,
 			ReadBufferSize: 16 * 1024,
 		},
 	)
@@ -111,7 +121,7 @@ func main() {
 
 	app.Use(favicon.New(favicon.Config{
 		Data: []byte(faviconData),
-		URL:  "/favicon.ico",
+		URL:  basePath + "/favicon.ico",
 	}))
 
 	if os.Getenv("NOLOGS") != "true" {
@@ -122,9 +132,18 @@ func main() {
 		})
 	}
 
-	app.Get("/", handlers.Form)
+	// Redirect /mypath -> /mypath/
+	if basePath != "" {
+		app.Get(basePath, func(c *fiber.Ctx) error {
+			return c.Redirect(basePath+"/", fiber.StatusMovedPermanently)
+		})
+	}
 
-	app.Get("/styles.css", func(c *fiber.Ctx) error {
+	router := app.Group(basePath)
+
+	router.Get("/", handlers.Form)
+
+	router.Get("/styles.css", func(c *fiber.Ctx) error {
 		cssData, err := cssData.ReadFile("styles.css")
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
@@ -135,11 +154,11 @@ func main() {
 		return c.Send(cssData)
 	})
 
-	app.Get("ruleset", handlers.Ruleset)
-	app.Get("raw/*", handlers.Raw)
-	app.Post("/api", handlers.Api)
-	app.Get("/api/*", handlers.Api)
-	app.Get("/*", handlers.ProxySite(*ruleset))
+	router.Get("/ruleset", handlers.Ruleset)
+	router.Get("/raw/*", handlers.Raw)
+	router.Post("/api", handlers.Api)
+	router.Get("/api/*", handlers.Api)
+	router.Get("/*", handlers.ProxySite(*ruleset))
 
 	log.Fatal(app.Listen(":" + *port))
 }
