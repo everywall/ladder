@@ -28,7 +28,7 @@ jobs:
           echo -n $(git describe --tags --abbrev=0) > handlers/VERSION
       -
         name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
           go-version: 1.26
       -

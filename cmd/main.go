@@ -104,6 +104,7 @@ func main() {
 		fiber.Config{
 			Prefork:       *prefork,
 			StrictRouting: true,
+			ReadBufferSize: 16 * 1024,
 		},
 	)
 
