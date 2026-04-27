@@ -93,7 +93,8 @@ func main() {
 
 	app := fiber.New(
 		fiber.Config{
-			Prefork: *prefork,
+			Prefork:        *prefork,
+			ReadBufferSize: 16 * 1024,
 		},
 	)
 
