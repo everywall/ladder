@@ -6,8 +6,6 @@ import (
 	"os"
 
 	"ladder/pkg/ruleset"
-
-	"golang.org/x/term"
 )
 
 // HandleRulesetMerge merges a set of ruleset files, specified by the rulesetPath or RULESET env variable, into either YAML or Gzip format.
@@ -48,40 +46,22 @@ func HandleRulesetMerge(rulesetPath string, mergeRulesets bool, useGzip bool, ou
 	return yamlMerge(rs, output)
 }
 
-// gzipMerge takes a RuleSet and an optional output file path pointer. It compresses the RuleSet into Gzip format.
-// If the output file path is provided, the compressed data is written to this file. Otherwise, it prints a warning
-// and outputs the binary data to stdout
+// gzipMerge takes a RuleSet and an output writer. It compresses the RuleSet into Gzip format and writes it to the output.
 //
 // Parameters:
 // - rs: The ruleset.RuleSet to be compressed.
-// - output: The output for the gzip data. If nil, stdout will be used.
+// - output: The output for the gzip data.
 //
 // Returns:
-// - An error if compression or file writing fails, otherwise nil.
+// - An error if compression or writing fails, otherwise nil.
 func gzipMerge(rs ruleset.RuleSet, output io.Writer) error {
 	gzip, err := rs.GzipYaml()
 	if err != nil {
 		return err
 	}
 
-	if output != nil {
-		_, err = io.Copy(output, gzip)
-		if err != nil {
-			return err
-		}
-	}
-
-	if term.IsTerminal(int(os.Stdout.Fd())) {
-		println("warning: binary output can mess up your terminal. Use '--merge-rulesets-output <ruleset.gz>' or pipe it to a file.")
-		os.Exit(1)
-	}
-
-	_, err = io.Copy(os.Stdout, gzip)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err = io.Copy(output, gzip)
+	return err
 }
 
 // yamlMerge takes a RuleSet and an optional output file path pointer. It converts the RuleSet into YAML format.
