@@ -14,6 +14,8 @@ It allows developers, researchers, and publishers to simulate different client e
 
 Ladder is intended for legitimate testing, research, and quality assurance purposes only. It should only be used in compliance with applicable laws and the terms of service of the target website.
 
+![screenshot](ladder.png)
+
 ### How it works
 
 ```mermaid
