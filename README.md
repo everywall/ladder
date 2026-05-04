@@ -8,6 +8,8 @@
 
 *Ladder is a http web proxy.* 
 
+[简体中文](README.zh-CN.md)
+
 Ladder is a developer tool for testing and analyzing paywall implementations and content delivery behavior on modern websites.
 
 It allows developers, researchers, and publishers to simulate different client environments (such as browsers and crawlers) and observe how content is served under varying conditions. This makes it useful for debugging paywall configurations, verifying access controls, http headers, and ensuring consistent behavior across different user agents.
