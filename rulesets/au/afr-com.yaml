@@ -1,0 +1,28 @@
+- domain: www.afr.com
+  headers:
+    referer: https://www.google.com/
+    user-agent: Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            // Remove AFR paywall elements
+            const paywall = document.querySelectorAll('.paywall, .subscription-wall, [class*="paywall"], [class*="premium"], [id*="paywall"]');
+            paywall.forEach(el => { el.remove(); });
+            
+            // Unlock article content
+            const article = document.querySelectorAll('article, [class*="article-content"], [class*="story-body"]');
+            article.forEach(el => {
+              el.style.overflow = '';
+              el.style.maxHeight = 'none';
+              el.classList.remove('locked', 'truncated', 'premium');
+            });
+            
+            // Remove subscription overlays
+            const overlays = document.querySelectorAll('.overlay, .modal, [class*="subscription"], [class*="subscribe"]');
+            overlays.forEach(el => { el.remove(); });
+          });
+        </script>
+
