@@ -41,6 +41,18 @@ type Rule struct {
 	UseFlareSolverr bool    `yaml:"useFlareSolverr,omitempty"`
 	RegexRules      []Regex `yaml:"regexRules,omitempty"`
 
+	// TLSFingerprint configures CycleTLS-based TLS/HTTP2 fingerprinting for this rule.
+	// Setting any sub-field activates CycleTLS as the HTTP client instead of net/http.
+	TLSFingerprint struct {
+		// Ja3 is the raw JA3 TLS fingerprint string, e.g. from a browser capture.
+		Ja3 string `yaml:"ja3,omitempty"`
+		// Ja4r is the JA4 Raw TLS fingerprint (more precise extension ordering).
+		Ja4r string `yaml:"ja4r,omitempty"`
+		// HTTP2 is the HTTP/2 SETTINGS + pseudo-header order fingerprint.
+		// Format: "1:65536;4:131072;5:16384|12517377|0|m,p,a,s"
+		HTTP2 string `yaml:"http2,omitempty"`
+	} `yaml:"tlsFingerprint,omitempty"`
+
 	URLMods struct {
 		Domain []Regex `yaml:"domain,omitempty"`
 		Path   []Regex `yaml:"path,omitempty"`
