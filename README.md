@@ -129,6 +129,7 @@ http://localhost:8080/ruleset
 | `FLARESOLVERR_HOST` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
 
 `ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
+| `BASE_PATH` | Base path for the proxy, useful if you want to run the proxy on a subpath (e.g. http://localhost:8080/proxy/) | `` |
 
 ### Ruleset
 
