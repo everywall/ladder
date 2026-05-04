@@ -32,6 +32,7 @@ sequenceDiagram
 - [x] Remove/inject custom code (HTML, CSS, JavaScript) into the page
 - [x] Apply domain based ruleset/code to modify response / requested URL
 - [x] Keep site browsable
+- [x] TLS Fingerprint emulation (JA3, JA4R, HTTP2)
 - [x] API
 - [x] Fetch RAW HTML
 - [x] Custom User Agent
@@ -174,6 +175,10 @@ There is a basic ruleset available in a separate repository [ruleset.yaml](https
       prepend: | 
         <h2>Subtitle</h2>
 - domain: demo.com
+  tlsFingerprint:
+    ja3: "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513,29-23-24,0"
+    ja4r: "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0000,0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
+    http2: "1:65536;2:0;4:131072;5:16384|12517377|0|m,p,a,s"
   headers:
     content-security-policy: script-src 'self';
     user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36
