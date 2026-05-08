@@ -22,9 +22,10 @@
             <div>
                 <input type="url" id="inputField" placeholder="Proxy Search" name="inputField" class="w-full text-sm leading-6 text-slate-400 rounded-md ring-1 ring-slate-900/10 shadow-sm py-1.5 pl-2 pr-3 hover:ring-slate-300 dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700" required autofocus>
                 <button id="clearButton" type="button" aria-label="Clear Search" title="Clear Search" class="hidden absolute inset-y-0 right-0 items-center pr-2 hover:text-slate-400 hover:dark:text-slate-300" tabindex="-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round""><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                 </button>
             </div>
+            <button type="button" id="pasteButton" class="mt-2 w-full sm:hidden rounded-md bg-blue-600 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">Paste &amp; Go</button>
         </form>
         <footer class="mt-10 mx-4 text-center text-slate-600 dark:text-slate-400">
             <p>
@@ -57,6 +58,18 @@
             document.getElementById('inputField').value = '';
             this.style.display = 'none';
             document.getElementById('inputField').focus();
+        });
+        document.getElementById('pasteButton').addEventListener('click', async function() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('inputField').value = text;
+                if (text.indexOf('http') === -1) {
+                    text = 'https://' + text;
+                }
+                window.location.href = window.location.pathname.replace(/\/$/, '') + '/' + text;
+            } catch (err) {
+                // Clipboard access denied or not available
+            }
         });
     </script>
 
