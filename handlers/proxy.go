@@ -16,6 +16,7 @@ import (
 
 	"ladder/pkg/ruleset"
 
+	cycletls "github.com/Danny-Dasilva/CycleTLS/cycletls"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gofiber/fiber/v2"
 )
@@ -272,35 +273,29 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
-	// Fetch the site
-	client := &http.Client{
-		Timeout: time.Second * time.Duration(defaultTimeout),
-	}
-	req, _ := http.NewRequest("GET", url, nil)
-
+	// Resolve headers shared by both code paths.
+	userAgent := UserAgent
 	if rule.Headers.UserAgent != "" {
-		req.Header.Set("User-Agent", rule.Headers.UserAgent)
-	} else {
-		req.Header.Set("User-Agent", UserAgent)
+		userAgent = rule.Headers.UserAgent
 	}
 
+	referer := u.String()
+	if rule.Headers.Referer != "" && rule.Headers.Referer != "none" {
+		referer = rule.Headers.Referer
+	} else if rule.Headers.Referer == "none" {
+		referer = ""
+	}
+
+	xForwardedFor := ForwardedFor
 	if rule.Headers.XForwardedFor != "" {
-		if rule.Headers.XForwardedFor != "none" {
-			req.Header.Set("X-Forwarded-For", rule.Headers.XForwardedFor)
+		if rule.Headers.XForwardedFor == "none" {
+			xForwardedFor = ""
+		} else {
+			xForwardedFor = rule.Headers.XForwardedFor
 		}
-	} else {
-		req.Header.Set("X-Forwarded-For", ForwardedFor)
 	}
 
-	if rule.Headers.Referer != "" {
-		if rule.Headers.Referer != "none" {
-			req.Header.Set("Referer", rule.Headers.Referer)
-		}
-	} else {
-		req.Header.Set("Referer", u.String())
-	}
-
-	// Handle FlareSolverr integration
+	// Handle FlareSolverr integration (shared by both paths).
 	cookieValue := rule.Headers.Cookie
 	debug := os.Getenv("LOG_URLS") == "true"
 
@@ -319,23 +314,124 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		}
 	}
 
-	if cookieValue != "" {
-		req.Header.Set("Cookie", cookieValue)
-	}
+	fp := rule.TLSFingerprint
+	useCycleTLS := fp.Ja3 != "" || fp.Ja4r != "" || fp.HTTP2 != ""
 
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	defer resp.Body.Close()
+	var resp *http.Response
+	var bodyB []byte
+	var req *http.Request
 
-	bodyB, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", nil, nil, err
+	if useCycleTLS {
+		// ------------------------------------------------------------------
+		// CycleTLS path: spoofs JA3 / JA4r / HTTP2 TLS+HTTP fingerprints.
+		// ------------------------------------------------------------------
+
+		extraHeaders := map[string]string{}
+		/*
+			if xForwardedFor != "" {
+				extraHeaders["X-Forwarded-For"] = xForwardedFor
+			}
+			if referer != "" {
+				extraHeaders["Referer"] = referer
+			}
+			if cookieValue != "" {
+				extraHeaders["Cookie"] = cookieValue
+			}
+		*/
+		extraHeaders["Accept-Encoding"] = "gzip, deflate"
+		extraHeaders["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+		extraHeaders["Accept-Language"] = "en-US,en;q=0.9"
+		//extraHeaders["Cache-Control"] = "no-cache"
+		//extraHeaders["Pragma"] = "no-cache"
+		//extraHeaders["Upgrade-Insecure-Requests"] = "1"
+
+		cycleTLSCookies := []cycletls.Cookie{}
+		if cookieValue != "" {
+			// split cookie from ruleset into individual cookies and add to CycleTLS options
+			cookieParts := strings.Split(cookieValue, ";")
+			for _, part := range cookieParts {
+				part = strings.TrimSpace(part)
+				if part == "" {
+					continue
+				}
+				kv := strings.SplitN(part, "=", 2)
+				if len(kv) != 2 {
+					continue
+				}
+				cycleTLSCookies = append(cycleTLSCookies, cycletls.Cookie{
+					Name:  kv[0],
+					Value: kv[1],
+				})
+			}
+		}
+
+		ctOpts := cycletls.Options{
+			UserAgent:        userAgent,
+			Ja3:              fp.Ja3,
+			Ja4r:             fp.Ja4r,
+			HTTP2Fingerprint: fp.HTTP2,
+			Timeout:          defaultTimeout,
+			Headers:          extraHeaders,
+			Cookies:          cycleTLSCookies,
+		}
+
+		if debug {
+			log.Printf("CycleTLS fetch %s (ja3=%q ja4r=%q http2=%q)", url, fp.Ja3, fp.Ja4r, fp.HTTP2)
+		}
+
+		var cycleTLSErr error
+		resp, bodyB, cycleTLSErr = fetchWithCycleTLS(url, ctOpts)
+		if cycleTLSErr != nil {
+			return "", nil, nil, cycleTLSErr
+		}
+
+		// Build a synthetic *http.Request for callers that inspect it (e.g. api.go).
+		req, _ = http.NewRequest("GET", url, nil)
+		req.Header.Set("User-Agent", userAgent)
+		if xForwardedFor != "" {
+			req.Header.Set("X-Forwarded-For", xForwardedFor)
+		}
+		if referer != "" {
+			req.Header.Set("Referer", referer)
+		}
+		if cookieValue != "" {
+			req.Header.Set("Cookie", cookieValue)
+		}
+	} else {
+		// ------------------------------------------------------------------
+		// Standard net/http path.
+		// ------------------------------------------------------------------
+		client := &http.Client{
+			Timeout: time.Second * time.Duration(defaultTimeout),
+		}
+		req, _ = http.NewRequest("GET", url, nil)
+
+		req.Header.Set("User-Agent", userAgent)
+		if xForwardedFor != "" {
+			req.Header.Set("X-Forwarded-For", xForwardedFor)
+		}
+		if referer != "" {
+			req.Header.Set("Referer", referer)
+		}
+		if cookieValue != "" {
+			req.Header.Set("Cookie", cookieValue)
+		}
+
+		var doErr error
+		resp, doErr = client.Do(req)
+		if doErr != nil {
+			return "", nil, nil, doErr
+		}
+		defer resp.Body.Close()
+
+		var readErr error
+		bodyB, readErr = io.ReadAll(resp.Body)
+		if readErr != nil {
+			return "", nil, nil, readErr
+		}
 	}
 
 	if rule.Headers.CSP != "" {
-		// log.Println(rule.Headers.CSP)
 		resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
 	} else {
 		resp.Header.Del("Content-Security-Policy")

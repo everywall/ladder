@@ -22,3 +22,24 @@
     - position: h1
       replace: |
         <h1>An example with a ladder ;-)</h1>
+
+# Example: TLS fingerprinting via CycleTLS
+# Setting any tlsFingerprint field activates CycleTLS instead of net/http.
+# This is useful for sites that block requests based on TLS/HTTP2 fingerprints
+# (e.g. Cloudflare Bot Management, Akamai, DataDome).
+#
+# - ja3:  Raw JA3 string — spoof the TLS ClientHello to look like a real browser
+# - ja4r: JA4 Raw format — more precise extension ordering fingerprint
+# - http2: HTTP/2 SETTINGS frame + pseudo-header order fingerprint
+#
+# You can capture these values from a real browser session using:
+#   https://tls.peet.ws/api/all  (shows ja3, ja4, http2 akamai fingerprint)
+#
+# - domains:
+#   - www.example-tls-protected.com
+#   tlsFingerprint:
+#     ja3: "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513,29-23-24,0"
+#     ja4r: "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0000,0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
+#     http2: "1:65536;2:0;4:131072;5:16384|12517377|0|m,p,a,s"
+#   headers:
+#     user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
