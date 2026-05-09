@@ -124,7 +124,7 @@ func main() {
 		URL:  basePath + "/favicon.ico",
 	}))
 
-	if os.Getenv("NOLOGS") != "true" {
+	if os.Getenv("NOLOGS") != "true" && os.Getenv("LOG_URLS") != "false" {
 		app.Use(func(c *fiber.Ctx) error {
 			log.Println(c.Method(), c.Path())
 
