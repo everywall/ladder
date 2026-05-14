@@ -103,23 +103,25 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 	// eg: https://localhost:8080/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
 	if isRelativePath {
 		// Parse the referer URL from the request header.
-		refererUrl, err := url.Parse(c.Get("referer"))
+		referer := c.Get("referer")
+		if referer == "" {
+			return "", fmt.Errorf("relative URL '%s' requires a Referer header to reconstruct the target URL; navigate to a full URL (e.g. https://example.com) or use the form first", reqUrl)
+		}
+		refererUrl, err := url.Parse(referer)
 		if err != nil {
 			return "", fmt.Errorf("error parsing referer URL from req: '%s': %v", reqUrl, err)
 		}
 
-		// Extract the real url from referer path
-		realUrl, err := url.Parse(strings.TrimPrefix(refererUrl.Path, "/"))
-		if err != nil {
-			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
-		}
-
 		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
 		fullUrl := &url.URL{
-			Scheme:   realUrl.Scheme,
-			Host:     realUrl.Host,
+			Scheme:   refererUrl.Scheme,
+			Host:     refererUrl.Host,
 			Path:     urlQuery.Path,
 			RawQuery: urlQuery.RawQuery,
+		}
+
+		if fullUrl.Host == "" {
+			return "", fmt.Errorf("relative URL '%s' has a referer '%s' with no host; cannot reconstruct target URL", reqUrl, referer)
 		}
 
 		if os.Getenv("LOG_URLS") == "true" {
