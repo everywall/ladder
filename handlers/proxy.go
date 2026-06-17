@@ -59,7 +59,49 @@ var (
 	allowedDomains   = []string{}
 	defaultTimeout   = 15 // in seconds
 	basePath         = normalizeBasePath(os.Getenv("BASE_PATH"))
+	defaultScheme    = "https"
 )
+
+// SetDefaultScheme configures the scheme prepended to proxied URLs that are
+// supplied without one (e.g. "example.com/page"). Only "http" and "https"
+// are accepted.
+func SetDefaultScheme(scheme string) error {
+	scheme = strings.ToLower(strings.TrimSpace(scheme))
+	if scheme != "http" && scheme != "https" {
+		return fmt.Errorf("invalid default scheme %q: must be \"http\" or \"https\"", scheme)
+	}
+	defaultScheme = scheme
+	return nil
+}
+
+// DefaultScheme returns the currently configured default URL scheme.
+func DefaultScheme() string {
+	return defaultScheme
+}
+
+// ensureScheme prepends the configured default scheme to a URL that looks
+// like an absolute URL but is missing one (e.g. "example.com/page" becomes
+// "https://example.com/page"). URLs that already carry a scheme and paths
+// that don't look host-like are returned unchanged.
+func ensureScheme(raw string) string {
+	if raw == "" {
+		return raw
+	}
+	if i := strings.Index(raw, "://"); i > 0 && i < 12 {
+		return raw
+	}
+	if strings.HasPrefix(raw, "/") {
+		return raw
+	}
+	first := raw
+	if idx := strings.IndexAny(raw, "/?#"); idx >= 0 {
+		first = raw[:idx]
+	}
+	if !strings.ContainsAny(first, ".:") {
+		return raw
+	}
+	return defaultScheme + "://" + raw
+}
 
 func normalizeBasePath(p string) string {
 	if p == "" {
@@ -78,6 +120,11 @@ func init() {
 	}
 	if timeoutStr := os.Getenv("HTTP_TIMEOUT"); timeoutStr != "" {
 		defaultTimeout, _ = strconv.Atoi(timeoutStr)
+	}
+	if scheme := os.Getenv("DEFAULT_SCHEME"); scheme != "" {
+		if err := SetDefaultScheme(scheme); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -113,19 +160,29 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
 		}
 
-		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
-		fullUrl := &url.URL{
-			Scheme:   realUrl.Scheme,
-			Host:     realUrl.Host,
-			Path:     urlQuery.Path,
-			RawQuery: urlQuery.RawQuery,
+		// If the referer points to a proxied site we can reconstruct the full
+		// URL from it. Otherwise (no referer, or referer not a proxied URL),
+		// the user supplied a schemeless absolute URL — fall back to the
+		// configured default scheme.
+		if realUrl.Scheme != "" && realUrl.Host != "" {
+			fullUrl := &url.URL{
+				Scheme:   realUrl.Scheme,
+				Host:     realUrl.Host,
+				Path:     urlQuery.Path,
+				RawQuery: urlQuery.RawQuery,
+			}
+
+			if os.Getenv("LOG_URLS") == "true" {
+				log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+			}
+			return fullUrl.String(), nil
 		}
 
-		if os.Getenv("LOG_URLS") == "true" {
-			log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+		prepended := ensureScheme(reqUrl)
+		if prepended != reqUrl && os.Getenv("LOG_URLS") == "true" {
+			log.Printf("prepended default scheme: '%s' -> '%s'", reqUrl, prepended)
 		}
-		return fullUrl.String(), nil
-
+		return prepended, nil
 	}
 
 	// default behavior:
@@ -243,6 +300,7 @@ func modifyURL(uri string, rule ruleset.Rule) (string, error) {
 }
 
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
+	urlpath = ensureScheme(urlpath)
 	urlQuery := "?"
 	if len(queries) > 0 {
 		for k, v := range queries {

@@ -129,6 +129,7 @@ http://localhost:8080/ruleset
 | `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
 | `FLARESOLVERR_HOST` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
+| `DEFAULT_SCHEME` | Scheme prepended when a requested URL has no scheme (`example.com/page` → `<scheme>://example.com/page`). Must be `http` or `https`. Also configurable via the `--default-scheme` / `-s` CLI flag. | `https` |
 
 `ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
 | `BASE_PATH` | Base path for the proxy, useful if you want to run the proxy on a subpath (e.g. http://localhost:8080/proxy/) | `` |
