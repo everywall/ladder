@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
@@ -130,4 +132,46 @@ func TestExtractUrlPrependsDefaultScheme(t *testing.T) {
 		got := run(t, "/example.com/page", nil)
 		assert.Equal(t, "http://example.com/page", got)
 	})
+}
+
+// TestUnsupportedProtocolSchemeBugRepro pins down the exact stdlib error the
+// user reported. http.Client returns `unsupported protocol scheme ""` when
+// handed a schemeless host-style URL — no network needed, the transport
+// rejects it before dialing. If Go ever changes this wording the test will
+// flag it so we can update the comment/docs.
+func TestUnsupportedProtocolSchemeBugRepro(t *testing.T) {
+	_, err := http.Get("example.com/page")
+	if err == nil {
+		t.Fatalf("expected stdlib http.Get to fail for schemeless URL")
+	}
+	if !strings.Contains(err.Error(), `unsupported protocol scheme ""`) {
+		t.Fatalf("expected `unsupported protocol scheme \"\"` in error, got: %v", err)
+	}
+}
+
+// TestFetchSiteHandlesSchemelessURL is the end-to-end fix verification: a
+// schemeless URL flows through fetchSite to a real (httptest) upstream and
+// returns the body without the unsupported-protocol error.
+func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
+	originalScheme := DefaultScheme()
+	t.Cleanup(func() { _ = SetDefaultScheme(originalScheme) })
+
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("hello from upstream"))
+	}))
+	t.Cleanup(upstream.Close)
+
+	// httptest.NewServer speaks plain http; configure the default accordingly.
+	if err := SetDefaultScheme("http"); err != nil {
+		t.Fatalf("SetDefaultScheme: %v", err)
+	}
+
+	schemelessHost := strings.TrimPrefix(upstream.URL, "http://")
+
+	body, _, resp, err := fetchSite(schemelessHost, map[string]string{})
+	assert.NoError(t, err, "schemeless URL should now succeed via the default-scheme fallback")
+	if assert.NotNil(t, resp) {
+		assert.Equal(t, http.StatusOK, resp.StatusCode)
+	}
+	assert.Contains(t, body, "hello from upstream")
 }
