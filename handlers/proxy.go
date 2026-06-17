@@ -79,20 +79,13 @@ func DefaultScheme() string {
 }
 
 func ensureScheme(raw string) string {
-	if raw == "" {
+	if raw == "" || strings.HasPrefix(raw, "/") {
 		return raw
 	}
-	if i := strings.Index(raw, "://"); i > 0 && i < 12 {
-		return raw
+	if strings.HasPrefix(raw, "://") {
+		raw = raw[3:]
 	}
-	if strings.HasPrefix(raw, "/") {
-		return raw
-	}
-	first := raw
-	if idx := strings.IndexAny(raw, "/?#"); idx >= 0 {
-		first = raw[:idx]
-	}
-	if !strings.ContainsAny(first, ".:") {
+	if strings.Contains(raw, "://") {
 		return raw
 	}
 	return defaultScheme + "://" + raw
@@ -115,11 +108,6 @@ func init() {
 	}
 	if timeoutStr := os.Getenv("HTTP_TIMEOUT"); timeoutStr != "" {
 		defaultTimeout, _ = strconv.Atoi(timeoutStr)
-	}
-	if scheme := os.Getenv("DEFAULT_SCHEME"); scheme != "" {
-		if err := SetDefaultScheme(scheme); err != nil {
-			log.Fatal(err)
-		}
 	}
 }
 
@@ -291,7 +279,6 @@ func modifyURL(uri string, rule ruleset.Rule) (string, error) {
 }
 
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
-	urlpath = ensureScheme(urlpath)
 	urlQuery := "?"
 	if len(queries) > 0 {
 		for k, v := range queries {

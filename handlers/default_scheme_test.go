@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -54,10 +55,13 @@ func TestEnsureScheme(t *testing.T) {
 		{"schemeless host with query", "example.com/page?q=1", "https://example.com/page?q=1"},
 		{"schemeless host with port", "example.com:8443/page", "https://example.com:8443/page"},
 		{"localhost with port", "localhost:8080/api", "https://localhost:8080/api"},
+		{"single-segment host", "localhost/api", "https://localhost/api"},
 		{"truly relative path", "/images/foo.jpg", "/images/foo.jpg"},
-		{"single segment no dot", "about", "about"},
+		{"bare hostname", "example.com", "https://example.com"},
+		{"stray leading scheme separator", "://example.com", "https://example.com"},
+		{"non-network scheme treated as schemeless", "mailto:foo@bar.com", "https://mailto:foo@bar.com"},
+		{"ftp scheme left alone", "ftp://example.com/file", "ftp://example.com/file"},
 		{"empty", "", ""},
-		{"protocol-relative looks like host", "example.com", "https://example.com"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -144,7 +148,7 @@ func TestUnsupportedProtocolSchemeBugRepro(t *testing.T) {
 	}
 }
 
-func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
+func TestRawHandlerHandlesSchemelessURL(t *testing.T) {
 	originalScheme := DefaultScheme()
 	t.Cleanup(func() { _ = SetDefaultScheme(originalScheme) })
 
@@ -159,10 +163,14 @@ func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
 
 	schemelessHost := strings.TrimPrefix(upstream.URL, "http://")
 
-	body, _, resp, err := fetchSite(schemelessHost, map[string]string{})
+	app := fiber.New()
+	app.Get("/raw/*", Raw)
+	req := httptest.NewRequest("GET", "/raw/"+schemelessHost, nil)
+	resp, err := app.Test(req)
 	assert.NoError(t, err)
-	if assert.NotNil(t, resp) {
-		assert.Equal(t, http.StatusOK, resp.StatusCode)
-	}
-	assert.Contains(t, body, "hello from upstream")
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.Contains(t, string(body), "hello from upstream")
 }

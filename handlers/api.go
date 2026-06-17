@@ -33,6 +33,7 @@ func Api(c *fiber.Ctx) error {
 		url = c.Params("*")
 	}
 
+	url = ensureScheme(url)
 	body, req, resp, err := fetchSite(url, queries)
 	if err != nil {
 		log.Println("ERROR:", err)

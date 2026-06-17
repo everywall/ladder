@@ -8,7 +8,7 @@ import (
 
 func Raw(c *fiber.Ctx) error {
 	// Get the url from the URL
-	urlQuery := c.Params("*")
+	urlQuery := ensureScheme(c.Params("*"))
 
 	queries := c.Queries()
 	body, _, _, err := fetchSite(urlQuery, queries)
