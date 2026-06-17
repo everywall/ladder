@@ -134,11 +134,6 @@ func TestExtractUrlPrependsDefaultScheme(t *testing.T) {
 	})
 }
 
-// TestUnsupportedProtocolSchemeBugRepro pins down the exact stdlib error the
-// user reported. http.Client returns `unsupported protocol scheme ""` when
-// handed a schemeless host-style URL — no network needed, the transport
-// rejects it before dialing. If Go ever changes this wording the test will
-// flag it so we can update the comment/docs.
 func TestUnsupportedProtocolSchemeBugRepro(t *testing.T) {
 	_, err := http.Get("example.com/page")
 	if err == nil {
@@ -149,9 +144,6 @@ func TestUnsupportedProtocolSchemeBugRepro(t *testing.T) {
 	}
 }
 
-// TestFetchSiteHandlesSchemelessURL is the end-to-end fix verification: a
-// schemeless URL flows through fetchSite to a real (httptest) upstream and
-// returns the body without the unsupported-protocol error.
 func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
 	originalScheme := DefaultScheme()
 	t.Cleanup(func() { _ = SetDefaultScheme(originalScheme) })
@@ -161,7 +153,6 @@ func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
 	}))
 	t.Cleanup(upstream.Close)
 
-	// httptest.NewServer speaks plain http; configure the default accordingly.
 	if err := SetDefaultScheme("http"); err != nil {
 		t.Fatalf("SetDefaultScheme: %v", err)
 	}
@@ -169,7 +160,7 @@ func TestFetchSiteHandlesSchemelessURL(t *testing.T) {
 	schemelessHost := strings.TrimPrefix(upstream.URL, "http://")
 
 	body, _, resp, err := fetchSite(schemelessHost, map[string]string{})
-	assert.NoError(t, err, "schemeless URL should now succeed via the default-scheme fallback")
+	assert.NoError(t, err)
 	if assert.NotNil(t, resp) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 	}

@@ -62,9 +62,8 @@ var (
 	defaultScheme    = "https"
 )
 
-// SetDefaultScheme configures the scheme prepended to proxied URLs that are
-// supplied without one (e.g. "example.com/page"). Only "http" and "https"
-// are accepted.
+// SetDefaultScheme sets the scheme prepended to schemeless proxied URLs.
+// Only "http" and "https" are accepted.
 func SetDefaultScheme(scheme string) error {
 	scheme = strings.ToLower(strings.TrimSpace(scheme))
 	if scheme != "http" && scheme != "https" {
@@ -74,15 +73,11 @@ func SetDefaultScheme(scheme string) error {
 	return nil
 }
 
-// DefaultScheme returns the currently configured default URL scheme.
+// DefaultScheme returns the configured default URL scheme.
 func DefaultScheme() string {
 	return defaultScheme
 }
 
-// ensureScheme prepends the configured default scheme to a URL that looks
-// like an absolute URL but is missing one (e.g. "example.com/page" becomes
-// "https://example.com/page"). URLs that already carry a scheme and paths
-// that don't look host-like are returned unchanged.
 func ensureScheme(raw string) string {
 	if raw == "" {
 		return raw
@@ -160,10 +155,6 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
 		}
 
-		// If the referer points to a proxied site we can reconstruct the full
-		// URL from it. Otherwise (no referer, or referer not a proxied URL),
-		// the user supplied a schemeless absolute URL — fall back to the
-		// configured default scheme.
 		if realUrl.Scheme != "" && realUrl.Host != "" {
 			fullUrl := &url.URL{
 				Scheme:   realUrl.Scheme,
