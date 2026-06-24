@@ -42,6 +42,11 @@
             if (url.indexOf('http') === -1) {
                 url = 'https://' + url;
             }
+            try {
+                url = encodeURIComponent(decodeURIComponent(url));
+            } catch (e) {
+                url = encodeURIComponent(url);
+            }
             window.location.href = window.location.pathname.replace(/\/$/, '') + '/' + url;
             return false;
         });
