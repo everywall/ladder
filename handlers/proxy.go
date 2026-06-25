@@ -377,8 +377,12 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		resp.Header.Del("Content-Security-Policy")
 	}
 
-	// log.Print("rule", rule) TODO: Add a debug mode to print the rule
-	body := rewriteHtml(bodyB, u, rule)
+	// Apply ruleset modifications (regexRules + injections) BEFORE URL rewriting:
+	// rewriteHtml renames `src="/..."` to `script="..."` on relative-URL script tags,
+	// which would otherwise prevent our `<script[^>]*src="..."` regex patterns from
+	// matching. applyRules also adds injections to <head> before any prefix munging.
+	body := applyRules(string(bodyB), rule)
+	body = rewriteHtml([]byte(body), u, rule)
 	return body, req, resp, nil
 }
 
