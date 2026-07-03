@@ -1,6 +1,5 @@
 - domains: 
-  - www.nytimes.com
-  - www.time.com#   
+  - httpbingo.org
   tlsFingerprint:
     ja3: "771,4865-4866-4867-49195-49199-49196-49200-52393-52392-49171-49172-156-157-47-53,0-23-65281-10-11-35-16-5-13-18-51-45-43-27-17513,29-23-24,0"
     ja4r: "t13d1516h2_002f,0035,009c,009d,1301,1302,1303,c013,c014,c02b,c02c,c02f,c030,cca8,cca9_0000,0005,000a,000b,000d,0012,0017,001b,0023,002b,002d,0033,44cd,fe0d,ff01_0403,0804,0401,0503,0805,0501,0806,0601"
@@ -8,14 +7,4 @@
   headers:
     user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     cookie: nyt-a=; nyt-gdpr=0; nyt-geo=DE; nyt-privacy=1; path=/; SameSite=Lax
-    referer: https://www.nytimes.com/
-  injections:
-    - position: head
-      append: |
-        <script>
-          window.localStorage.clear();
-          document.addEventListener("DOMContentLoaded", () => {
-            const banners = document.querySelectorAll('div[data-testid="inline-message"], div[id^="ad-"], div[id^="leaderboard-"], div.expanded-dock, div.pz-ad-box, div[id="top-wrapper"], div[id="bottom-wrapper"]');
-            banners.forEach(el => { el.remove(); });
-          });
-        </script>
+    #referer: https://www.google.com/ 
