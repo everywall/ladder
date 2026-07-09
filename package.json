@@ -3,7 +3,7 @@
 		"build": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --build && npx minify ./styles/output.css > ./cmd/styles.css"
 	},
 	"devDependencies": {
-		"minify": "^15.2.0",
+		"minify": "^15.3.1",
 		"tailwindcss": "^3.4.18"
 	}
 }
