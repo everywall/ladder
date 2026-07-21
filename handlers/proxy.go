@@ -59,7 +59,37 @@ var (
 	allowedDomains   = []string{}
 	defaultTimeout   = 15 // in seconds
 	basePath         = normalizeBasePath(os.Getenv("BASE_PATH"))
+	defaultScheme    = "https"
 )
+
+// SetDefaultScheme sets the scheme prepended to schemeless proxied URLs.
+// Only "http" and "https" are accepted.
+func SetDefaultScheme(scheme string) error {
+	scheme = strings.ToLower(strings.TrimSpace(scheme))
+	if scheme != "http" && scheme != "https" {
+		return fmt.Errorf("invalid default scheme %q: must be \"http\" or \"https\"", scheme)
+	}
+	defaultScheme = scheme
+	return nil
+}
+
+// DefaultScheme returns the configured default URL scheme.
+func DefaultScheme() string {
+	return defaultScheme
+}
+
+func ensureScheme(raw string) string {
+	if raw == "" || strings.HasPrefix(raw, "/") {
+		return raw
+	}
+	if strings.HasPrefix(raw, "://") {
+		raw = raw[3:]
+	}
+	if strings.Contains(raw, "://") {
+		return raw
+	}
+	return defaultScheme + "://" + raw
+}
 
 func normalizeBasePath(p string) string {
 	if p == "" {
@@ -113,19 +143,25 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
 		}
 
-		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
-		fullUrl := &url.URL{
-			Scheme:   realUrl.Scheme,
-			Host:     realUrl.Host,
-			Path:     urlQuery.Path,
-			RawQuery: urlQuery.RawQuery,
+		if realUrl.Scheme != "" && realUrl.Host != "" {
+			fullUrl := &url.URL{
+				Scheme:   realUrl.Scheme,
+				Host:     realUrl.Host,
+				Path:     urlQuery.Path,
+				RawQuery: urlQuery.RawQuery,
+			}
+
+			if os.Getenv("LOG_URLS") == "true" {
+				log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+			}
+			return fullUrl.String(), nil
 		}
 
-		if os.Getenv("LOG_URLS") == "true" {
-			log.Printf("modified relative URL: '%s' -> '%s'", reqUrl, fullUrl.String())
+		prepended := ensureScheme(reqUrl)
+		if prepended != reqUrl && os.Getenv("LOG_URLS") == "true" {
+			log.Printf("prepended default scheme: '%s' -> '%s'", reqUrl, prepended)
 		}
-		return fullUrl.String(), nil
-
+		return prepended, nil
 	}
 
 	// default behavior:
@@ -341,8 +377,12 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		resp.Header.Del("Content-Security-Policy")
 	}
 
-	// log.Print("rule", rule) TODO: Add a debug mode to print the rule
-	body := rewriteHtml(bodyB, u, rule)
+	// Apply ruleset modifications (regexRules + injections) BEFORE URL rewriting:
+	// rewriteHtml renames `src="/..."` to `script="..."` on relative-URL script tags,
+	// which would otherwise prevent our `<script[^>]*src="..."` regex patterns from
+	// matching. applyRules also adds injections to <head> before any prefix munging.
+	body := applyRules(string(bodyB), rule)
+	body = rewriteHtml([]byte(body), u, rule)
 	return body, req, resp, nil
 }
 
