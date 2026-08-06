@@ -61,6 +61,17 @@ func main() {
 		Help:     "Specify output file for --merge-rulesets and --merge-rulesets-gzip. Requires --ruleset and --merge-rulesets args.",
 	})
 
+	defaultSchemeEnv := os.Getenv("DEFAULT_SCHEME")
+	if defaultSchemeEnv == "" {
+		defaultSchemeEnv = "https"
+	}
+
+	defaultScheme := parser.String("s", "default-scheme", &argparse.Options{
+		Required: false,
+		Default:  defaultSchemeEnv,
+		Help:     "Scheme to prepend when a proxied URL has no scheme. Must be \"http\" or \"https\".",
+	})
+
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -89,6 +100,11 @@ func main() {
 
 	if os.Getenv("PREFORK") == "true" {
 		*prefork = true
+	}
+
+	if err := handlers.SetDefaultScheme(*defaultScheme); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	// BASE_PATH allows running ladder under a sub-path, e.g. /mypath
