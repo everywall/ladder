@@ -1,0 +1,27 @@
+- domain: www.news.com.au
+  headers:
+    referer: https://www.google.com/
+  injections:
+    - position: head
+      append: |
+        <script>
+          window.localStorage.clear();
+          document.addEventListener("DOMContentLoaded", () => {
+            // Remove News.com.au paywall elements
+            const paywall = document.querySelectorAll('.paywall, .subscription-gate, [class*="paywall"], [class*="premium"], [id*="paywall"], [id*="subscription"]');
+            paywall.forEach(el => { el.remove(); });
+            
+            // Unlock article content
+            const article = document.querySelectorAll('article, [class*="article-body"], [class*="story"]');
+            article.forEach(el => {
+              el.style.overflow = '';
+              el.style.maxHeight = '';
+              el.style.display = '';
+            });
+            
+            // Remove subscription prompts and banners
+            const subscribeBanners = document.querySelectorAll('[class*="subscribe"], [class*="sign-up"], .subscription-promo');
+            subscribeBanners.forEach(el => { el.remove(); });
+          });
+        </script>
+
