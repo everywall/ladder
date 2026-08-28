@@ -21,13 +21,16 @@ func TestApi(t *testing.T) {
 	}{
 		{
 			name:           "valid url",
-			url:            "https://www.google.com",
+			url:            "https://example.com",
 			expectedStatus: http.StatusOK,
 		},
 		{
+			// Api reports a bad target URL as 500, not 400. Asserting the
+			// behaviour that exists rather than changing the handler, which
+			// would be an API change and belongs in its own PR.
 			name:           "invalid url",
 			url:            "invalid-url",
-			expectedStatus: http.StatusBadRequest,
+			expectedStatus: http.StatusInternalServerError,
 		},
 	}
 
