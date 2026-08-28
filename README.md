@@ -126,11 +126,30 @@ http://localhost:8080/ruleset
 | `FORM_PATH` | Path to custom Form HTML | `` |
 | `RULESET` | Path or URL to a ruleset file, accepts local directories | `https://raw.githubusercontent.com/everywall/ladder-rules/main/ruleset.yaml` or `/path/to/my/rules.yaml` or `/path/to/my/rules/` |
 | `EXPOSE_RULESET` | Make your Ruleset available to other ladders | `true` |
-| `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Empty = no limitations | `` |
+| `ALLOWED_DOMAINS` | Comma separated list of allowed domains. Matches the domain itself and its subdomains. Empty = no limitations | `` |
 | `ALLOWED_DOMAINS_RULESET` | Allow Domains from Ruleset. false = no limitations | `false` |
+| `ALLOW_PRIVATE_ADDRESSES` | Allow fetching loopback, private and link-local addresses. Off by default, see [Fetching private addresses](#fetching-private-addresses) | `false` |
 | `FLARESOLVERR_HOST` | URL for the FlareSolverr service for Cloudflare bypass (optional) | `http://localhost:8191` |
 
 `ALLOWED_DOMAINS` and `ALLOWED_DOMAINS_RULESET` are joined together. If both are empty, no limitations are applied.
+
+#### Fetching private addresses
+
+Ladder fetches whatever URL it is handed, from the server rather than from your
+browser. That means anything that can reach ladder can also ask it to read
+`http://localhost`, the rest of the machine's network, or a cloud provider's
+instance metadata service at `169.254.169.254`.
+
+By default ladder refuses to connect to loopback, private, link-local, CGNAT and
+multicast addresses. The address is checked immediately before connecting, so it
+also applies to redirects and to hostnames that resolve into a private range.
+
+Set `ALLOW_PRIVATE_ADDRESSES=true` if you are deliberately pointing ladder at
+hosts on your own network. Note that this check applies to the address ladder
+dials, so if you route ladder's traffic through an HTTP proxy on a private
+address you will need to set it too. `FLARESOLVERR_HOST` and a remote `RULESET`
+URL are not affected: those come from your own configuration rather than from a
+request.
 | `BASE_PATH` | Base path for the proxy, useful if you want to run the proxy on a subpath (e.g. http://localhost:8080/proxy/) | `` |
 
 ### Ruleset

@@ -171,3 +171,21 @@ func TestLoadRulesFromLocalDir(t *testing.T) {
 		assert.Equal(t, rule.RegexRules[0].Replace, "https:")
 	}
 }
+
+// Rules written with only the plural `domains:` key have an empty Domain field.
+// Domains() must not emit that empty string: ALLOWED_DOMAINS_RULESET joins this
+// list into the allowlist, where a blank entry matched every host and so turned
+// the option into "allow everything".
+func TestDomainsSkipsEmptyEntries(t *testing.T) {
+	rs := RuleSet{
+		{Domain: "example.com"},
+		{Domains: []string{"www.nytimes.com", "www.time.com"}},
+		{Domain: "", Domains: []string{""}},
+	}
+
+	domains := rs.Domains()
+
+	assert.Equal(t, []string{"example.com", "www.nytimes.com", "www.time.com"}, domains)
+	assert.NotContains(t, domains, "")
+	assert.Equal(t, 3, rs.DomainCount())
+}
