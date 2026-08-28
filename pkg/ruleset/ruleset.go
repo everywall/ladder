@@ -277,11 +277,21 @@ func (rs *RuleSet) GzipYaml() (io.Reader, error) {
 }
 
 // Domains extracts and returns a slice of all domains present in the RuleSet.
+// Blank entries are skipped. Rules that only use the plural `domains:` key have
+// an empty `Domain` field, and emitting that empty string used to poison
+// ALLOWED_DOMAINS_RULESET: an empty entry matched every host, so turning the
+// option on allowed everything instead of restricting anything.
 func (rs *RuleSet) Domains() []string {
 	var domains []string
 	for _, rule := range *rs {
-		domains = append(domains, rule.Domain)
-		domains = append(domains, rule.Domains...)
+		if rule.Domain != "" {
+			domains = append(domains, rule.Domain)
+		}
+		for _, domain := range rule.Domains {
+			if domain != "" {
+				domains = append(domains, domain)
+			}
+		}
 	}
 	return domains
 }
