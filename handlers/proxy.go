@@ -367,6 +367,17 @@ func rewriteHtml(bodyB []byte, u *url.URL, rule ruleset.Rule) string {
 	body = strings.ReplaceAll(body, "url('/", "url('"+proxyPrefix)
 	body = strings.ReplaceAll(body, "url(/", "url("+proxyPrefix)
 	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\""+proxyPrefix)
+
+	// Apply the ruleset's regexRules and injections. This call was dropped by
+	// accident in 8fa0531 when the URL rewriting was refactored onto
+	// proxyPrefix, which left regexRules and injections doing nothing at all.
+	// applyRules already returns early when no ruleset is loaded.
+	//
+	// The original was guarded by os.Getenv("RULESET") != "", which missed
+	// rulesets supplied with the --ruleset flag instead of the environment
+	// variable. Guarding on the loaded ruleset inside applyRules covers both.
+	body = applyRules(body, rule)
+
 	return body
 }
 
@@ -406,14 +417,24 @@ func applyRules(body string, rule ruleset.Rule) string {
 		return body
 	}
 
+	// Rules come from a ruleset file that may be fetched from a remote URL, so
+	// a bad pattern in one is an input error, not a programmer error. Compile
+	// rather than MustCompile: a rule that does not compile is skipped and
+	// logged instead of panicking the request.
 	for _, regexRule := range rule.RegexRules {
-		re := regexp.MustCompile(regexRule.Match)
+		re, err := regexp.Compile(regexRule.Match)
+		if err != nil {
+			log.Printf("WARN: skipping regexRule with invalid pattern %q: %v", regexRule.Match, err)
+			continue
+		}
 		body = re.ReplaceAllString(body, regexRule.Replace)
 	}
+
 	for _, injection := range rule.Injections {
 		doc, err := goquery.NewDocumentFromReader(strings.NewReader(body))
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("WARN: skipping injections, could not parse document: %v", err)
+			return body
 		}
 		if injection.Replace != "" {
 			doc.Find(injection.Position).ReplaceWithHtml(injection.Replace)
@@ -424,10 +445,12 @@ func applyRules(body string, rule ruleset.Rule) string {
 		if injection.Prepend != "" {
 			doc.Find(injection.Position).PrependHtml(injection.Prepend)
 		}
-		body, err = doc.Html()
+		injected, err := doc.Html()
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("WARN: skipping injection at %q, could not render document: %v", injection.Position, err)
+			continue
 		}
+		body = injected
 	}
 
 	return body
