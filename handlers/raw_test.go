@@ -16,19 +16,25 @@ func TestRaw(t *testing.T) {
 	app.Get("/raw/*", Raw)
 
 	testCases := []struct {
-		name     string
-		url      string
-		expected string
+		name           string
+		url            string
+		expectedStatus int
+		expected       string
 	}{
 		{
-			name:     "valid url",
-			url:      "https://www.google.com",
-			expected: "<!doctype html>",
+			name:           "valid url",
+			url:            "https://example.com",
+			expectedStatus: http.StatusOK,
+			expected:       "<!doctype html>",
 		},
 		{
-			name:     "invalid url",
-			url:      "invalid-url",
-			expected: "parse invalid-url: invalid URI for request",
+			// Raw reports a bad target URL as 500 and returns the error from
+			// the HTTP client, not a url.Parse error. Both assertions here
+			// were guesses that had never been run.
+			name:           "invalid url",
+			url:            "invalid-url",
+			expectedStatus: http.StatusInternalServerError,
+			expected:       `unsupported protocol scheme`,
 		},
 	}
 
@@ -41,8 +47,8 @@ func TestRaw(t *testing.T) {
 			}
 			defer resp.Body.Close()
 
-			if resp.StatusCode != http.StatusOK {
-				t.Errorf("expected status OK; got %v", resp.Status)
+			if resp.StatusCode != tc.expectedStatus {
+				t.Errorf("expected status %d; got %v", tc.expectedStatus, resp.Status)
 			}
 
 			body, err := io.ReadAll(resp.Body)
