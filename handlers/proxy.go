@@ -101,16 +101,34 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 
 	// eg: https://localhost:8080/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
 	if isRelativePath {
+		// The path is on our own origin, so the only thing that says which
+		// site it belongs to is the referer. Without one there is nothing to
+		// resolve it against, and handing the path back unchanged only defers
+		// the failure to the HTTP client, which reports it as the unhelpful
+		// `unsupported protocol scheme ""`.
+		referer := c.Get("referer")
+		if referer == "" {
+			return "", fmt.Errorf("cannot resolve relative path '%s': request has no referer to resolve it against", reqUrl)
+		}
+
 		// Parse the referer URL from the request header.
-		refererUrl, err := url.Parse(c.Get("referer"))
+		refererUrl, err := url.Parse(referer)
 		if err != nil {
 			return "", fmt.Errorf("error parsing referer URL from req: '%s': %v", reqUrl, err)
 		}
 
-		// Extract the real url from referer path
-		realUrl, err := url.Parse(strings.TrimPrefix(refererUrl.Path, "/"))
+		// Extract the real url from referer path. Under BASE_PATH the proxied
+		// URL sits after the base path rather than at the root.
+		refererPath := strings.TrimPrefix(refererUrl.Path, basePath)
+		realUrl, err := url.Parse(strings.TrimPrefix(refererPath, "/"))
 		if err != nil {
 			return "", fmt.Errorf("error parsing real URL from referer '%s': %v", refererUrl.Path, err)
+		}
+
+		// A referer that is not itself a proxied page - the form at /, a bare
+		// origin, another site - carries no host to borrow.
+		if realUrl.Scheme == "" || realUrl.Host == "" {
+			return "", fmt.Errorf("cannot resolve relative path '%s': referer '%s' does not contain a proxied URL", reqUrl, referer)
 		}
 
 		// reconstruct the full URL using the referer's scheme, host, and the relative path / queries
@@ -130,6 +148,12 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 
 	// default behavior:
 	// eg: https://localhost:8080/https://realsite.com/images/foobar.jpg -> https://realsite.com/images/foobar.jpg
+	if urlQuery.Scheme != "http" && urlQuery.Scheme != "https" {
+		return "", fmt.Errorf("cannot proxy request URL '%s': unsupported scheme '%s'", reqUrl, urlQuery.Scheme)
+	}
+	if urlQuery.Host == "" {
+		return "", fmt.Errorf("cannot proxy request URL '%s': no host", reqUrl)
+	}
 	return urlQuery.String(), nil
 }
 
@@ -188,6 +212,7 @@ func ProxySite(rulesetPath string) fiber.Handler {
 		url, err := extractUrl(c)
 		if err != nil {
 			log.Println("ERROR In URL extraction:", err)
+			return c.Status(fiber.StatusBadRequest).SendString(err.Error())
 		}
 
 		queries := c.Queries()
