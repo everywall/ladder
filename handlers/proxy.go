@@ -133,6 +133,45 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 	return urlQuery.String(), nil
 }
 
+// staticAsset matches paths that are not pages. They are fetched directly,
+// because FlareSolverr's browser would return them wrapped in an HTML page.
+var staticAsset = regexp.MustCompile(`(?i)\.(css|js|mjs|map|json|xml|png|jpe?g|gif|webp|avif|svg|ico|bmp|woff2?|ttf|otf|eot|mp4|webm|mp3|m4a|pdf|zip)$`)
+
+// getFlareSolverrPage returns the page as FlareSolverr's browser loaded it.
+func getFlareSolverrPage(targetURL string) (string, int, error) {
+	if flareSolverrHost == "" {
+		return "", 0, fmt.Errorf("FLARESOLVERR_HOST environment variable not set")
+	}
+
+	reqBody := FlareSolverrRequest{
+		Cmd:        "request.get",
+		URL:        targetURL,
+		MaxTimeout: 60000,
+	}
+
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return "", 0, err
+	}
+
+	resp, err := http.Post(flareSolverrHost+"/v1", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", 0, err
+	}
+	defer resp.Body.Close()
+
+	var fsResp FlareSolverrResponse
+	if err := json.NewDecoder(resp.Body).Decode(&fsResp); err != nil {
+		return "", 0, err
+	}
+
+	if fsResp.Status != "ok" {
+		return "", 0, fmt.Errorf("FlareSolverr error: %s", fsResp.Message)
+	}
+
+	return fsResp.Solution.Response, fsResp.Solution.Status, nil
+}
+
 // getFlareSolverrCookies retrieves cookies from FlareSolverr for the given URL
 func getFlareSolverrCookies(targetURL string) (string, error) {
 	if flareSolverrHost == "" {
@@ -272,6 +311,23 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
+	// For pages, return what FlareSolverr's browser loaded. Sites that
+	// fingerprint the client reject a refetch even with the solved cookies.
+	useFlareSolverr := rule.UseFlareSolverr && flareSolverrHost != "" && !staticAsset.MatchString(u.Path)
+	if useFlareSolverr {
+		page, status, err := getFlareSolverrPage(url)
+		if err == nil {
+			req, _ := http.NewRequest("GET", url, nil)
+			resp := &http.Response{StatusCode: status, Header: http.Header{}}
+			resp.Header.Set("Content-Type", "text/html; charset=utf-8")
+			if rule.Headers.CSP != "" {
+				resp.Header.Set("Content-Security-Policy", rule.Headers.CSP)
+			}
+			return rewriteHtml([]byte(page), u, rule), req, resp, nil
+		}
+		log.Printf("FlareSolverr page failed for %s, fetching directly: %v", url, err)
+	}
+
 	// Fetch the site
 	client := &http.Client{
 		Timeout: time.Second * time.Duration(defaultTimeout),
@@ -304,7 +360,7 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 	cookieValue := rule.Headers.Cookie
 	debug := os.Getenv("LOG_URLS") == "true"
 
-	if rule.UseFlareSolverr && flareSolverrHost != "" {
+	if useFlareSolverr {
 		if fsCookies, err := getFlareSolverrCookies(url); err == nil {
 			if cookieValue != "" {
 				cookieValue = cookieValue + "; " + fsCookies
