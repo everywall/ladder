@@ -46,7 +46,7 @@ func TestRewriteHtml(t *testing.T) {
 			</head>
 			<body>
 				<img src="/https://example.com/image.jpg">
-				<script script="/https://example.com/script.js"></script>
+				<script src="/https://example.com/script.js"></script>
 				<a href="/https://example.com/about">About Us</a>
 				<div style="background-image: url('/https://example.com/background.jpg')"></div>
 			</body>
