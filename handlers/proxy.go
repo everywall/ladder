@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"ladder/pkg/ruleset"
@@ -59,7 +61,121 @@ var (
 	allowedDomains   = []string{}
 	defaultTimeout   = 15 // in seconds
 	basePath         = normalizeBasePath(os.Getenv("BASE_PATH"))
+
+	// allowPrivateAddresses opts out of the SSRF guard below. It is off by
+	// default: ladder fetches whatever URL the caller hands it, so without a
+	// guard it will happily read the loopback interface, the LAN it is running
+	// on, or a cloud provider's instance metadata service on behalf of anyone
+	// who can reach it. Set ALLOW_PRIVATE_ADDRESSES=true if you are running
+	// ladder against hosts on your own network on purpose.
+	allowPrivateAddresses = os.Getenv("ALLOW_PRIVATE_ADDRESSES") == "true"
+
+	// RFC 6598 carrier grade NAT and RFC 1122 "this host on this network".
+	// Neither is covered by net.IP's own helpers.
+	cgnatNet    = &net.IPNet{IP: net.IPv4(100, 64, 0, 0), Mask: net.CIDRMask(10, 32)}
+	thisHostNet = &net.IPNet{IP: net.IPv4(0, 0, 0, 0), Mask: net.CIDRMask(8, 32)}
+
+	// safeTransport is used for every page fetch. FlareSolverr calls and remote
+	// ruleset loading deliberately keep using the default transport: those
+	// hosts come from the operator's config rather than from a request, and
+	// they are normally on a private network.
+	safeTransport = newSafeTransport()
 )
+
+// newSafeTransport returns the default transport with a dial guard attached.
+func newSafeTransport() *http.Transport {
+	t := http.DefaultTransport.(*http.Transport).Clone()
+	t.DialContext = (&net.Dialer{
+		Timeout:   10 * time.Second,
+		KeepAlive: 30 * time.Second,
+		Control:   safeDialControl,
+	}).DialContext
+	return t
+}
+
+// safeDialControl runs after DNS resolution and immediately before connect, so
+// it inspects the address actually being dialled. Checking there rather than on
+// the request URL means it also covers redirects and DNS rebinding, where the
+// hostname looks fine but resolves somewhere it should not.
+func safeDialControl(network, address string, _ syscall.RawConn) error {
+	if allowPrivateAddresses {
+		return nil
+	}
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return err
+	}
+	if ip := net.ParseIP(host); isBlockedIP(ip) {
+		return fmt.Errorf("blocked request to non-public address %s (set ALLOW_PRIVATE_ADDRESSES=true to allow)", host)
+	}
+	return nil
+}
+
+// isBlockedIP reports whether ip is somewhere ladder has no business fetching
+// from on a caller's behalf: the host itself, the private network around it, or
+// the link local range cloud providers put instance metadata on (169.254.169.254).
+func isBlockedIP(ip net.IP) bool {
+	if ip == nil {
+		return true
+	}
+	if ip.IsLoopback() || ip.IsPrivate() || ip.IsUnspecified() ||
+		ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() ||
+		ip.IsInterfaceLocalMulticast() || ip.IsMulticast() {
+		return true
+	}
+	return cgnatNet.Contains(ip) || thisHostNet.Contains(ip)
+}
+
+// checkRedirect re-applies the domain allowlist on every hop. Without it an
+// allowed domain could redirect anywhere and the allowlist would only ever be
+// enforced on the first request.
+func checkRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) >= 10 {
+		return fmt.Errorf("stopped after %d redirects", len(via))
+	}
+	if len(allowedDomains) > 0 && !domainAllowed(req.URL.Hostname(), allowedDomains) {
+		return fmt.Errorf("domain not allowed. redirect to %s not in %s", req.URL.Hostname(), allowedDomains)
+	}
+	return nil
+}
+
+// parseDomainList splits a comma separated domain list and drops blank entries.
+// The blanks matter: strings.Split("", ",") returns []string{""}, and an empty
+// entry used to match every host, so an unset or trailing-comma ALLOWED_DOMAINS
+// turned the allowlist into "allow everything".
+func parseDomainList(s string) []string {
+	var out []string
+	for _, d := range strings.Split(s, ",") {
+		if d = strings.TrimSpace(d); d != "" {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
+// domainAllowed reports whether host is an exact match for an allowed domain or
+// a subdomain of one. It is deliberately not a prefix match: "nytimes.com" must
+// not also allow "nytimes.com.example.net", which is a hostname an attacker can
+// register. Blank entries are ignored so a partly filled list cannot allow all.
+func domainAllowed(host string, allowed []string) bool {
+	host = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(host), "."))
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	if host == "" {
+		return false
+	}
+	for _, d := range allowed {
+		d = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(d), "."))
+		if d == "" {
+			continue
+		}
+		if host == d || strings.HasSuffix(host, "."+d) {
+			return true
+		}
+	}
+	return false
+}
 
 func normalizeBasePath(p string) string {
 	if p == "" {
@@ -72,7 +188,7 @@ func normalizeBasePath(p string) string {
 }
 
 func init() {
-	allowedDomains = strings.Split(os.Getenv("ALLOWED_DOMAINS"), ",")
+	allowedDomains = parseDomainList(os.Getenv("ALLOWED_DOMAINS"))
 	if os.Getenv("ALLOWED_DOMAINS_RULESET") == "true" {
 		allowedDomains = append(allowedDomains, rulesSet.Domains()...)
 	}
@@ -321,8 +437,8 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 		return "", nil, nil, err
 	}
 
-	if len(allowedDomains) > 0 && !StringInSlice(u.Host, allowedDomains) {
-		return "", nil, nil, fmt.Errorf("domain not allowed. %s not in %s", u.Host, allowedDomains)
+	if len(allowedDomains) > 0 && !domainAllowed(u.Hostname(), allowedDomains) {
+		return "", nil, nil, fmt.Errorf("domain not allowed. %s not in %s", u.Hostname(), allowedDomains)
 	}
 
 	if os.Getenv("LOG_URLS") == "true" {
@@ -355,7 +471,9 @@ func fetchSite(urlpath string, queries map[string]string) (string, *http.Request
 
 	// Fetch the site
 	client := &http.Client{
-		Timeout: time.Second * time.Duration(defaultTimeout),
+		Timeout:       time.Second * time.Duration(defaultTimeout),
+		Transport:     safeTransport,
+		CheckRedirect: checkRedirect,
 	}
 	req, _ := http.NewRequest("GET", url, nil)
 
@@ -514,6 +632,9 @@ func applyRules(body string, rule ruleset.Rule) string {
 	return body
 }
 
+// StringInSlice reports whether s starts with any entry in list. It is a prefix
+// test on purpose and is only used for rule paths. Host matching goes through
+// domainAllowed, which requires an exact or subdomain match.
 func StringInSlice(s string, list []string) bool {
 	for _, x := range list {
 		if strings.HasPrefix(s, x) {
