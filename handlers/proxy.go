@@ -241,7 +241,7 @@ func ProxySite(rulesetPath string) fiber.Handler {
 	if rulesetPath != "" {
 		rs, err := ruleset.NewRuleset(rulesetPath)
 		if err != nil {
-			panic(err)
+			log.Println(err)
 		}
 		rulesSet = rs
 	}
