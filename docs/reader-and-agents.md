@@ -1,6 +1,8 @@
 # Reader, agent tools and local controls
 
 Build from the repository root with `go build -mod=readonly -o bin/ladder cmd/main.go`.
+The reader replaces the old root form. `DISABLE_FORM` and `FORM_PATH` do not
+configure this new reader; the old exported form helper remains for Go embedders.
 All reader conversion happens locally. Ladder has no telemetry, account requirement,
 external conversion service or browser extension requirement.
 
@@ -15,9 +17,14 @@ Markdown and plain text, Copy Markdown, refresh and the original source. Metadat
 shows the requested and final URLs, actual upstream status, retrieval time and
 cache freshness. An upstream refusal or error remains visible. Extraction uses
 HTML heuristics; it cannot render JavaScript or recover content the server did
-not supply. Images become their descriptions instead of loading remote assets.
+not supply. Reader and legacy HTML transformations currently expect UTF-8; other character
+encodings are not decoded. Open the original or use the raw route when a page
+requires another encoding. Images become their descriptions instead of loading
+remote assets.
 
-The bookmarklet opens the current page's URL in this reader. Drag it from the
+The bookmarklet opens the current page's URL in this reader. Bookmarklet and
+direct `/reader?url=...` links retrieve automatically and add a history entry
+when history is enabled. Drag it from the
 reader's controls into Chrome's bookmarks bar. It navigates to Ladder without
 reading the page's contents, cookies or browser credentials.
 
@@ -25,7 +32,19 @@ Legacy proxy and raw routes remain available. Raw preserves the fetched body,
 content type and upstream status. Active documents receive a sandbox policy to
 isolate them from reader controls and history; sites that depend on scripts,
 forms, cookies or browser storage can behave differently. Use Open original to
-visit a site directly.
+visit a site directly. Configured legacy rule CSP is enforced alongside the
+mandatory sandbox. Proxied resources send their referrer only back to the same
+Ladder origin, so stylesheet resource fallback remains available. The opaque
+sandbox suppresses document referrers independently: root-relative URLs created
+by page JavaScript can still fail without an upstream context. Use the reader or
+Open original for those pages. The sandbox remains mandatory to isolate
+untrusted page scripts from local history and controls.
+
+All routes share an 8 MiB upstream body limit by default. Larger media, PDFs
+and pages receive a 502 rather than a truncated body. Set a larger positive
+`MAX_BODY_BYTES`, for example `MAX_BODY_BYTES=33554432` for 32 MiB, when those
+resources are required. The limit bounds the fully buffered response and applies
+to the reader, CLI/MCP and legacy proxy/raw/JSON routes.
 
 ## Fetch from a terminal or agent
 
@@ -47,8 +66,11 @@ characters. The HTML format contains sanitized reader content.
 Run `bin/ladder mcp --stdio` as a local MCP server. Configure an MCP client with
 the absolute binary path and arguments `["mcp", "--stdio"]`. Set `RULESET` and
 `RULE_PACKS` in that client's environment if required. Stdio messages use stdout;
-diagnostics use stderr. The tools use the shared retrieval service without
-requiring the web server or saving web history.
+diagnostics use stderr. Input messages are capped at 1 MiB and result messages
+at 8 MiB; raising the upstream body limit does not raise these protocol bounds. The tools use the shared retrieval service without
+requiring the web server or saving web history. Legacy initialization negotiates
+`2025-11-25` when the client requests another version; the client can disconnect
+if it does not support the offered version.
 
 The implementation supports current discovery with protocol version `2026-07-28`
 and legacy `2025-11-25` initialization. This is a focused tools connector, not an
@@ -60,7 +82,8 @@ for client lifecycle details.
 `RULESET` continues to load existing Ladder rules. Leading-dot legacy domains
 retain their subdomains-only meaning, and legacy path lists remain exact matches. Versioned packs are explicit,
 local YAML files selected through `RULE_PACKS` (separate multiple paths with `;`)
-or the command's `--pack` option. Packs carry a schema version, stable ID,
+or the command's `--pack` option. The flag adds to `RULE_PACKS`; list a pack only
+once across both inputs, since duplicate IDs are rejected. Packs carry a schema version, stable ID,
 version, rules and expected content checks. Ladder displays the SHA-256 digest
 of the exact file. Changing a pack changes its digest; keep a new version when
 sharing an update. No pack is downloaded or updated automatically, and packs do
@@ -88,7 +111,8 @@ deleted, or cleared. Disabling history stops new records; Clear history removes
 existing ones. Treat stored URLs as private, since they can contain query data.
 
 `LADDER_STATE_DIR` overrides the default user configuration directory's `ladder`
-folder. State directories use mode `0700` and history files `0600`. Updates are
+folder. Choose a dedicated state directory: Ladder enforces mode `0700` on
+that directory and `0600` on history files. Updates are
 atomic and locked across processes. CLI and MCP calls do not add history.
 
 The retrieval cache is bounded, in memory, and defaults to five minutes. The UI
@@ -123,8 +147,10 @@ that user's systemd session. Other platforms can run the server manually.
 | `BIND_ADDR` | Bind address; set `127.0.0.1` for local use |
 | `PORT` | Server port; default `8080` |
 | `RULESET` | Existing rules, separated with `;` |
+| `ALLOWED_DOMAINS_RULESET` | Derive the allowlist from legacy rules; leading dots keep subdomain-only scope |
 | `RULE_PACKS` | Explicit local versioned pack paths, separated with `;` |
 | `HTTP_TIMEOUT` | Upstream timeout in seconds |
+| `MAX_BODY_BYTES` | Positive upstream response byte limit; default `8388608` (8 MiB) |
 | `CACHE_TTL` | Go duration such as `5m` |
 | `CACHE_MAX_ENTRIES` | Maximum process-local cache entries |
 | `LADDER_STATE_DIR` | Private local history/preferences directory |

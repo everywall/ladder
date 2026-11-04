@@ -50,7 +50,12 @@ There is no suffix wildcard syntax. Domains do not contain schemes or ports.
 URL modifications and request headers affect the shared fetch. Query edits
 preserve unrelated duplicate values. Changed URLs and every HTTP redirect are
 validated again. Origin changes strip credential headers, including configured
-cookies. Document regexes and selector removals apply to HTML in reader/proxy
+cookies. Sensitive header detection uses names: Cookie/Authorization, components
+`auth`, `authentication`, `authorization`, `session`, or `cookie`, and names
+containing `api-key`, `token`, or `secret`. These headers are redacted, removed
+across origin changes, and exclude responses from caching. An arbitrary opaque
+name cannot reveal that its value is a credential; use a recognized name for
+credential-bearing custom headers. Document regexes and selector removals apply to HTML in reader/proxy
 views; raw fetch bytes remain unchanged. Legacy injection/regex fields retain
 their previous inactive runtime behavior. Binary bodies are never transformed.
 
