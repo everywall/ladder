@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"mime"
 	"net/http"
 	"net/url"
@@ -97,6 +98,13 @@ func ConfigFromLookup(lookup func(string) (string, bool)) (Config, error) {
 			return cfg, fmt.Errorf("HTTP_TIMEOUT must be positive")
 		}
 	}
+	if raw := getenv("MAX_BODY_BYTES"); raw != "" {
+		var parseErr error
+		cfg.MaxBodyBytes, parseErr = strconv.ParseInt(raw, 10, 64)
+		if parseErr != nil || cfg.MaxBodyBytes < 1 || cfg.MaxBodyBytes == math.MaxInt64 {
+			return cfg, fmt.Errorf("MAX_BODY_BYTES must be a positive byte count below 9223372036854775807")
+		}
+	}
 	if s := getenv("CACHE_TTL"); s != "" {
 		cfg.CacheTTL, err = time.ParseDuration(s)
 		if err != nil || cfg.CacheTTL < 0 {
@@ -128,8 +136,8 @@ func New(cfg Config) (*Service, error) {
 	if cfg.MaxBodyBytes == 0 {
 		cfg.MaxBodyBytes = 8 * 1024 * 1024
 	}
-	if cfg.MaxBodyBytes < 1 {
-		return nil, fmt.Errorf("body limit must be positive")
+	if cfg.MaxBodyBytes < 1 || cfg.MaxBodyBytes == math.MaxInt64 {
+		return nil, fmt.Errorf("body limit must be a positive byte count below 9223372036854775807")
 	}
 	if cfg.CacheMaxEntries == 0 {
 		cfg.CacheMaxEntries = 128
@@ -157,8 +165,8 @@ func New(cfg Config) (*Service, error) {
 	cfg.PackPaths = append([]string{}, cfg.PackPaths...)
 	cfg.AllowedDomains = append([]string{}, cfg.AllowedDomains...)
 	for _, d := range cfg.AllowedDomains {
-		if !ruleset.ValidDomain(d) {
-			return nil, fmt.Errorf("allowed domains must contain hostnames or exact IP addresses")
+		if !ruleset.ValidDomainPattern(d) {
+			return nil, fmt.Errorf("allowed domains must contain hostnames, leading-dot subdomain patterns or exact IP addresses")
 		}
 	}
 	if strings.ContainsAny(cfg.UserAgent+cfg.ForwardedFor, "\r\n") {
@@ -245,7 +253,7 @@ func (s *Service) validate(raw string) (*url.URL, error) {
 	if len(s.cfg.AllowedDomains) > 0 {
 		ok := false
 		for _, d := range s.cfg.AllowedDomains {
-			if ruleset.MatchDomain(u.Hostname(), d) {
+			if ruleset.MatchDomainPattern(u.Hostname(), d) {
 				ok = true
 				break
 			}
@@ -424,9 +432,6 @@ func (s *Service) Fetch(ctx context.Context, input Request) (FetchResult, error)
 		result.Header.Set("Cache-Control", "no-store")
 	}
 	result.Header.Set("Content-Type", contentType)
-	if legacy.Headers.CSP != "" {
-		result.Header.Set("Content-Security-Policy", legacy.Headers.CSP)
-	}
 	return s.finish(input, key, u, selected, result, epoch), nil
 }
 func applyLegacyHeaders(h http.Header, r ruleset.Rule) {
@@ -458,6 +463,12 @@ func transportError(err error) error {
 	return failure("upstream_error", 502, "upstream request failed")
 }
 func (s *Service) finish(input Request, key string, u *url.URL, selected []selectedRule, result FetchResult, epoch uint64) FetchResult {
+	// Preserve legacy CSP selection for both direct HTTP and solver results.
+	// Upstream CSP is removed unless a rule explicitly supplies a replacement.
+	result.Header.Del("Content-Security-Policy")
+	if policy := s.cfg.Rules.Match(u).Headers.CSP; policy != "" {
+		result.Header.Set("Content-Security-Policy", policy)
+	}
 	now := s.cfg.Now()
 	result.Metadata.SourceURL = input.URL
 	result.Metadata.SourceHost = u.Hostname()
@@ -492,6 +503,12 @@ func RedactHeaders(h http.Header) http.Header {
 }
 func secretHeader(k string) bool {
 	k = strings.ToLower(k)
+	for _, part := range strings.Split(k, "-") {
+		switch part {
+		case "auth", "authentication", "authorization", "session", "cookie":
+			return true
+		}
+	}
 	return k == "cookie" || k == "set-cookie" || k == "authorization" || k == "proxy-authorization" || strings.Contains(k, "api-key") || strings.Contains(k, "token") || strings.Contains(k, "secret")
 }
 func hasCredentials(h http.Header) bool {

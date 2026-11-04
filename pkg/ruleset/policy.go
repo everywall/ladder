@@ -79,6 +79,24 @@ func MatchDomain(host, domain string) bool {
 	}
 	return host == domain || strings.HasSuffix(host, "."+domain)
 }
+
+// ValidDomainPattern permits the legacy subdomain-only spelling without allowing it in URL hosts.
+func ValidDomainPattern(pattern string) bool {
+	pattern = normalizeDomain(pattern)
+	if strings.HasPrefix(pattern, ".") {
+		suffix := strings.TrimPrefix(pattern, ".")
+		return ValidDomain(suffix) && net.ParseIP(suffix) == nil
+	}
+	return ValidDomain(pattern)
+}
+
+// MatchDomainPattern retains a leading dot as a subdomains-only constraint.
+func MatchDomainPattern(host, pattern string) bool {
+	pattern = normalizeDomain(pattern)
+	subdomainsOnly := strings.HasPrefix(pattern, ".")
+	domain := strings.TrimPrefix(pattern, ".")
+	return ValidDomainPattern(pattern) && MatchDomain(host, domain) && (!subdomainsOnly || normalizeDomain(host) != domain)
+}
 func MatchPath(actual, prefix string) bool {
 	if prefix == "/" {
 		return strings.HasPrefix(actual, "/") || actual == ""
@@ -93,10 +111,7 @@ func (rs RuleSet) Match(u *url.URL) Rule {
 			domains = append(domains, r.Domain)
 		}
 		for _, d := range domains {
-			domain := normalizeDomain(d)
-			subdomainsOnly := strings.HasPrefix(domain, ".")
-			domain = strings.TrimPrefix(domain, ".")
-			if !MatchDomain(u.Hostname(), domain) || (subdomainsOnly && normalizeDomain(u.Hostname()) == domain) {
+			if !MatchDomainPattern(u.Hostname(), d) {
 				continue
 			}
 			if len(r.Paths) == 0 {
@@ -117,13 +132,7 @@ func (rs RuleSet) Validate() error {
 			if d == "" {
 				continue
 			}
-			normalized := normalizeDomain(d)
-			valid := ValidDomain(normalized)
-			if strings.HasPrefix(normalized, ".") {
-				suffix := strings.TrimPrefix(normalized, ".")
-				valid = ValidDomain(suffix) && net.ParseIP(suffix) == nil
-			}
-			if !valid {
+			if !ValidDomainPattern(d) {
 				return fmt.Errorf("legacy rule %d: invalid domain", i)
 			}
 		}

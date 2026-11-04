@@ -519,3 +519,111 @@ func TestResponsePrivacyHeadersAcrossFieldLines(t *testing.T) {
 		})
 	}
 }
+
+func TestBodyLimitEnvironmentValidation(t *testing.T) {
+	for _, raw := range []string{"0", "-1", "not-a-number", "9223372036854775807", "9223372036854775808"} {
+		t.Run(raw, func(t *testing.T) {
+			_, err := ConfigFromLookup(func(key string) (string, bool) {
+				if key == "MAX_BODY_BYTES" {
+					return raw, true
+				}
+				return "", false
+			})
+			require.Error(t, err)
+		})
+	}
+}
+
+func TestRuleDerivedAllowlistPreservesLeadingDotScope(t *testing.T) {
+	filename := filepath.Join(t.TempDir(), "legacy.yaml")
+	require.NoError(t, os.WriteFile(filename, []byte("- domain: .example.org\n"), 0600))
+	cfg, err := ConfigFromLookup(func(key string) (string, bool) {
+		switch key {
+		case "RULESET":
+			return filename, true
+		case "ALLOWED_DOMAINS_RULESET":
+			return "true", true
+		}
+		return "", false
+	})
+	require.NoError(t, err)
+	svc, err := New(cfg)
+	require.NoError(t, err)
+	for _, raw := range []string{"https://en.example.org/page", "https://nested.en.example.org/page"} {
+		_, err := svc.validate(raw)
+		require.NoError(t, err)
+	}
+	for _, raw := range []string{"https://example.org/page", "https://badexample.org/page", "https://example.org.evil.test/page"} {
+		_, err := svc.validate(raw)
+		require.Error(t, err)
+	}
+	require.Error(t, func() error { _, err := svc.validate("https://.example.org/"); return err }(), "URL host validation remains strict")
+}
+
+func TestLegacyCSPSelectionOverridesUpstreamForHTTPAndSolver(t *testing.T) {
+	origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("Content-Security-Policy", "default-src 'none'")
+		io.WriteString(w, "<article>policy fixture</article>")
+	}))
+	defer origin.Close()
+	solver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]any{"status": "ok", "solution": map[string]any{"url": origin.URL, "status": 200, "response": "<article>policy fixture</article>", "headers": map[string]string{"Content-Security-Policy": "default-src 'none'"}}})
+	}))
+	defer solver.Close()
+	u, _ := url.Parse(origin.URL)
+	for _, useSolver := range []bool{false, true} {
+		for _, policy := range []string{"", "script-src 'self';"} {
+			rule := ruleset.Rule{Domain: u.Hostname(), UseFlareSolverr: useSolver}
+			rule.Headers.CSP = policy
+			svc := newService(t, Config{Rules: ruleset.RuleSet{rule}, FlareSolverrURL: solver.URL})
+			result := fetch(t, svc, origin.URL, "")
+			require.Equal(t, policy, result.Header.Get("Content-Security-Policy"), "only the configured legacy policy is forwarded")
+		}
+	}
+}
+
+func TestCustomAuthAndSessionHeadersStayPrivateAcrossRedirects(t *testing.T) {
+	for _, name := range []string{"X-Auth", "X-Session"} {
+		t.Run(name, func(t *testing.T) {
+			var destinationHits atomic.Int64
+			var leaked, missing atomic.Bool
+			destination := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				destinationHits.Add(1)
+				if r.Header.Get(name) != "" {
+					leaked.Store(true)
+				}
+				w.Header().Set("Content-Type", "text/plain")
+				io.WriteString(w, "protected payload")
+			}))
+			defer destination.Close()
+			origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Header.Get(name) == "" {
+					missing.Store(true)
+				}
+				if r.URL.Path == "/redirect" {
+					http.Redirect(w, r, destination.URL, 302)
+					return
+				}
+				w.Header().Set("Content-Type", "text/plain")
+				io.WriteString(w, "protected payload")
+			}))
+			defer origin.Close()
+			u, _ := url.Parse(origin.URL)
+			file := filepath.Join(t.TempDir(), "pack.yaml")
+			pack := "schemaVersion: 1\nid: protected\nversion: 1.0.0\nrules:\n  - id: auth\n    domains: [" + u.Hostname() + "]\n    headers:\n      set:\n        " + name + ": fixture-only\n    tests:\n      - name: content\n        url: " + origin.URL + "/redirect\n        status: 200\n        contains: [protected]\n"
+			require.NoError(t, os.WriteFile(file, []byte(pack), 0600))
+			svc := newService(t, Config{PackPaths: []string{file}, CacheTTL: time.Minute})
+			for range 2 {
+				result := fetch(t, svc, origin.URL+"/redirect", "")
+				require.False(t, result.Metadata.Cache.Hit)
+			}
+			require.Equal(t, int64(2), destinationHits.Load())
+			require.False(t, leaked.Load(), "credential must not cross origin")
+			require.False(t, missing.Load(), "configured credential must reach selected origin")
+			direct := fetch(t, svc, origin.URL+"/direct", "")
+			require.Equal(t, "[REDACTED]", direct.RequestHeader.Get(name))
+			require.True(t, direct.Metadata.Cache.ExpiresAt.IsZero())
+		})
+	}
+}

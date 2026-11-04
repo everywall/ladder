@@ -177,8 +177,8 @@ func ProxySite(rulesetPath string) fiber.Handler {
 			u, _ := url.Parse(result.Metadata.FinalURL)
 			body = []byte(rewriteHtml(body, u, ruleset.Rule{}))
 		}
-		sendHeaders(c, result.Header)
 		sandbox(c)
+		sendHeaders(c, result.Header)
 		return c.Status(result.Metadata.UpstreamStatus).Send(body)
 	}
 }
@@ -188,9 +188,15 @@ func ProxySite(rulesetPath string) fiber.Handler {
 func sandbox(c *fiber.Ctx) {
 	c.Set("Content-Security-Policy", "sandbox allow-scripts; object-src 'none'; frame-ancestors 'self'")
 	c.Set("X-Content-Type-Options", "nosniff")
-	c.Set("Referrer-Policy", "no-referrer")
+	c.Set("Referrer-Policy", "same-origin")
 }
 func sendHeaders(c *fiber.Ctx, h http.Header) {
+	// Multiple CSP fields are intersected by the browser; a rule cannot relax the sandbox.
+	for _, policy := range h.Values("Content-Security-Policy") {
+		if strings.TrimSpace(policy) != "" {
+			c.Response().Header.Add("Content-Security-Policy", policy)
+		}
+	}
 	for _, k := range []string{"Content-Type", "Content-Language", "Cache-Control", "ETag", "Last-Modified"} {
 		if v := h.Get(k); v != "" {
 			c.Set(k, v)

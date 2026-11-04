@@ -18,7 +18,7 @@ func Raw(c *fiber.Ctx) error {
 	if err != nil {
 		return legacyError(c, err)
 	}
-	sendHeaders(c, f.Header)
 	sandbox(c)
+	sendHeaders(c, f.Header)
 	return c.Status(f.Metadata.UpstreamStatus).Send(f.Body)
 }
