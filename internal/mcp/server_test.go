@@ -297,3 +297,22 @@ func TestValidNonRequestJSONIsInvalidRequestRatherThanParseError(t *testing.T) {
 		}
 	}
 }
+
+func TestLegacyInitializeNegotiatesSupportedVersion(t *testing.T) {
+	for _, version := range []string{"2024-11-05", "2025-06-18", "2026-07-28", "2099-01-01"} {
+		t.Run(version, func(t *testing.T) {
+			c := openClient(t, fixtureBackend{})
+			c.send(map[string]any{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": map[string]any{"protocolVersion": version, "capabilities": map[string]any{}, "clientInfo": map[string]any{"name": "negotiation fixture", "version": "1"}}})
+			initialized := result(t, c.receive())
+			if initialized["protocolVersion"] != LegacyVersion {
+				t.Fatalf("server must offer its supported legacy version: %+v", initialized)
+			}
+			c.send(map[string]any{"jsonrpc": "2.0", "method": "notifications/initialized"})
+			c.send(map[string]any{"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+			listed := result(t, c.receive())
+			if len(listed["tools"].([]any)) != 2 {
+				t.Fatal("negotiated client cannot use tools")
+			}
+		})
+	}
+}

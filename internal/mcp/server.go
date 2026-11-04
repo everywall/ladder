@@ -199,12 +199,10 @@ func (s *server) protocol(method string, params map[string]json.RawMessage) (boo
 	}
 	if method == "initialize" {
 		var version string
-		if json.Unmarshal(params["protocolVersion"], &version) != nil {
+		if json.Unmarshal(params["protocolVersion"], &version) != nil || strings.TrimSpace(version) == "" {
 			return false, &rpcError{Code: -32602, Message: "protocolVersion is required"}
 		}
-		if version != LegacyVersion {
-			return false, unsupported(version)
-		}
+		// Legacy initialization negotiates our supported version in the result.
 		return false, nil
 	}
 	if meta.Version != "" {
