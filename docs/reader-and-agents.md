@@ -37,8 +37,8 @@ bin/ladder fetch 'https://example.org/article' --json --refresh
 ```
 
 These commands call the same retrieval service directly. The web server does
-not need to be running. JSON includes the source metadata and all three content
-representations. Invalid input, acquisition failures and upstream HTTP failures
+not need to be running. JSON includes the source metadata, the selected format and its content.
+Choose `--format` to retrieve another representation. Invalid input, acquisition failures and upstream HTTP failures
 have nonzero exit codes. Quote URLs so a shell cannot interpret their query
 characters. The HTML format contains sanitized reader content.
 
