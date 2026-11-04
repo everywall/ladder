@@ -2,8 +2,10 @@
 
 Packs are explicit local inputs selected with `RULE_PACKS=file1.yaml;file2.yaml`
 or CLI `--pack`. They are separate from the recursive legacy `RULESET` loader.
-No pack is enabled by default. `testdata/wikipedia.yaml` is a sample intended
-for public encyclopedia reading. It identifies Ladder honestly and does not
+No pack is enabled by default. The current [Wikipedia reader pack](../../sitepacks/wikipedia/1.0.1.yaml) removes
+Vector navigation and tools before article extraction. The original
+`testdata/wikipedia.yaml` sample remains version 1.0.0 for reproducible tests.
+Both are intended for public encyclopedia reading. It identifies Ladder honestly and does not
 set personal cookies, addresses, or a forged referrer.
 
 ```yaml

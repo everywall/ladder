@@ -68,8 +68,8 @@ not execute commands.
 For example, the included Wikipedia pack can be validated and tested with:
 
 ```sh
-bin/ladder rules check pkg/sitepack/testdata/wikipedia.yaml
-bin/ladder rules test --pack pkg/sitepack/testdata/wikipedia.yaml \
+bin/ladder rules check sitepacks/wikipedia/1.0.1.yaml
+bin/ladder rules test --pack sitepacks/wikipedia/1.0.1.yaml \
   https://en.wikipedia.org/wiki/HTTP
 ```
 
