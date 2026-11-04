@@ -510,7 +510,7 @@ func stripCredentials(h http.Header) {
 	}
 }
 func cacheLifetime(r FetchResult, ttl time.Duration) (time.Duration, bool) {
-	if ttl <= 0 || r.RequestHeader.Get("Cookie") != "" || r.RequestHeader.Get("Authorization") != "" || r.Header.Get("Set-Cookie") != "" {
+	if ttl <= 0 || r.RequestHeader.Get("Cookie") != "" || r.RequestHeader.Get("Authorization") != "" || len(r.Header.Values("Set-Cookie")) > 0 {
 		return 0, false
 	}
 	for k := range r.RequestHeader {
@@ -518,14 +518,14 @@ func cacheLifetime(r FetchResult, ttl time.Duration) (time.Duration, bool) {
 			return 0, false
 		}
 	}
-	for _, directive := range strings.Split(strings.ToLower(r.Header.Get("Cache-Control")), ",") {
+	for _, directive := range strings.Split(strings.ToLower(strings.Join(r.Header.Values("Cache-Control"), ",")), ",") {
 		parts := strings.SplitN(strings.TrimSpace(directive), "=", 2)
-		switch parts[0] {
+		switch strings.TrimSpace(parts[0]) {
 		case "no-store", "private", "no-cache":
 			return 0, false
 		case "max-age":
 			if len(parts) == 2 {
-				seconds, err := strconv.ParseInt(strings.Trim(parts[1], "\""), 10, 64)
+				seconds, err := strconv.ParseInt(strings.Trim(strings.TrimSpace(parts[1]), "\""), 10, 64)
 				if err != nil || seconds <= 0 {
 					return 0, false
 				}
@@ -535,7 +535,10 @@ func cacheLifetime(r FetchResult, ttl time.Duration) (time.Duration, bool) {
 			}
 		}
 	}
-	if age := r.Header.Get("Age"); age != "" {
+	if len(r.Header.Values("Age")) > 1 {
+		return 0, false
+	}
+	if age := strings.TrimSpace(r.Header.Get("Age")); age != "" {
 		seconds, err := strconv.ParseInt(age, 10, 64)
 		if err != nil || seconds < 0 {
 			return 0, false
@@ -545,8 +548,10 @@ func cacheLifetime(r FetchResult, ttl time.Duration) (time.Duration, bool) {
 		}
 		ttl -= time.Duration(seconds) * time.Second
 	}
-	if strings.TrimSpace(r.Header.Get("Vary")) == "*" {
-		return 0, false
+	for _, value := range strings.Split(strings.Join(r.Header.Values("Vary"), ","), ",") {
+		if strings.TrimSpace(value) == "*" {
+			return 0, false
+		}
 	}
 	return ttl, true
 }

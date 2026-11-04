@@ -482,3 +482,40 @@ func TestCacheMetadataReflectsStoredEntriesAndReloadEvictsOldSuccess(t *testing.
 	require.False(t, fetch(t, s, origin.URL, "").Metadata.Cache.Hit)
 	require.Equal(t, int64(5), hits.Load())
 }
+
+func TestResponsePrivacyHeadersAcrossFieldLines(t *testing.T) {
+	cases := []struct {
+		name    string
+		headers http.Header
+	}{
+		{"no-store", http.Header{"Cache-Control": {"max-age=60", "no-store"}}},
+		{"private", http.Header{"Cache-Control": {"max-age=60", "private"}}},
+		{"no-cache", http.Header{"Cache-Control": {"max-age=60", "no-cache"}}},
+		{"vary-star", http.Header{"Cache-Control": {"max-age=60"}, "Vary": {"Accept-Language", "Accept-Encoding, *"}}},
+		{"later-cookie", http.Header{"Cache-Control": {"max-age=60"}, "Set-Cookie": {"", "session=private"}}},
+		{"ambiguous-age", http.Header{"Cache-Control": {"max-age=60"}, "Age": {"0", "50"}}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var hits atomic.Int64
+			origin := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				hits.Add(1)
+				for key, values := range tc.headers {
+					for _, value := range values {
+						w.Header().Add(key, value)
+					}
+				}
+				w.Header().Set("Content-Type", "text/plain")
+				io.WriteString(w, "private payload")
+			}))
+			defer origin.Close()
+			s := newService(t, Config{CacheTTL: time.Minute})
+			for range 2 {
+				f := fetch(t, s, origin.URL, "")
+				require.False(t, f.Metadata.Cache.Hit, "privacy response must not be reused")
+				require.True(t, f.Metadata.Cache.ExpiresAt.IsZero(), "uncached response must not claim freshness")
+			}
+			require.Equal(t, int64(2), hits.Load())
+		})
+	}
+}
