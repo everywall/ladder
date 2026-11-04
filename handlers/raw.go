@@ -1,21 +1,24 @@
 package handlers
 
 import (
-	"log"
-
 	"github.com/gofiber/fiber/v2"
+	"ladder/internal/service"
 )
 
 func Raw(c *fiber.Ctx) error {
-	// Get the url from the URL
-	urlQuery := c.Params("*")
-
-	queries := c.Queries()
-	body, _, _, err := fetchSite(urlQuery, queries)
+	target, err := routeTarget(c, false)
 	if err != nil {
-		log.Println("ERROR:", err)
-		c.SendStatus(500)
-		return c.SendString(err.Error())
+		return legacyError(c, &service.Error{Code: "invalid_url", Status: 400, Message: err.Error()})
 	}
-	return c.SendString(body)
+	s, err := configured()
+	if err != nil {
+		return legacyError(c, &service.Error{Code: "configuration", Status: 500, Message: "invalid transport configuration"})
+	}
+	f, err := s.Fetch(c.UserContext(), service.Request{URL: target})
+	if err != nil {
+		return legacyError(c, err)
+	}
+	sendHeaders(c, f.Header)
+	sandbox(c)
+	return c.Status(f.Metadata.UpstreamStatus).Send(f.Body)
 }
