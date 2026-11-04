@@ -24,3 +24,28 @@ func TestModifyURLPreservesUnrelatedDuplicateQueryValues(t *testing.T) {
 	require.Equal(t, "a+b", modified.Query().Get("new"))
 	require.Equal(t, "/a%2Fb", modified.EscapedPath())
 }
+
+func TestLegacyLeadingDotDomainRetainsSubdomainsOnly(t *testing.T) {
+	r := Rule{Domain: ".wikipedia.org"}
+	r.Headers.UserAgent = "Scoped reader"
+	rs := RuleSet{r}
+	require.NoError(t, rs.Validate())
+	for _, tc := range []struct {
+		host  string
+		match bool
+	}{{"en.wikipedia.org", true}, {"simple.wikipedia.org", true}, {"wikipedia.org", false}, {"badwikipedia.org", false}, {"wikipedia.org.evil.test", false}} {
+		got := rs.Match(&url.URL{Scheme: "https", Host: tc.host, Path: "/wiki/HTTP"})
+		require.Equal(t, tc.match, got.Headers.UserAgent != "", tc.host)
+	}
+	require.False(t, ValidDomain(".wikipedia.org"), "URL hosts, pack domains and allowlists remain strict")
+	require.Error(t, (RuleSet{{Domain: "..wikipedia.org"}}).Validate())
+	require.Error(t, (RuleSet{{Domain: ".127.0.0.1"}}).Validate())
+}
+func TestLegacyPathsRemainExact(t *testing.T) {
+	r := Rule{Domain: "example.org", Paths: []string{"/article"}}
+	r.Headers.UserAgent = "Scoped reader"
+	rs := RuleSet{r}
+	require.Equal(t, "Scoped reader", rs.Match(&url.URL{Host: "example.org", Path: "/article"}).Headers.UserAgent)
+	require.Empty(t, rs.Match(&url.URL{Host: "example.org", Path: "/article/child"}).Headers.UserAgent, "legacy credential/header scope must not expand")
+	require.True(t, MatchPath("/article/child", "/article"), "versioned pack segment prefixes keep their own behavior")
+}

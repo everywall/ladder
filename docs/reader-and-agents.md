@@ -57,7 +57,8 @@ for client lifecycle details.
 
 ## Versioned site-rule packs
 
-`RULESET` continues to load existing Ladder rules. Versioned packs are explicit,
+`RULESET` continues to load existing Ladder rules. Leading-dot legacy domains
+retain their subdomains-only meaning, and legacy path lists remain exact matches. Versioned packs are explicit,
 local YAML files selected through `RULE_PACKS` (separate multiple paths with `;`)
 or the command's `--pack` option. Packs carry a schema version, stable ID,
 version, rules and expected content checks. Ladder displays the SHA-256 digest

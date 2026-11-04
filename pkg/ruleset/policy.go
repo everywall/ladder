@@ -93,14 +93,17 @@ func (rs RuleSet) Match(u *url.URL) Rule {
 			domains = append(domains, r.Domain)
 		}
 		for _, d := range domains {
-			if !MatchDomain(u.Hostname(), d) {
+			domain := normalizeDomain(d)
+			subdomainsOnly := strings.HasPrefix(domain, ".")
+			domain = strings.TrimPrefix(domain, ".")
+			if !MatchDomain(u.Hostname(), domain) || (subdomainsOnly && normalizeDomain(u.Hostname()) == domain) {
 				continue
 			}
 			if len(r.Paths) == 0 {
 				return r
 			}
 			for _, p := range r.Paths {
-				if MatchPath(u.Path, p) {
+				if u.Path == p {
 					return r
 				}
 			}
@@ -111,7 +114,16 @@ func (rs RuleSet) Match(u *url.URL) Rule {
 func (rs RuleSet) Validate() error {
 	for i, r := range rs {
 		for _, d := range append(append([]string{}, r.Domains...), r.Domain) {
-			if d != "" && !ValidDomain(d) {
+			if d == "" {
+				continue
+			}
+			normalized := normalizeDomain(d)
+			valid := ValidDomain(normalized)
+			if strings.HasPrefix(normalized, ".") {
+				suffix := strings.TrimPrefix(normalized, ".")
+				valid = ValidDomain(suffix) && net.ParseIP(suffix) == nil
+			}
+			if !valid {
 				return fmt.Errorf("legacy rule %d: invalid domain", i)
 			}
 		}
