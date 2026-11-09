@@ -91,6 +91,11 @@ func extractUrl(c *fiber.Ctx) (string, error) {
 		reqUrl = c.Params("*")
 	}
 
+	// Client-side routers (e.g. Next.js) normalize repeated slashes and request
+	// /https:/host/path; repair the damaged scheme before parsing.
+	reScheme := regexp.MustCompile(`^(https?:)/([^/])`)
+	reqUrl = reScheme.ReplaceAllString(reqUrl, "$1//$2")
+
 	// Extract the actual path from req ctx
 	urlQuery, err := url.Parse(reqUrl)
 	if err != nil {
