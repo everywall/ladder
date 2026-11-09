@@ -459,6 +459,8 @@ func rewriteHtml(bodyB []byte, u *url.URL, rule ruleset.Rule) string {
 	// absolute same-host links: keep a single slash before the path
 	reAbs := regexp.MustCompile(`href="https://` + regexp.QuoteMeta(u.Host) + `(/|")`)
 	body = reAbs.ReplaceAllString(body, "href=\""+basePath+"/https://"+u.Host+`$1`)
+	// apply ruleset result modifications (injections and regexRules)
+	body = applyRules(body, rule)
 	return body
 }
 
