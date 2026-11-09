@@ -449,10 +449,16 @@ func rewriteHtml(bodyB []byte, u *url.URL, rule ruleset.Rule) string {
 	body = reScript.ReplaceAllString(body, fmt.Sprintf(`<script $1 src="%s$3"`, proxyPrefix))
 
 	// body = strings.ReplaceAll(body, "srcset=\"/", "srcset=\""+proxyPrefix) // TODO: Needs a regex to rewrite the URL's
+	// protocol-relative links (href="//host/...") must be rewritten before
+	// the generic root-relative replacement, which would corrupt them
+	reProto := regexp.MustCompile(`href="//` + regexp.QuoteMeta(u.Host) + `(/|")`)
+	body = reProto.ReplaceAllString(body, "href=\""+basePath+"/https://"+u.Host+`$1`)
 	body = strings.ReplaceAll(body, "href=\"/", "href=\""+proxyPrefix)
 	body = strings.ReplaceAll(body, "url('/", "url('"+proxyPrefix)
 	body = strings.ReplaceAll(body, "url(/", "url("+proxyPrefix)
-	body = strings.ReplaceAll(body, "href=\"https://"+u.Host, "href=\""+proxyPrefix)
+	// absolute same-host links: keep a single slash before the path
+	reAbs := regexp.MustCompile(`href="https://` + regexp.QuoteMeta(u.Host) + `(/|")`)
+	body = reAbs.ReplaceAllString(body, "href=\""+basePath+"/https://"+u.Host+`$1`)
 	return body
 }
 
