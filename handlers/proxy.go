@@ -307,14 +307,16 @@ func modifyURL(uri string, rule ruleset.Rule) (string, error) {
 }
 
 func fetchSite(urlpath string, queries map[string]string) (string, *http.Request, *http.Response, error) {
-	urlQuery := "?"
+	// The values from c.Queries() are already decoded, so they have to be
+	// encoded again; joined as-is, a value holding & or # or + is cut short.
+	urlQuery := ""
 	if len(queries) > 0 {
+		values := url.Values{}
 		for k, v := range queries {
-			urlQuery += k + "=" + v + "&"
+			values.Set(k, v)
 		}
+		urlQuery = "?" + values.Encode()
 	}
-	urlQuery = strings.TrimSuffix(urlQuery, "&")
-	urlQuery = strings.TrimSuffix(urlQuery, "?")
 
 	u, err := url.Parse(urlpath)
 	if err != nil {
