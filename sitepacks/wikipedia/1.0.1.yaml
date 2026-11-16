@@ -1,0 +1,47 @@
+schemaVersion: 1
+id: wikipedia
+version: "1.0.1"
+rules:
+  - id: english-articles
+    domains: [en.wikipedia.org]
+    paths: [/wiki]
+    headers:
+      set:
+        User-Agent: "Ladder/1.0 (https://github.com/everywall/ladder)"
+      remove: [X-Forwarded-For, Referer]
+    # Keep article headings, infoboxes, data tables and reference lists.
+    # Vector's language dropdown is inside main, without a navigation role.
+    remove:
+      - ".mw-portlet-lang"
+      - "#p-lang"
+      - ".vector-page-toolbar"
+      - "#vector-page-tools"
+      - ".vector-column-start"
+      - ".vector-column-end"
+      - "#mw-panel-toc"
+      - "#toc"
+      - "#mw-panel"
+      - "#footer"
+      - ".mw-editsection"
+      - ".mw-indicators"
+      - "#siteSub"
+      - ".navbox"
+      - ".sidebar"
+      - ".printfooter"
+      - "#catlinks"
+    tests:
+      - name: encyclopedia-article
+        url: https://en.wikipedia.org/wiki/Encyclopedia
+        status: 200
+        contains: [Encyclopedia, reference work]
+        notContains: ['id="mw-panel"', 'id="p-lang-btn"', Edit links, 'id="catlinks"']
+      - name: http-article
+        url: https://en.wikipedia.org/wiki/HTTP
+        status: 200
+        contains: [HTTP, Hypertext Transfer Protocol, application layer]
+        notContains: ['id="mw-panel"', 'id="p-lang-btn"', Edit links, 'id="catlinks"']
+      - name: proxy-server-article
+        url: https://en.wikipedia.org/wiki/Proxy_server
+        status: 200
+        contains: [proxy server, intermediary]
+        notContains: ['id="mw-panel"', 'id="p-lang-btn"', Edit links, 'id="catlinks"']

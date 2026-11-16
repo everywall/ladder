@@ -85,6 +85,11 @@ See [README.md](/helm-chart/README.md) in helm-chart sub-directory for more info
 
 ## Usage
 
+The local reader, Markdown/text/HTML fetch command, MCP connector, versioned site
+rule packs and optional login service are described in
+[Reader and agent tools](docs/reader-and-agents.md).
+
+
 ### Browser
 1) Open Browser (Default: http://localhost:8080)
 2) Enter URL

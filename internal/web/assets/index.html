@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Ladder · Your reading desk</title>
+  <link rel="stylesheet" href="{{.BasePath}}/reader-assets/style.css">
+  <script defer src="{{.BasePath}}/reader-assets/app.js"></script>
+</head>
+<body data-base-path="{{.BasePath}}">
+  <a class="skip-link" href="#main">Skip to reading desk</a>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{.BasePath}}/reader" aria-label="Ladder reading desk"><span class="ladder-mark" aria-hidden="true"><i></i><i></i><i></i></span>Ladder<span class="brand-period">.</span></a>
+      <p class="brand-note">A clear way<br>to read the web.</p>
+      <nav class="rung-nav" aria-label="Reading desk">
+        <button class="nav-item active" data-panel="reader" aria-current="page"><span class="rung" aria-hidden="true"></span>Read</button>
+        <button class="nav-item" data-panel="history"><span class="rung" aria-hidden="true"></span>History<span class="nav-count" id="history-count"></span></button>
+        <button class="nav-item" data-panel="rules"><span class="rung" aria-hidden="true"></span>Rules</button>
+        <button class="nav-item" data-panel="settings"><span class="rung" aria-hidden="true"></span>Settings</button>
+      </nav>
+      <div class="sidebar-bottom"><span class="local-dot" aria-hidden="true"></span>On this server<p>Your history stays here.<br>No account. No analytics.</p><a href="#bookmarklet" id="bookmarklet-nav">Take Ladder with you <span aria-hidden="true">↗</span></a></div>
+    </aside>
+    <main id="main" tabindex="-1">
+      <header class="desk-header"><span class="eyebrow">Your reading desk</span><span class="utility">A little room for the words.</span></header>
+      <section id="panel-reader" class="panel" aria-labelledby="reader-heading">
+        <div class="section-heading"><h1 id="reader-heading">Find your next<br class="wide-only"> clear page.</h1><p>Bring a link. Leave the clutter.</p></div>
+        <form id="read-form" class="url-form">
+          <label for="read-url">Page URL</label>
+          <div class="input-row"><input id="read-url" name="url" type="url" inputmode="url" placeholder="https://example.org/a-story" autocomplete="url" required spellcheck="false"><button id="read-button" class="primary" type="submit">Read page <span aria-hidden="true">↗</span></button><button id="cancel-read" class="quiet" type="button" hidden>Cancel</button></div>
+          <p class="form-hint">Public web pages work best. <kbd>/</kbd> to focus the URL.</p>
+        </form>
+        <div id="read-status" class="status" role="status" aria-live="polite" hidden></div>
+        <div id="reader-empty" class="empty-page"><div class="page-corner" aria-hidden="true"></div><span class="eyebrow">Ready when you are</span><h2>One link.<br>Just the words.</h2><p>Paste a page URL above to open a quiet reading view.<br>Keep the Markdown or plain text when you need it.</p><span class="empty-rule" aria-hidden="true"></span><p class="small">Ladder retrieves the page from this server. Pages that require<br class="wide-only"> a login or block retrieval may remain unavailable.</p></div>
+        <article id="document" class="document" hidden>
+          <header class="document-header"><div class="document-source" id="document-source"></div><h2 id="document-title"></h2><p id="document-byline" class="byline" hidden></p></header>
+          <div class="reader-toolbar"><div class="view-switch" role="group" aria-label="Reading format"><button type="button" data-view="html" aria-pressed="true">Read</button><button type="button" data-view="markdown" aria-pressed="false">Markdown</button><button type="button" data-view="text" aria-pressed="false">Text</button></div><div class="document-actions"><button type="button" id="copy-markdown">Copy Markdown</button><a id="open-original" target="_blank" rel="noopener noreferrer">Original <span aria-hidden="true">↗</span></a><button type="button" id="refresh-read">Refresh <span aria-hidden="true">↻</span></button></div></div>
+          <div id="document-problems" class="status warning" role="status" hidden></div>
+          <iframe id="reading-frame" title="Isolated article reading view" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>
+          <pre id="document-code" class="document-code" tabindex="0" hidden></pre>
+          <div id="copy-fallback" class="copy-fallback" hidden><label for="copy-text">Copy is unavailable in this browser. Select the Markdown below and use your copy shortcut.</label><textarea id="copy-text" readonly rows="8"></textarea><button id="close-copy" type="button">Close</button></div>
+          <details class="retrieval-details"><summary><span id="retrieval-summary">Page details</span><span aria-hidden="true">+</span></summary><dl id="document-metadata" class="metadata"></dl></details>
+        </article>
+        <section class="bookmarklet-section" id="bookmarklet" aria-labelledby="bookmarklet-heading"><div><span class="eyebrow">A shortcut for Chrome</span><h2 id="bookmarklet-heading">Read from wherever you are.</h2><p>Drag this link to your bookmarks bar. On a page you want to read, select it to open that page in Ladder.</p><p class="small">It sends only the page URL. It does not read the page or your cookies.</p></div><a id="bookmarklet-link" class="bookmarklet-link" draggable="true" href="#bookmarklet" title="Drag to your bookmarks bar">↗ Read with Ladder</a></section>
+      </section>
+      <section id="panel-history" class="panel" aria-labelledby="history-heading" hidden>
+        <div class="section-heading"><span class="eyebrow">Kept on this server</span><h1 id="history-heading">Your recent pages.</h1><p>A small trail back to what you read.</p></div>
+        <div class="panel-toolbar"><label class="checkbox-label"><input type="checkbox" id="history-enabled"> Save reading history</label><button type="button" id="clear-history" class="danger">Clear history</button></div><p class="small">The latest 100 page URLs, titles, and read times. Article contents are not stored in history. Anyone with access to this server can see this list.</p>
+        <div id="history-status" class="status" role="status" hidden></div><ol id="history-list" class="history-list"></ol>
+      </section>
+      <section id="panel-rules" class="panel" aria-labelledby="rules-heading" hidden>
+        <div class="section-heading"><span class="eyebrow">Know what changes a page</span><h1 id="rules-heading">Rules, in the open.</h1><p>Inspect the loaded packs and try a URL against them.</p></div>
+        <div id="rules-status" class="status" role="status" hidden></div><div id="pack-list" class="pack-list"></div>
+        <form id="test-form" class="url-form"><label for="test-url">Test a page URL</label><div class="input-row"><input id="test-url" name="url" type="url" inputmode="url" placeholder="https://example.org/a-story" required spellcheck="false"><button id="test-button" class="primary" type="submit">Test URL</button></div><p class="form-hint">This retrieves the page without using or saving a cached response. It does not add to history.</p></form><div id="test-status" class="status" role="status" hidden></div><div id="test-result" hidden><h2 class="subheading">Check results</h2><ul id="test-checks" class="check-list"></ul><dl id="test-metadata" class="metadata"></dl></div>
+      </section>
+      <section id="panel-settings" class="panel" aria-labelledby="settings-heading" hidden>
+        <div class="section-heading"><span class="eyebrow">A desk that stays yours</span><h1 id="settings-heading">Keep it local.</h1><p>A few controls. No account to manage.</p></div>
+        <div id="settings-status" class="status" role="status" hidden></div>
+        <section class="setting-row"><div><h2>Reading history</h2><p>Keep up to 100 recent page URLs, titles, and read times on this server. Turning this off keeps existing entries until you clear them.</p></div><label class="checkbox-label"><input type="checkbox" id="settings-history-enabled"> Save history</label></section>
+        <section class="setting-row"><div><h2>Page cache</h2><p>Reuse recently retrieved pages while their cache lifetime allows it. Refresh a page to retrieve a new copy, or clear all cached pages here.</p><p id="cache-status" class="small" role="status"></p></div><button type="button" id="clear-cache">Clear page cache</button></section>
+        <section class="setting-row"><div><h2>Start at login</h2><p id="startup-status">Checking the service on this machine…</p><p>Startup is off by default. Enable or disable it explicitly from the terminal on the machine running Ladder.</p><code class="command">ladder startup enable</code><code class="command">ladder startup disable</code><code class="command">ladder startup status</code></div><span class="badge" id="startup-badge">Checking</span></section>
+        <section class="setting-row"><div><h2>Your browser shortcut</h2><p>The bookmark in Read opens the current page in this Ladder instance. Recreate it if this server's address changes.</p></div><button type="button" id="show-bookmarklet">Get bookmark</button></section>
+        <p class="settings-footnote">Ladder fetches pages on the server. Reading history stays on this server, rather than in your browser. There are no analytics, external fonts, or third-party scripts in this desk.</p>
+      </section>
+      <footer class="desk-footer"><span>Ladder · a clearer view</span><span>Read at your own pace.</span></footer>
+    </main>
+  </div>
+  <noscript><p class="noscript">Ladder's reading desk needs JavaScript to retrieve pages and manage local history. Enable JavaScript for this server, or use <code>ladder fetch URL</code> in the terminal.</p></noscript>
+</body>
+</html>
